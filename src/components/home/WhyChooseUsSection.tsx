@@ -8,7 +8,7 @@ const WhyChooseUsSection = () => {
   return (
     <div className="flex justify-center px-4 py-12 sm:px-6 lg:px-8 lg:mt-40 mt-10">
       {/* الـ Div الرئيسي الأزرق الداكن */}
-      <div className="flex w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden bg-[#0f3b4b] text-white flex-col lg:flex-row">
+      <div className="flex sm:w-full md:w-[80%] lg:w-[90%] max-w-6xl rounded-2xl shadow-2xl overflow-hidden bg-[#0f3b4b] text-white flex-col lg:flex-row">
         {features.map((feature, index) => (
           <div
             key={index}

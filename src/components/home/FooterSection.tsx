@@ -26,7 +26,7 @@ const FooterSection: React.FC = () => {
   return (
     <footer className="bg-[#0b2944] pt-40 pb-6 text-white relative">
 
-      <div className="absolute inset-x-0 -top-24 max-w-4xl mx-auto px-4">
+      <div className="absolute inset-x-0 top-[-5%] sm:-top-20  max-w-4xl mx-auto px-4">
         <div className="bg-white text-gray-900 rounded-xl shadow-2xl p-10 text-center relative overflow-hidden">
 
           <svg
@@ -38,7 +38,7 @@ const FooterSection: React.FC = () => {
           </svg>
 
           <div className="relative z-10">
-            <h3 className="text-3xl font-bold mb-4">
+            <h3 className="text-xl md:text-2xl lg:text-2xl font-bold mb-4">
               Start Your Learning Journey Today.
             </h3>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">

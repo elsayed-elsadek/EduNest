@@ -22,10 +22,10 @@ const Home: React.FC = () => {
 
       {/* Hero */}
       <section id="home" className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-16 py-10 lg:py-24 grid grid-cols-1 lg:grid-cols-2 md:gap-10 items-center">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16 py-10 lg:py-24 grid grid-cols-1 lg:grid-cols-2 md:gap-10 items-center justify-items-center">
 
           {/* Left content */}
-          <div className="z-10 mb-10 md:mb-0">
+          <div className="z-10 mb-10 md:mb-0 ">
             <h1 className="blueTextColor text-3xl md:text-5xl font-extrabold  leading-tight">
               Learn.Mentor. Grow
               <br />
@@ -54,7 +54,7 @@ const Home: React.FC = () => {
 
           {/* Right composition */}
           <div className="relative flex justify-center lg:justify-end">
-            <div className="w-[540px] h-[480px] rounded-[40px] bg-gradient-to-br from-orange-50/75 via-white/40 to-blue-50/60 backdrop-blur-sm relative flex items-center justify-center">
+            <div className="sm:w-[90%] md:w-[540px] h-[480px] rounded-[40px] bg-gradient-to-br from-orange-50/75 via-white/40 to-blue-50/60 backdrop-blur-sm relative flex items-center justify-center">
 
               {/* decorative floating cards */}
 
