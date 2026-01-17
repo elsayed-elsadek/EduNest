@@ -38,7 +38,8 @@ const Register: React.FC = () => {
         <FormHeader />
         <JoinAsToggle joinAs={form.joinAs} setJoinAs={form.setJoinAs} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 gap-y-1">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 gap-y-1"> */}
+        <div className="flex flex-wrap md:flex-row gap-x-32 gap-y-1">
           <FirstNameInput
             value={form.formData.firstName}
             onChange={(v) => form.handleInputChange("firstName", v)}

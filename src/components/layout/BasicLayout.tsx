@@ -15,8 +15,9 @@ export const BasicLayout: React.FC<Props> = ({ children, scroll = false }) => {
       {/* LEFT SIDE */}
       <div
         className="
-          w-full md:w-1/2
+          w-full md:w-[55%]
           flex flex-col
+          flex-1
           bg-white shadow-lg
           relative
           px-4 md:px-10 lg:px-14
@@ -24,7 +25,8 @@ export const BasicLayout: React.FC<Props> = ({ children, scroll = false }) => {
           pb-2
           rounded-none md:rounded-r-[50px]
           z-20
-          transform md:translate-x-6
+          md:-mr-10
+          transform md:translate-x-0
           overflow-visible
         "
       >
