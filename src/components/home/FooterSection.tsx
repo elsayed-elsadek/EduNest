@@ -10,7 +10,7 @@ import {
 
 const quickLinks = [
   { name: "Home", id: "home" },
-  { name: "Programs", id: "programs" },
+  { name: "Programs", id: "mentorships" },
   { name: "About Us", id: "about" },
   { name: "Contact", id: "contactUs" },
 ];
@@ -46,7 +46,7 @@ const FooterSection: React.FC = () => {
             </p>
 
             <a
-              href="#register"
+              href="/register"
               className="py-3 px-10 inline-block bg-[#0f5e8b] text-white rounded-2xl font-semibold hover:bg-[#147fb8] transition"
             >
               Register Now
@@ -108,7 +108,7 @@ const FooterSection: React.FC = () => {
                 <li key={i}>
                   <a
                     href={`#${item.id}`}
-                    className="text-gray-400 hover:text-[#147fb8] text-sm transition"
+                    className="text-gray-400 hover:text-[#147fb8] text-sm transition duration-500"
                   >
                     {item.name}
                   </a>

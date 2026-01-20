@@ -1,11 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import logo from "../assets/edunestlogo.png";
 
 const navItems = [
-  { label: 'Home', target: 'home' },
-  { label: 'Services', target: 'services' },
-  { label: 'Mentorships', target: 'mentorships' },
-  { label: 'Blogs', target: 'blogs' },
-  { label: 'About Us', target: 'about' },
+  { label: "Home", target: "home" },
+  { label: "Services", target: "services" },
+  { label: "Mentorships", target: "mentorships" },
+  { label: "About Us", target: "about" },
+  { label: "Blogs", target: "blogs" }
+
 ];
 
 const scrollToSection = (id: string) => {
@@ -15,66 +19,42 @@ const scrollToSection = (id: string) => {
   const offset = 90;
   const top = el.getBoundingClientRect().top + window.scrollY - offset;
 
-  window.scrollTo({ top, behavior: 'smooth' });
+  window.scrollTo({ top, behavior: "smooth" });
 };
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTarget, setActiveTarget] = useState('home');
-  // 1. إنشاء مرجع لحاوية الناف بار الرئيسية
-  const navbarRef = useRef<HTMLDivElement>(null); 
-
+  const [activeNavItem, setActiveNavItem] = useState("home");
+  const navigate = useNavigate();
   const handleNavClick = (target: string) => {
+    setActiveNavItem(target);
     scrollToSection(target);
-    setActiveTarget(target); 
     setIsOpen(false);
   };
 
-  //  2. useEffect لإدارة حدث النقر خارج الناف بار
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-
-      if (navbarRef.current && !navbarRef.current.contains(event.target as Node) && isOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]); 
-
-  const activeColorClass = 'text-[#0f5e8b] font-semibold';
-  const inactiveColorClass = 'text-gray-600 hover:text-[#0f5e8b]';
-
-
   return (
-    <header ref={navbarRef} className="w-full sticky top-0 z-40 bg-white/70 backdrop-blur-md">
+    <header className="w-full sticky top-0 z-40 bg-white/70 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between bg-[#6FB7D61A] shadow-sm backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3">
-          
           {/* Logo */}
           <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => handleNavClick('home')}
+            className="flex items-center gap-3 cursor-pointer h-10"
+            onClick={() => handleNavClick("home")}
           >
-            <div className="w-10 h-10 bg-[#0f5e8b] rounded-full flex items-center justify-center text-white font-bold">
-              E
-            </div>
-            <span className="font-semibold text-lg">EduNest</span>
+         <img className="w-14 h-14 " src={logo} alt="logo" />
           </div>
 
           {/* Desktop navigation */}
-          <nav className="hidden lg:flex items-center gap-8 text-sm flex-1 justify-center">
+          <nav className="hidden lg:flex items-center gap-8 text-sm text-gray-600 flex-1 justify-center">
             {navItems.map((item) => (
               <button
                 key={item.target}
                 onClick={() => handleNavClick(item.target)}
                 className={`relative transition text-sm ${
-                    item.target === activeTarget ? activeColorClass : inactiveColorClass
-                  }`}
+                  activeNavItem === item.target
+                    ? "text-[#0f5e8b] font-medium"
+                    : "hover:text-[#0f5e8b]"
+                }`}
               >
                 {item.label}
               </button>
@@ -83,10 +63,17 @@ const Navbar: React.FC = () => {
 
           {/* Desktop right actions */}
           <div className="hidden lg:flex items-center gap-4 ml-auto">
-            <button className="text-sm text-gray-600 hover:text-[#0f5e8b] transition">
-              Sign in
-            </button>
-            <button className="px-4 py-2 bg-[#0f5e8b] text-white rounded-full text-sm hover:bg-[#0d4a6e] transition">
+            <Link to="/login">
+              <button className="text-sm text-gray-600 hover:text-[#0f5e8b] transition font-semibold">
+                Sign in
+              </button>
+            </Link>
+            <button
+              onClick={() => {
+                navigate("/register");
+              }}
+              className="px-4 py-2 bg-[#0f5e8b] text-white rounded-full text-sm hover:bg-[#0d4a6e] transition"
+            >
               Register Now
             </button>
           </div>
@@ -98,8 +85,9 @@ const Navbar: React.FC = () => {
             aria-label="Toggle navigation"
           >
             <span
-              className={`relative flex items-center justify-center w-5 h-5 rounded-full transition-colors ${isOpen ? 'bg-[#0f5e8b] text-white' : 'bg-transparent'
-                }`}
+              className={`relative flex items-center justify-center w-5 h-5 rounded-full transition-colors ${
+                isOpen ? "bg-[#0f5e8b] text-white" : "bg-transparent"
+              }`}
             >
               {isOpen ? (
                 <span className="text-xs font-semibold">×</span>
@@ -124,8 +112,9 @@ const Navbar: React.FC = () => {
 
         {/* Mobile / medium menu */}
         <div
-          className={`lg:hidden overflow-hidden transition-all duration-200 ease-out ${isOpen ? 'max-h-80 mt-2' : 'max-h-0'
-            }`}
+          className={`lg:hidden overflow-hidden transition-all duration-200 ease-out ${
+            isOpen ? "max-h-96 mt-2" : "max-h-0"
+          }`}
         >
           <div className="bg-white/95 shadow-md rounded-2xl px-4 py-4 space-y-2">
             {navItems.map((item) => (
@@ -133,20 +122,27 @@ const Navbar: React.FC = () => {
                 key={item.target}
                 onClick={() => handleNavClick(item.target)}
                 className={`w-full text-left px-2 py-2 text-sm rounded-lg ${
-                  item.target === activeTarget 
-                    ? 'text-white bg-[#0f5e8b] font-medium' 
-                    : 'text-gray-700 hover:text-[#0f5e8b] hover:bg-[#e3f1fb]'
+                  activeNavItem === item.target
+                    ? "text-[#0f5e8b] bg-[#e3f1fb] font-medium"
+                    : "text-gray-700 hover:text-[#0f5e8b] hover:bg-[#e3f1fb]"
                 }`}
               >
                 {item.label}
               </button>
             ))}
 
-            <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-4"> 
-              <button className="w-full text-sm text-gray-600 text-left hover:text-[#0f5e8b]">
-                Sign in
-              </button>
-              <button className="w-full px-3 py-2 bg-[#0f5e8b] text-white rounded-full text-sm hover:bg-[#0d4a6e]">
+            <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-2">
+              <Link to="/login">
+                <button className="w-full text-sm text-gray-600 text-left hover:text-[#0f5e8b] p-2 font-semibold rounded-lg">
+                  Sign in
+                </button>
+              </Link>
+              <button
+                onClick={() => {
+                  navigate("/register");
+                }}
+                className="w-full px-3 py-2 bg-[#0f5e8b] text-white rounded-full text-sm hover:bg-[#0d4a6e]"
+              >
                 Register Now
               </button>
             </div>

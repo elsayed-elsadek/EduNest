@@ -10,6 +10,7 @@ import Blog from '../components/home/Blog';
 import Testimonials from '../components/home/Testimonials';
 import ContactUsSection from '../components/home/ContactUsSection';
 import FooterSection from '../components/home/FooterSection';
+import { Link } from 'react-router-dom';
 
 
 
@@ -26,19 +27,19 @@ const Home: React.FC = () => {
 
           {/* Left content */}
           <div className="z-10 mb-10 md:mb-0 ">
-            <h1 className="blueTextColor text-3xl md:text-5xl font-extrabold  leading-tight">
+            <h1 className="blueTextColor text-3xl md:text-5xl font-extrabold  leading-tight text-center md:text-left">
               Learn.Mentor. Grow
               <br />
               <span className="block">All in one place.</span>
             </h1>
 
-            <p className="mt-6 text-gray-500 max-w-xl">
+            <p className="mt-6 text-gray-500 max-w-xl text-center md:text-left">
               Join a community where mentors share experience and students grow with real-world guidance
             </p>
 
             <div className="mt-8 flex items-center gap-4 flex-wrap">
-              <button className="px-5 py-2 blueBGColor text-white rounded-full font-medium">Become a mentor</button>
-              <button className="px-5 py-2 border border-[#bcd7ee] rounded-full blueTextColor font-medium">Join now</button>
+              <Link to="/register" className="px-5 py-2 blueBGColor text-white rounded-full font-medium">Become a mentor</Link>
+              <Link to="/register" className="px-5 py-2 border border-[#bcd7ee] rounded-full blueTextColor font-medium">Join now</Link>
             </div>
 
             <div className="mt-6 flex items-center gap-3">
@@ -137,7 +138,7 @@ const Home: React.FC = () => {
       </section>
 
         {/* FooterSection section */}
-        <section id="footerSection">
+        <section id="footerSection" className="mt-20">
         <FooterSection />
       </section>
     </div>

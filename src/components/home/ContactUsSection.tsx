@@ -1,27 +1,108 @@
-import React from 'react';
+
+import React, { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faHome, faPhone } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
+import { sendContact, type ContactData } from "../../services/contactService";
+import toast, { Toaster } from 'react-hot-toast';
 
 const ContactUsSection: React.FC = () => {
+  const [form, setForm] = useState<ContactData>({
+    name: "",
+    email: "",
+    phone: "",
+    message: ""
+  });
 
-  // يمكنك إضافة منطق التعامل مع إرسال النموذج هنا (مثل handleSubmit)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+    
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFieldErrors({}); 
+    setLoading(true);
+
+    const dataToSend = {
+      name: form.name.trim() || null,
+      email: form.email.trim() || null,
+      phone: form.phone.trim() || null,
+      message: form.message.trim() || null
+    };
+
+    try {
+      const res = await sendContact(dataToSend as unknown as ContactData);
+      const data = res.data as Record<string, unknown> | undefined;
+
+      // معالجة رسالة النجاح من الباك أند
+      let successMsg = "تم الإرسال بنجاح ✅";
+      if (data?.['messages'] && typeof data['messages'] === 'object' && 'Status' in (data['messages'] as Record<string, unknown>)) {
+        successMsg = String((data['messages'] as Record<string, unknown>)['Status']);
+      }
+
+      toast.success(successMsg, { position: "top-right" });
+      setForm({ name: "", email: "", phone: "", message: "" });
+
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const responseData = err.response?.data;
+        
+        if (responseData?.errorMessages) {
+          setFieldErrors(responseData.errorMessages);
+          toast.error("Please check the input fields.", { position: "top-right" });
+        } 
+        else {
+          const generalError = responseData?.message || "Something went wrong. Please try again later";
+          toast.error(generalError, { position: "top-right" });
+        }
+      } else {
+        toast.error("Unable to connect to the server. Please check your internet connection.", { position: "top-right" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="py-16 sm:py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-12 sm:gap-16 items-start">
+   
+<Toaster
+  toastOptions={{
 
-          
+    className: 'text-sm md:text-lg md:max-w-md w-full shadow-lg rounded-2xl border border-gray-100 p-4',
+    duration: 4000,
+    success: {
+      className: 'bg-white text-green-800 border-green-100',
+    },
+    error: {
+      className: 'bg-white text-red-800 border-red-100',
+    },
+  }}
+/>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-12 sm:gap-16 items-start">
+
           {/* Left Side: Content and Info */}
-          <div className="order-2 lg:order-1 h-[100%] grid  content-center">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Contact Us
-            </h2>
+          <div className="order-2 lg:order-1 h-[100%] grid content-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Contact Us</h2>
             <p className="text-base text-gray-600 mb-8 max-w-md">
               We are committed to processing the information in order to contact you and talk about your project.
             </p>
 
-            {/* Contact Details */}
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
                 <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 text-gray-600" />
@@ -48,34 +129,77 @@ const ContactUsSection: React.FC = () => {
           </div>
 
           {/* Right Side: Contact Form */}
-          <div className="order-1 lg:order-2 p-6 sm:p-8 rounded-2xl">
-            <form className="space-y-6">
-              <input
-                type="text"
-                placeholder="Name"
-                className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#0f5e8b] focus:border-[#0f5e8b] outline-none"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#0f5e8b] focus:border-[#0f5e8b] outline-none"
-              />
-              <input
-                type="tel"
-                placeholder="Phone"
-                className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#0f5e8b] focus:border-[#0f5e8b] outline-none"
-              />
-              <textarea
-                placeholder="Message"
-                rows={5}
-                className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#0f5e8b] focus:border-[#0f5e8b] outline-none resize-none"
-              ></textarea>
+          <div className="order-1 lg:order-2 p-6 sm:p-8 rounded-2xl bg-white shadow-sm border border-gray-100 w-full">
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              
+              {/* Name */}
+              <div>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  type="text"
+                  placeholder="Name"
+                  className={`w-full p-4 border rounded-2xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.name ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:ring-[#0f5e8b]'
+                  }`}
+                />
+                {fieldErrors.name && <p className="text-red-500 text-xs mt-1 ml-2">{fieldErrors.name}</p>}
+              </div>
+
+              {/* Email */}
+              <div>
+                <input
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  type="email"
+                  placeholder="Email"
+                  className={`w-full p-4 border rounded-2xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.email ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:ring-[#0f5e8b]'
+                  }`}
+                />
+                {fieldErrors.email && <p className="text-red-500 text-xs mt-1 ml-2">{fieldErrors.email}</p>}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <input
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  type="tel"
+                  placeholder="Phone"
+                  className={`w-full p-4 border rounded-2xl focus:ring-2 outline-none transition-all ${
+                    fieldErrors.phone ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:ring-[#0f5e8b]'
+                  }`}
+                />
+                {fieldErrors.phone && <p className="text-red-500 text-xs mt-1 ml-2">{fieldErrors.phone}</p>}
+              </div>
+
+              {/* Message */}
+              <div>
+                <textarea
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
+                  placeholder="Message"
+                  rows={4}
+                  className={`w-full p-4 border rounded-2xl focus:ring-2 outline-none resize-none transition-all ${
+                    fieldErrors.message ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:ring-[#0f5e8b]'
+                  }`}
+                ></textarea>
+                {fieldErrors.message && <p className="text-red-500 text-xs mt-1 ml-2">{fieldErrors.message}</p>}
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-3  text-white font-semibold rounded-2xl bg-[#0f5e8b] "
+                disabled={loading}
+                className={`w-full py-3 text-white font-semibold rounded-2xl bg-[#0f5e8b] transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#0d4d72]'}`}
               >
-                Submit
+                {loading ? 'Sending...' : 'Submit'}
               </button>
+
             </form>
           </div>
         </div>
