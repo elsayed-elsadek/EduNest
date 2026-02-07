@@ -1,4 +1,8 @@
 import { useState } from "react";
+import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { forgetPassword } from "../services/authService";
 
 interface ForgetPassFormData {
   email: string;
@@ -12,6 +16,7 @@ export const useForgetPassForm = () => {
   const [formData, setFormData] = useState<ForgetPassFormData>({ email: "" });
   const [errors, setErrors] = useState<ForgetPassErrors>({});
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const emailRegex = /^\S+@\S+\.\S+$/;
 
@@ -36,6 +41,32 @@ export const useForgetPassForm = () => {
     }
   };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    setLoading(true);
+    try {
+      await forgetPassword(formData.email);
+      toast.success("Verification code sent to your email.");
+
+      navigate("/check-email", { state: { email: formData.email } });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      const backendMessage =
+        error?.response?.data?.errorMessages?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong while sending reset email.";
+
+      toast.error(backendMessage);
+      console.error("Forget password error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     formData,
     errors,
@@ -43,5 +74,6 @@ export const useForgetPassForm = () => {
     setLoading,
     validate,
     handleInputChange,
+    handleSubmit,
   };
 };

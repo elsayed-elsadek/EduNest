@@ -1,41 +1,55 @@
-import type { RegisterFormData } from '../types/auth';
-import api from './api';
+import type { RegisterFormData, AuthResponse } from "../types/auth";
+import api from "./api";
 
-// Register mentor
-export const registerMentor = async (
-  formData: RegisterFormData
-) => {
-  const response = await api.post('/register-mentor', formData);
-  return response.data;
+// 1. مركزية الروابط لتسهيل التعديل
+const ENDPOINTS = {
+  REGISTER_MENTOR: 'api/v1/register/mentor',
+  REGISTER_STUDENT: 'api/v1/register/student',
+  SEND_OTP: 'api/v1/register/send-otp',
+  VERIFY_OTP: 'api/v1/register/verify-user',
+  LOGIN: 'login-api',
+  FORGET_PWD: 'forget-password',
+  FORGET_PWD_VERIFY: 'forget-password/verify-otp',
+  FORGET_PWD_RESET: 'forget-password/reset',
 };
 
-// Register student
-export const registerStudent = async (
-  formData: RegisterFormData
-) => {
-  const response = await api.post('/register-student', formData);
-  return response.data;
+// 2. استخدام Generic Types لضمان دقة البيانات العائدة
+const handleRequest = async <T>(request: Promise<{ data: T }>): Promise<T> => {
+  try {
+    const response = await request;
+    return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
 };
 
-export const sendOtp = async (email: string) => {
-  const response = await api.post(
-    `/send-otp`,
-    null, 
-    {
-      params: { email }, 
-    }
-  );
+// --- Registration ---
 
-  return response.data;
-};
+export const registerMentor = (formData: RegisterFormData) => 
+  handleRequest(api.post(ENDPOINTS.REGISTER_MENTOR, formData));
 
-// Verify OTP code
-export const verifyOtp = async (email: string, otp: string) => {
-  const response = await api.post(
-    `/verify-user`,
-    { email, otp }
-  );
+export const registerStudent = (formData: RegisterFormData) => 
+  handleRequest(api.post(ENDPOINTS.REGISTER_STUDENT, formData));
 
-  return response.data;
-};
+export const sendOtp = (email: string) => 
+  handleRequest(api.post(ENDPOINTS.SEND_OTP, null, { params: { email } }));
 
+export const verifyOtp = (email: string, otp: string) => 
+  handleRequest(api.post(ENDPOINTS.VERIFY_OTP, { email, otp }));
+
+// --- Authentication ---
+
+export const loginUser = (email: string, password: string) => 
+  handleRequest<AuthResponse>(api.post(ENDPOINTS.LOGIN, { email, password }));
+
+// --- Forget Password Section ---
+
+export const forgetPassword = (email: string) => 
+  handleRequest(api.post(ENDPOINTS.FORGET_PWD, { email }));
+
+export const forgetPasswordVerifyOtp = (email: string, otp: string) => 
+  handleRequest(api.post(ENDPOINTS.FORGET_PWD_VERIFY, { email, otp }));
+
+export const forgetResetPassword = (email: string, newPassword: string) => 
+  handleRequest(api.post(ENDPOINTS.FORGET_PWD_RESET, { email, newPassword }));

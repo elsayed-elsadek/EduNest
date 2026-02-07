@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useResetPassForm } from "../../hooks/useResetPassForm";
 import {
@@ -8,23 +8,44 @@ import {
   ConfirmPasswordInput,
   ResetPasswordSubmitButton,
 } from "../../components/resetPass-com";
+import { forgetResetPassword } from "../../services/authService";
+import toast from "react-hot-toast";
 
 const ResetPassword: React.FC = () => {
   const form = useResetPassForm();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const state = location.state as { email?: string } | null;
+  const email = state?.email || localStorage.getItem("resetEmail") || "";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.validate()) return;
 
-    form.setLoading(true);
+    if (!email) {
+      toast.error("Email not found. Please restart the reset password process.");
+      return;
+    }
 
-    // Simulate API call to reset password
-    setTimeout(() => {
-      form.setLoading(false);
+    form.setLoading(true);
+    try {
+      await forgetResetPassword(email, form.formData.password);
+      toast.success("Password reset successfully.");
       navigate("/reset-success");
-    }, 1500);
+    } catch (error) {
+      const backendMessage =
+        (typeof error === "object" && (error as { errorMessages?: { error?: string }; message?: string })?.errorMessages?.error) ||
+        (typeof error === "object" && (error as { message?: string })?.message) ||
+        (typeof error === "string" ? error : null) ||
+        "Something went wrong while resetting password.";
+
+      toast.error(backendMessage);
+      console.error("Reset password error:", error);
+    } finally {
+      form.setLoading(false);
+    }
   };
 
   return (

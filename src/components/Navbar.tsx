@@ -41,7 +41,7 @@ const Navbar: React.FC = () => {
             className="flex items-center gap-3 cursor-pointer h-10"
             onClick={() => handleNavClick("home")}
           >
-         <img className="w-14 h-14 " src={logo} alt="logo" />
+         <img className="w-14 h-14 object-fit" src={logo} alt="logo" />
           </div>
 
           {/* Desktop navigation */}

@@ -4,19 +4,21 @@ import { Link } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useLogin } from "../../hooks/useLogin";
 
+
 const Login: React.FC = () => {
-  const { 
-    formData, 
-    errors, 
-    loading, 
-    showPassword, 
-    setShowPassword, 
-    handleInputChange, 
-    handleSubmit 
+  const {
+    formData,
+    errors,
+    loading,
+    showPassword,
+    setShowPassword,
+    handleInputChange,
+    handleSubmit
   } = useLogin();
 
 
   const emailRegex = /^\S+@\S+\.\S+$/;
+
 
   return (
     <BasicLayout>
@@ -31,7 +33,7 @@ const Login: React.FC = () => {
 
         {/* Email Field */}
         <div className="flex flex-col">
-          <label className="text-xs font-medium text-gray-700 mb-2">E-mail / Username</label>
+          <label className="text-xs font-medium text-gray-700 mb-2">E-mail</label>
           <div className="relative">
             <input
               type="email"

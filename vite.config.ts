@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'https://blake-glottologic-carlee.ngrok-free.dev'
+      '/api': 'https://arline-unbalked-hiram.ngrok-free.dev/api/v1/'
     }
   }
 });

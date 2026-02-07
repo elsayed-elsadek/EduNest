@@ -37,11 +37,11 @@ export const BasicLayout: React.FC<Props> = ({ children, scroll = false }) => {
           }
         >
           {/* logo */}
-          <Link to="/" className="inline-block mb-6 sm:mb-8 md:mb-10 hover:opacity-80 transition-opacity duration-200 w-1/4">
+          <Link to="/" className="inline-block my-6 sm:mb-8 md:mb-10 hover:opacity-80 transition-opacity duration-200 w-1/4">
             <img
               src={logo}
               alt="Logo"
-              className="w-16 h-20  object-contain "
+              className="w-14 h-14 object-fit "
             />
           </Link>
 
