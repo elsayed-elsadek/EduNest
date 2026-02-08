@@ -19,10 +19,6 @@
     "@tanstack/react-query": "^5.90.5",
     "aos": "^2.3.4",
     "axios": "^1.13.1",
-<<<<<<< HEAD
-    "framer-motion": "^12.33.0",
-=======
->>>>>>> origin/update-feature
     "lucide-react": "^0.563.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
