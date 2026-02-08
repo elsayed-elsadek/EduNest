@@ -11,7 +11,7 @@ interface StudentSearchProps {
 const StudentSearch: FC<StudentSearchProps> = ({ 
   value, 
   onChange,
-  placeholder = "Search tudent by name or mentorship..."
+  placeholder = "Search student by name or mentorship"
 }) => {
   return (
     <div className="relative w-full">

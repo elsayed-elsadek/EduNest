@@ -17,11 +17,12 @@ export const ConfirmButton: React.FC<Props> = ({
                  text-white font-semibold text-sm 
                  hover:opacity-90 transition
                  disabled:opacity-60 disabled:cursor-not-allowed
-                 w-auto mx-auto flex items-center justify-center"
+                 w-1/3 mx-auto flex items-center justify-center"
       onClick={onClick}
       disabled={loading || disabled} 
     >
-      {loading ? "Loading..." : "Confirm and proceed"}
+   
+      {loading ? "Verifying..." : "Confirm"}
     </button>
   );
 };

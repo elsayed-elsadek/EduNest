@@ -47,46 +47,56 @@ const CalendarWidget: FC<CalendarWidgetProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm w-full max-w-sm">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm w-full max-w-md mx-auto">
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-base font-bold text-[#0c2d48]">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h3 className="text-sm sm:text-base font-bold text-[#0c2d48]">
           {monthName} <span className="text-gray-400 font-medium">{year}</span>
         </h3>
         <div className="flex items-center gap-1">
-          <button onClick={handlePrevWeek} className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-400"><ChevronLeft size={18} /></button>
-          <button onClick={handleNextWeek} className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-400"><ChevronRight size={18} /></button>
+          <button onClick={handlePrevWeek} className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-400 transition-colors">
+            <ChevronLeft size={18} />
+          </button>
+          <button onClick={handleNextWeek} className="p-1.5 hover:bg-gray-50 rounded-lg text-gray-400 transition-colors">
+            <ChevronRight size={18} />
+          </button>
         </div>
       </div>
 
-      {/* Days Labels */}
-      <div className="grid grid-cols-7 gap-2 mb-3">
+      {/* Days Labels  */}
+      <div className="grid grid-cols-7 gap-1 mb-3">
         {daysOfWeek.map((day, index) => (
-          <div key={index} className="text-center text-[10px] font-bold text-gray-300 uppercase italic">
+          <div key={index} className="text-center text-[9px] sm:text-[10px] font-bold text-gray-300 uppercase italic">
             {day}
           </div>
         ))}
       </div>
 
-      {/* Days Grid with Month Break Logic */}
-      <div className="flex justify-between items-center gap-1">
+      {/* Days Grid */}
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 justify-items-center items-center">
         {weekDays.map((date, index) => {
-          const isSelected = date.getDate() === selectedDate.getDate() && date.getMonth() === selectedDate.getMonth();
+          const isSelected =
+            date.getDate() === selectedDate.getDate() &&
+            date.getMonth() === selectedDate.getMonth() &&
+            date.getFullYear() === selectedDate.getFullYear();
+
           const isDifferentMonth = date.getMonth() !== displayDate.getMonth();
 
           return (
-            <div key={index} className="flex flex-col items-center flex-1">
+            <div key={index} className="flex flex-col items-center w-full">
               <button
                 onClick={() => {
                   setSelectedDate(date);
                   onDateSelect?.(date);
                 }}
                 className={`
-                  w-10 h-10 flex items-center justify-center text-sm font-bold rounded-xl transition-all
+                  relative w-full aspect-square max-w-[40px] flex items-center justify-center 
+                  text-xs sm:text-sm font-bold rounded-xl transition-all duration-200
                   ${isSelected
-                    ? 'bg-[#0c2d48] text-white shadow-md scale-110'
+                    ? 'bg-[#0c2d48] text-white shadow-md scale-105 sm:scale-110'
                     : isDifferentMonth
-                      ? 'text-gray-300 opacity-50'
+                      ? 'text-gray-200'
                       : 'text-gray-600 hover:bg-blue-50'
                   }
                 `}
@@ -94,7 +104,10 @@ const CalendarWidget: FC<CalendarWidgetProps> = ({
                 {date.getDate()}
               </button>
 
-              {isSelected && <div className="w-1 h-1 bg-[#d4af37] rounded-full mt-1"></div>}
+              {/* gold point for selected */}
+              <div className="h-1 mt-1">
+                {isSelected && <div className="w-1 h-1 bg-[#d4af37] rounded-full mx-auto"></div>}
+              </div>
             </div>
           );
         })}

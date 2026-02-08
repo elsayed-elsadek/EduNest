@@ -14,7 +14,6 @@ const StudentsList: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
 
-  // Mock data 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const allStudents: Student[] = [
     { id: '1', name: 'shahd walid', email: 'shahd@gmail.com', avatar: 'https://i.pravatar.cc/150?img=1', activeMentorships: 2, completedMentorships: 3 },
@@ -48,31 +47,42 @@ const StudentsList: FC = () => {
 
   return (
     <DashLayout pageTitle="Dashboard / Students">
-      <div className="bg-[#F7F7F8] min-h-screen p-4 md:px-8 md:pt-4 md:pb-8">
-        <div className="max-w-[1400px] mx-auto space-y-6">
+      <div className="bg-[#F7F7F8] min-h-screen p-3 md:p-8">
+        <div className="max-w-[1400px] mx-auto space-y-4 md:space-y-6">
 
-          {/* Header & Search */}
-          <div className="flex flex-col gap-4">
-            <h1 className="text-xl font-bold text-[#1A1C1E]">Students List</h1>
-            <StudentSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-            />
+          {/* Header & Search - Stacked on Mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h1 className="text-xl md:text-2xl font-bold text-[#1A1C1E]">Students List</h1>
+            <div className="w-full sm:w-72">
+              <StudentSearch
+                value={searchQuery}
+                onChange={setSearchQuery}
+              />
+            </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition-all">
-
-            <div className="overflow-x-auto">
-              <div className="min-w-[800px]">
+          <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm transition-all">
+            <div className="w-full">
+              {filteredStudents.length > 0 ? (
                 <StudentsTable
                   students={currentStudents}
                   onViewProfile={(id) => navigate(`/mentor/students/${id}`)}
                 />
-              </div>
+              ) : (
+                <div className="p-12 md:p-20 text-center">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🔍</span>
+                  </div>
+                  <p className="text-gray-400 font-medium text-sm md:text-base">
+                    No students found matching your search.
+                  </p>
+                </div>
+              )}
             </div>
 
+            {/* Pagination  */}
             {filteredStudents.length > 0 && (
-              <div className="p-4 md:p-6 border-t border-gray-50">
+              <div className="p-3 md:p-6 border-t border-gray-50">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -81,12 +91,6 @@ const StudentsList: FC = () => {
                   onPageChange={setCurrentPage}
                   onItemsPerPageChange={(val) => setItemsPerPage(val)}
                 />
-              </div>
-            )}
-
-            {filteredStudents.length === 0 && (
-              <div className="p-20 text-center text-gray-400 font-medium">
-                No students found matching your search.
               </div>
             )}
           </div>

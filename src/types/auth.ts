@@ -32,3 +32,20 @@ export interface FormErrors {
 
 export type JoinAs = "mentor" | "student";
 
+// --- API Responses ---
+
+// هيكل الرسالة العائدة من السيرفر في عمليات الـ auth (login, register, ...)
+export interface AuthMessages {
+  jwt?: string;          // التوكن في حالة نجاح تسجيل الدخول
+  status?: string;       // رسالة الحالة العامة من الباك إند
+  // أي فيلدات إضافية يضيفها الباك إند بدون كسر التايب
+  [key: string]: unknown;
+}
+
+// الشكل العام لريسبونس الـ auth المستخدم في loginUser وغيره
+export interface AuthResponse {
+  messages?: AuthMessages;
+  // لو في بيانات أخرى (مثلاً user, errors ...) تتضاف هنا تلقائيًا
+  [key: string]: unknown;
+}
+

@@ -50,7 +50,7 @@ const Register: React.FC = () => {
         localStorage.setItem("registrationEmail", form.formData.email);
         
         const otpRes = await sendOtp(form.formData.email);
-        toast.success(otpRes.message || 'OTP sent to your email');
+        toast.success(otpRes.message  || 'OTP sent to your email');
       } catch (otpErr: unknown) {
         console.log('OTP Error:', otpErr);
         // Continue to verify page even if OTP fails
@@ -73,7 +73,7 @@ const Register: React.FC = () => {
         form.setEmailError('This email is already registered. Please use a different email.');
         toast.error('Email already exists. Please use a different email.');
       } else {
-        const errorMessage = errorData?.message || err.message || 'Registration Failed';
+        const errorMessage = Object.values(errorData?.errorMessages || {})[0] || err.message || 'Registration Failed';
         form.setGeneralError(errorMessage);
         toast.error(errorMessage);
       }

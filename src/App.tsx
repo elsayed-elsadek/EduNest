@@ -15,9 +15,13 @@ import ForgetPass from "./pages/forgetPass/ForgetPass.tsx";
 import CheckEmail from "./pages/forgetPass/CheckEmail.tsx";
 import ResetPassword from "./pages/forgetPass/ResetPassword.tsx";
 import ResetSuccess from "./pages/forgetPass/ResetSuccess.tsx";
-// import Dashboard from './pages/Dashboard.tsx'
-
-
+import MentorDash from './pages/mentordash/MentorDash.tsx';
+import MyMentorships from './pages/my-mentorsship-dash/MyMentorsship.tsx';
+import StudentsList from './pages/studentspage-mentordash/StudentsList.tsx';
+import Messages from './pages/mentorMessages/Messages.tsx';
+import NotificationsList from './pages/mentorNotifications/NotificationsList.tsx';
+import  ProfilePage from './pages/mentorProfile/ProfilePage.tsx';
+import  Setting from './pages/mentorSettings/Settings.tsx' ;
 
 
 function App() {
@@ -44,6 +48,18 @@ function App() {
         <Route path="/check-email" element={<CheckEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/reset-success" element={<ResetSuccess />} />
+          <Route path="/mentor/dashboard" element={<MentorDash />} />
+           <Route path="/mentor/mentorships" element={<MyMentorships/>} />
+            <Route path="/mentor/students" element={<StudentsList/>} />
+             <Route path="/mentor/messages" element={<Messages/>} />
+                <Route path="/mentor/notifications" element={<NotificationsList/>}/>  
+                 <Route path="/mentor/profile" element={<ProfilePage/>} />
+                 <Route path="/mentor/settings" element={<Setting/>} />
+                 
+
+             
+        
+         
         {/* <Route path="/dash-board" element={<Dashboard />} /> */}
 
       </Routes>
@@ -52,4 +68,4 @@ function App() {
 }
 
 
-export default App
+export default App;
