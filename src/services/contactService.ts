@@ -10,7 +10,7 @@ export interface ContactData {
   message: string;
 }
 
-const BASE_URL = "https://blake-glottologic-carlee.ngrok-free.dev/api/v1/save-contact-message";
+const BASE_URL = "https://arline-unbalked-hiram.ngrok-free.dev/api/v1/contact/save-message";
 
 export const sendContact = (data: ContactData): Promise<AxiosResponse<unknown>> => {
   return axios.post(BASE_URL, data, {

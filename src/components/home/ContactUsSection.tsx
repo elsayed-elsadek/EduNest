@@ -43,29 +43,29 @@ const ContactUsSection: React.FC = () => {
       message: form.message.trim() || null
     };
 
+ 
     try {
-      const res = await sendContact(dataToSend as unknown as ContactData);
-      const data = res.data as Record<string, unknown> | undefined;
+  const res = await sendContact(dataToSend as unknown as ContactData);
+  
+ 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = res.data as any; 
 
-      // معالجة رسالة النجاح من الباك أند
-      let successMsg = "تم الإرسال بنجاح ✅";
-      if (data?.['messages'] && typeof data['messages'] === 'object' && 'Status' in (data['messages'] as Record<string, unknown>)) {
-        successMsg = String((data['messages'] as Record<string, unknown>)['Status']);
-      }
+  const successMsg = data?.apiResponse?.Status || "تم الإرسال بنجاح ✅";
 
-      toast.success(successMsg, { position: "top-right" });
-      setForm({ name: "", email: "", phone: "", message: "" });
+  toast.success(successMsg, { position: "top-right" });
+  setForm({ name: "", email: "", phone: "", message: "" });
 
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        const responseData = err.response?.data;
+        const apiResponse = err.response?.data;
         
-        if (responseData?.errorMessages) {
-          setFieldErrors(responseData.errorMessages);
+        if (apiResponse?.errorMessages) {
+          setFieldErrors(apiResponse.errorMessages);
           toast.error("Please check the input fields.", { position: "top-right" });
         } 
         else {
-          const generalError = responseData?.message || "Something went wrong. Please try again later";
+          const generalError = apiResponse?.message || "Something went wrong. Please try again later";
           toast.error(generalError, { position: "top-right" });
         }
       } else {
@@ -130,7 +130,7 @@ const ContactUsSection: React.FC = () => {
 
           {/* Right Side: Contact Form */}
           <div className="order-1 lg:order-2 p-6 sm:p-8 rounded-2xl bg-white shadow-sm border border-gray-100 w-full">
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form className="space-y-5" onSubmit={handleSubmit} noValidate>
               
               {/* Name */}
               <div>
