@@ -24,6 +24,7 @@ import ProfilePage from './pages/mentorProfile/ProfilePage.tsx';
 import Setting from './pages/mentorSettings/Settings.tsx';
 import MentorshipDetail from './pages/mentorship-detail/MentorshipDetail.tsx';
 import EditMentorship from './pages/edit-mentorship/EditMentorship.tsx';
+import StudentProfile from './pages/mentor-view-studentprofile/StudentProfile.tsx'
 import { useAuthStore } from './store/authStore.ts';
 
 
@@ -76,7 +77,7 @@ function App() {
         <Route path="/mentor/profile" element={<ProfilePage />} />
         <Route path="/mentor/settings" element={<Setting />} />
                  
-
+  <Route path="/mentor/students/:id" element={<StudentProfile />} />
              
         
          
