@@ -13,4 +13,5 @@ export interface StudentActivity {
 export interface RecentActivityListProps {
   activities?: StudentActivity[];
   maxDisplay?: number;
+  title?: string;
 }

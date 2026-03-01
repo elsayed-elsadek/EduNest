@@ -56,3 +56,4 @@ export const forgetPasswordVerifyOtp = (email: string, otp: string) =>
 
 export const forgetResetPassword = (email: string, newPassword: string) => 
   handleRequest(api.post(ENDPOINTS.FORGET_PWD_RESET, { email, newPassword }));
+

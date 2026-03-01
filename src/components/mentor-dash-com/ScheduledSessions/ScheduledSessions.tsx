@@ -55,11 +55,7 @@ const ScheduledSessions: FC<ScheduledSessionsProps> = ({
         )}
       </div>
 
-      {hasApiData && (
-        <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
-          ✅ Data from API: {sessions.length} session{sessions.length !== 1 ? 's' : ''}
-        </div>
-      )}
+
     </div>
   );
 };

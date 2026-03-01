@@ -45,6 +45,7 @@ const Pagination: FC<PaginationProps> = ({
             onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
             className="appearance-none bg-[#F9FAFB] border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-[#1A1C1E] font-bold outline-none cursor-pointer focus:border-[#2176AE] transition-all"
           >
+            <option value={5}>5</option>
             <option value={6}>6</option>
             <option value={12}>12</option>
             <option value={20}>20</option>

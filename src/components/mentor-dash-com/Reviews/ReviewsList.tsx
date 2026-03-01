@@ -89,13 +89,20 @@ const ReviewsList: FC<ReviewsListProps> = ({
 
       {/* Reviews List */}
       <div className="max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
-        {displayedReviews.map((review) => (
-          <ReviewCard 
-            key={review.id} 
-            review={review}
-            onDelete={handleDelete}
-          />
-        ))}
+        {displayedReviews.length === 0 ? (
+          <div className="py-8 text-center text-gray-500">
+            <p className="font-medium">No reviews yet</p>
+            <p className="text-sm mt-1">You have not received any student reviews.</p>
+          </div>
+        ) : (
+          displayedReviews.map((review) => (
+            <ReviewCard 
+              key={review.id} 
+              review={review}
+              onDelete={handleDelete}
+            />
+          ))
+        )}
       </div>
     </div>
   );

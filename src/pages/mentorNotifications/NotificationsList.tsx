@@ -9,63 +9,7 @@ import type { Notification } from '../../types/mentornotification.types';
 
 const NotificationsList: FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'session',
-      title: 'Live session with Sarah Chen starts soon',
-      message: 'Your session "Advanced React Patterns" is scheduled to start in 1 hour.',
-      isRead: false,
-      isNew: true,
-      timestamp: '1h ago',
-      actionLabel: 'Join',
-      actionUrl: '/session/123',
-    },
-    {
-      id: '2',
-      type: 'assignment',
-      title: 'New assignment submission',
-      message: 'A new coding challenge has been posted in your Data Science course.',
-      isRead: false,
-      isNew: true,
-      timestamp: '2 days ago',
-      actionLabel: 'View',
-      actionUrl: '/assignment/456',
-    },
-    {
-      id: '3',
-      type: 'message',
-      title: '3 new messages',
-      message: 'You have unread messages in the Full-Stack Development group chat.',
-      isRead: false,
-      isNew: true,
-      timestamp: '2 days ago',
-      actionLabel: 'View',
-      actionUrl: '/messages',
-    },
-    {
-      id: '4',
-      type: 'session',
-      title: 'Live session with Sarah Chen starts soon',
-      message: 'Your session "Advanced React Patterns" is scheduled to start in 1 hour.',
-      isRead: true,
-      isNew: false,
-      timestamp: '1h ago',
-      actionLabel: 'Join',
-      actionUrl: '/session/124',
-    },
-    {
-      id: '5',
-      type: 'message',
-      title: '3 new messages',
-      message: 'You have unread messages in the Full-Stack Development group chat.',
-      isRead: true,
-      isNew: false,
-      timestamp: '2 days ago',
-      actionLabel: 'View',
-      actionUrl: '/messages',
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Calculate unread count
   const unreadCount = useMemo(

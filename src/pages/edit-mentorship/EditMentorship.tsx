@@ -1,22 +1,21 @@
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashLayout from '../../components/layout/Dash-layout';
-import { getMentorships, extractMentorshipsData } from '../../services/dashboardService';
+import {
+  getMentorshipDetail,
+  updateMentorship,
+  type MentorshipApiResponse,
+} from '../../services/mentorDashboardService';
 import { useAuthStore } from '../../store/authStore';
-
-interface MentorshipFormData {
-  title: string;
-  description: string;
-  level: string;
-  price: number;
-  status: string;
-}
+import type { MentorshipFormData } from './types';
+import EditMentorshipHeader from './components/EditMentorshipHeader';
+import EditMentorshipForm from './components/EditMentorshipForm';
 
 const EditMentorship: FC = () => {
-  const { mentorshipId } = useParams<{ mentorshipId: string }>();
+  const params = useParams<{ mentorshipId?: string; id?: string }>();
+  const mentorshipId = params.mentorshipId ?? params.id;
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
 
@@ -48,21 +47,19 @@ const EditMentorship: FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await getMentorships();
-        const data = extractMentorshipsData(res);
-        const mentorship = data.find((m: { id: string | number }) => String(m.id) === mentorshipId);
-        
+        const mentorship = (await getMentorshipDetail(mentorshipId)) as MentorshipApiResponse | null;
+
         if (!mentorship) {
           setError('Mentorship not found');
           return;
         }
 
         setFormData({
-          title: (mentorship.title as string) || '',
-          description: (mentorship.description as string) || '',
-          level: (mentorship.difficultyLevel ?? mentorship.level) as string || 'All Levels',
-          price: (mentorship.price as number) || 0,
-          status: (mentorship.status as string) || 'draft',
+          title: mentorship.title ?? '',
+          description: mentorship.description ?? '',
+          level: (mentorship.difficultyLevel as string) ?? 'ALL_LEVEL',
+          price: Number(mentorship.price ?? 0),
+          status: (mentorship.status as string) ?? 'draft',
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load mentorship';
@@ -94,9 +91,19 @@ const EditMentorship: FC = () => {
 
     try {
       setSubmitting(true);
-      // Update mentorship logic here
+
+      const payload: Partial<MentorshipApiResponse> = {
+        title: formData.title,
+        description: formData.description,
+        difficultyLevel: formData.level as MentorshipApiResponse['difficultyLevel'],
+        price: formData.price,
+        status: formData.status as MentorshipApiResponse['status'],
+      };
+
+      await updateMentorship(mentorshipId, payload);
+
       toast.success('Mentorship updated successfully');
-      navigate(`/mentor/mentorship/${mentorshipId}`);
+      navigate(`/mentor/mentorships/${mentorshipId}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to update mentorship';
       toast.error(message);
@@ -104,6 +111,10 @@ const EditMentorship: FC = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCancel = () => {
+    navigate(-1);
   };
 
   if (loading) {
@@ -129,127 +140,14 @@ const EditMentorship: FC = () => {
   return (
     <DashLayout pageTitle="Edit Mentorship">
       <div className="max-w-2xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-4"
-          >
-            <ArrowLeft size={20} />
-            Back
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Mentorship</h1>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
-          {/* Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter mentorship title"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={5}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter mentorship description"
-            />
-          </div>
-
-          {/* Level */}
-          <div>
-            <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-2">
-              Level
-            </label>
-            <select
-              id="level"
-              name="level"
-              value={formData.level}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option>All Levels</option>
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-            </select>
-          </div>
-
-          {/* Price */}
-          <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-              Price
-            </label>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              value={formData.price}
-              onChange={handleInputChange}
-              min="0"
-              step="0.01"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter price"
-            />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition"
-            >
-              {submitting ? 'Saving...' : 'Save Changes'}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+        <EditMentorshipHeader />
+        <EditMentorshipForm
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleSubmit}
+          submitting={submitting}
+          onCancel={handleCancel}
+        />
       </div>
     </DashLayout>
   );

@@ -1,9 +1,9 @@
 
 import type { FC } from 'react';
-import {  useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Calendar, ChevronDown } from 'lucide-react';
-import type { SalesChartProps } from './SalesChart.types';
+import type { SalesChartProps, SalesData } from './SalesChart.types';
 
 const SalesChart: FC<SalesChartProps> = ({ 
   title = 'Sales',
@@ -21,8 +21,8 @@ const SalesChart: FC<SalesChartProps> = ({
     { value: '1year', label: 'Last Year' },
   ];
 
-  // Data based on selected period (used when no API data)
-  const dataByPeriod = {
+  // Data based on selected period (used as a base structure)
+  const dataByPeriod: Record<string, SalesData[]> = {
     '1month': [
       { month: 'Week 1', value: 20000 },
       { month: 'Week 2', value: 25000 },
@@ -58,10 +58,44 @@ const SalesChart: FC<SalesChartProps> = ({
     ],
   };
 
-  const currentData = externalData && externalData.length > 0
-    ? externalData
-    : dataByPeriod[selectedPeriod as keyof typeof dataByPeriod];
-  const maxValue = currentData.length ? Math.max(...currentData.map(d => d.value)) : 0;
+  const baseData = dataByPeriod[selectedPeriod as keyof typeof dataByPeriod] ?? [];
+
+  const normalizeMonth = (month: string) =>
+    month.toString().trim().slice(0, 3).toLowerCase();
+
+  let currentData: SalesData[];
+
+  if (externalData && externalData.length > 0 && baseData.length > 0) {
+    // استخدم بيانات الـ API فوق الهيكل الافتراضي لنفس الشهور
+    const externalMap = new Map<string, SalesData>();
+    externalData.forEach((item) => {
+      externalMap.set(normalizeMonth(item.month), item);
+    });
+
+    currentData = baseData.map((item) => {
+      const key = normalizeMonth(item.month);
+      const match = externalMap.get(key);
+
+      return {
+        month: item.month,
+        value: match ? match.value : 0,
+      };
+    });
+  } else if (externalData && externalData.length > 0) {
+    // لا يوجد هيكل افتراضي مناسب، استخدم بيانات الـ API كما هي
+    currentData = externalData;
+  } else {
+    // لا توجد بيانات من الـ API (أو رجعت مصفوفة فاضية):
+    // نستخدم نفس الهيكل الزمني لكن بقيم = 0 عشان الأعمدة تبان فاضية
+    currentData = baseData.map((item) => ({
+      month: item.month,
+      value: 0,
+    }));
+  }
+
+  const maxValue = currentData.length
+    ? Math.max(...currentData.map((d) => d.value))
+    : 0;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -75,14 +109,23 @@ const SalesChart: FC<SalesChartProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: maxValue < 1000 ? 2 : 0,
+    }).format(value);
+
   // Custom Tooltip
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg">
-          <p className="text-[10px] text-gray-300">Dec 30, 2026</p>
-          <p className="text-sm font-bold">{(payload[0].value / 1000).toFixed(1)}K</p>
+          <p className="text-[10px] text-gray-300">{label}</p>
+          <p className="text-sm font-bold">
+            {formatCurrency(payload[0].value as number)}
+          </p>
         </div>
       );
     }
@@ -140,7 +183,10 @@ const SalesChart: FC<SalesChartProps> = ({
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={currentData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
+        <BarChart
+          data={currentData}
+          margin={{ top: 20, right: 20, left: 0, bottom: 10 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
           <XAxis 
             dataKey="month" 
@@ -148,22 +194,23 @@ const SalesChart: FC<SalesChartProps> = ({
             tickLine={false}
             tick={{ fill: '#9CA3AF', fontSize: 12 }}
           />
-          <YAxis 
+          <YAxis
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#9CA3AF', fontSize: 12 }}
-            tickFormatter={(value) => `$${value / 1000}K`}
+            tickFormatter={(value) => formatCurrency(value as number)}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
           <Bar 
             dataKey="value" 
             radius={[8, 8, 0, 0]}
             maxBarSize={50}
+            background={{ fill: '#E5E7EB', radius: [8, 8, 0, 0] }}
           >
             {currentData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
-                fill={entry.value === maxValue ? '#154d71': '#D1D5DB'} 
+                fill="#154d71"
               />
             ))}
           </Bar>
