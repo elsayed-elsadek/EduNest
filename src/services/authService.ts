@@ -14,20 +14,23 @@ const ENDPOINTS = {
 };
 
 // 2. استخدام Generic Types لضمان دقة البيانات العائدة
+// نرمي الخطأ الكامل (مع response) حتى صفحة التسجيل تقرأ status و data
 const handleRequest = async <T>(request: Promise<{ data: T }>): Promise<T> => {
-  try {
-    const response = await request;
-    return response.data;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    throw error.response?.data || error.message;
-  }
+  const response = await request;
+  return response.data;
 };
 
 // --- Registration ---
 
+// للمينتور لا نرسل educationalLevel (حقل خاص بالطالب فقط)
+function buildMentorPayload(formData: RegisterFormData) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { educationalLevel, ...rest } = formData;
+  return rest;
+}
+
 export const registerMentor = (formData: RegisterFormData) => 
-  handleRequest(api.post(ENDPOINTS.REGISTER_MENTOR, formData));
+  handleRequest(api.post(ENDPOINTS.REGISTER_MENTOR, buildMentorPayload(formData)));
 
 export const registerStudent = (formData: RegisterFormData) => 
   handleRequest(api.post(ENDPOINTS.REGISTER_STUDENT, formData));
@@ -53,3 +56,4 @@ export const forgetPasswordVerifyOtp = (email: string, otp: string) =>
 
 export const forgetResetPassword = (email: string, newPassword: string) => 
   handleRequest(api.post(ENDPOINTS.FORGET_PWD_RESET, { email, newPassword }));
+

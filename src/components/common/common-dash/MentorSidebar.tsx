@@ -1,6 +1,8 @@
 
 import type { FC } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../../../store/authStore';
 import {
   Home as LayoutDashboard,
   BookOpen,
@@ -13,12 +15,19 @@ import {
 } from 'lucide-react';
 import type { MentorSidebarProps } from "./Mentorside.types";
 
-const MentorSidebar: FC<MentorSidebarProps & { onClose?: () => void }> = ({
-  userName,
-  userEmail,
-  userAvatar,
-  onClose
-}) => {
+const MentorSidebar: FC<MentorSidebarProps & { onClose?: () => void }> = ({ onClose }) => {
+  // اسحب القيم دي من الـ Store
+  const { userName, userAvatar, userEmail, isHydrated } = useAuthStore();
+  const logout = useAuthStore((s) => s.logout);
+  const navigate = useNavigate();
+
+  const firstName = userName?.trim().split(/\s+/)[0] || 'Mentor';
+
+  // لو الـ Store لسه بيحمل البيانات من الـ LocalStorage، ممكن تظهر Loader بسيط أو ترجع null
+  if (!isHydrated) {
+    return <div className="w-64 min-h-screen bg-[#0c2d48]" />; // مستطيل فارغ بنفس لون السايدبار
+  }
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/mentor/dashboard' },
     { icon: BookOpen, label: 'My Mentorships', path: '/mentor/mentorships' },
@@ -27,9 +36,16 @@ const MentorSidebar: FC<MentorSidebarProps & { onClose?: () => void }> = ({
     { icon: Bell, label: 'Notifications', path: '/mentor/notifications' },
     { icon: User, label: 'Profile', path: '/mentor/profile' },
   ];
-
-  const navigate = useNavigate();
-  const handleLogout = () => navigate('/logout');
+  const handleLogout = () => {
+    logout();
+    onClose?.();
+    toast.success('You have been logged out. See you soon!', {
+      duration: 2000,
+      position: 'top-center',
+     
+    });
+    navigate('/', { replace: true });
+  };
 
   return (
     <aside className="w-64 min-h-screen bg-[#0c2d48] flex flex-col rounded-r-[32px] relative overflow-hidden">
@@ -39,10 +55,19 @@ const MentorSidebar: FC<MentorSidebarProps & { onClose?: () => void }> = ({
         <div className="relative mb-3">
         
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden ring-2 ring-white/20">
+            {/* استخدم userAvatar من الـ Store مباشرة */}
             {userAvatar ? (
-              <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
+              <img 
+                src={userAvatar} 
+                alt={firstName} 
+                className="w-full h-full object-cover" 
+                loading="eager"
+                key="sidebar-avatar"
+              />
             ) : (
-              <span className="text-white font-bold text-xl">{userName.charAt(0).toUpperCase()}</span>
+              <span className="text-white font-bold text-xl">
+                {firstName.charAt(0).toUpperCase()}
+              </span>
             )}
           </div>
           {/* state */}
@@ -50,7 +75,7 @@ const MentorSidebar: FC<MentorSidebarProps & { onClose?: () => void }> = ({
         </div>
 
         <div className="text-center">
-          <h3 className="text-white font-bold text-lg">{userName}</h3>
+          <h3 className="text-white font-bold text-lg">{userName || 'Mentor'}</h3>
           <p className="text-gray-400 text-[10px] truncate max-w-[150px]">{userEmail}</p>
         </div>
       </div>

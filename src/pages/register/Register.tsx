@@ -40,17 +40,19 @@ const Register: React.FC = () => {
         ? await registerStudent(form.formData)
         : await registerMentor(form.formData);
       
+      const res = response as { message?: string };
       console.log('Server Response:', response);
       form.clearErrors();
-      toast.success(response.message || 'Registration Successful');
+      toast.success(res.message || 'Registration Successful');
       
       // Send OTP to email
       try {
-        // Store email for verification page
+        // Store email and user type for verification page
         localStorage.setItem("registrationEmail", form.formData.email);
+        localStorage.setItem("registrationType", form.joinAs);
         
-        const otpRes = await sendOtp(form.formData.email);
-        toast.success(otpRes.message  || 'OTP sent to your email');
+        const otpRes = await sendOtp(form.formData.email) as { message?: string };
+        toast.success(otpRes.message || 'OTP sent to your email');
       } catch (otpErr: unknown) {
         console.log('OTP Error:', otpErr);
         // Continue to verify page even if OTP fails
@@ -64,18 +66,50 @@ const Register: React.FC = () => {
       
       console.log('Error Response:', errorData);
       
-      // Check if error is related to duplicate email (409 Conflict)
+      // استخراج رسالة الخطأ من أي مصدر محتمل (Email Error، message، أو أول قيمة في errorMessages)
+      const rawMsg = errorData?.errorMessages?.['Email Error'] 
+        || errorData?.message 
+        || (errorData?.errorMessages && Object.values(errorData.errorMessages)[0]);
+      const errorText = (typeof rawMsg === 'string' ? rawMsg : String(rawMsg || '')).toLowerCase();
+      
+      // الحل الأمثل: حساب موجود لكن غير مفعّل → توجيه تلقائي لصفحة OTP
+      const isUnverifiedAccount = 
+        errorText.includes('not verified') ||
+        errorText.includes('unverified') ||
+        errorText.includes('request a new otp') ||
+        errorText.includes('request new otp');
+      
+      if (isUnverifiedAccount) {
+        try {
+          localStorage.setItem("registrationEmail", form.formData.email);
+          localStorage.setItem("registrationType", form.joinAs);
+          const otpRes = await sendOtp(form.formData.email) as { message?: string };
+          toast.success(otpRes.message || 'A new verification code has been sent to your email');
+        } catch (otpErr) {
+          console.log('OTP Error:', otpErr);
+          toast.error('Failed to send the code. Please try again.');
+        }
+        navigate("/verify");
+        return;
+      }
+      
+      // Check if error is related to duplicate email (409 Conflict) - حساب مفعّل بالفعل
       if (errorStatus === 409 && errorData?.errorMessages?.['Email Error']) {
-        const emailErrorMsg = errorData.errorMessages['Email Error'];
-        form.setEmailError(emailErrorMsg);
-        toast.error(emailErrorMsg);
-      } else if (errorStatus === 400 && (errorData?.message?.toLowerCase().includes('email') || errorData?.message?.toLowerCase().includes('duplicate'))) {
+        const msg = errorData.errorMessages['Email Error'];
+        form.setEmailError(msg);
+        toast.error(msg);
+      } else if (errorStatus === 400 && (errorText.includes('email') || errorText.includes('duplicate')) && !isUnverifiedAccount) {
         form.setEmailError('This email is already registered. Please use a different email.');
         toast.error('Email already exists. Please use a different email.');
       } else {
-        const errorMessage = Object.values(errorData?.errorMessages || {})[0] || err.message || 'Registration Failed';
-        form.setGeneralError(errorMessage);
-        toast.error(errorMessage);
+        // استخراج الرسالة: errorMessages أولاً، ثم message من الباكند، ثم رسالة عامة
+        const errorMessage =
+          (errorData?.errorMessages && Object.values(errorData.errorMessages)[0]) ||
+          errorData?.message ||
+          err.message ||
+          'Registration Failed';
+        form.setGeneralError(typeof errorMessage === 'string' ? errorMessage : 'Registration Failed');
+        toast.error(typeof errorMessage === 'string' ? errorMessage : 'Registration Failed');
       }
       console.log(err);
     } finally {

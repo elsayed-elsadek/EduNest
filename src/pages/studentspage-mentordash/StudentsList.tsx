@@ -1,71 +1,172 @@
 
 import type { FC } from 'react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
 import DashLayout from '../../components/layout/Dash-layout';
 import StudentSearch from '../../components/studentslist-com/StudentSearch/StudentSearch';
 import StudentsTable from '../../components/studentslist-com/StudentsTable/StudentsTable';
 import Pagination from '../../components/common/Pagination/Pagination';
 import type { Student } from '../../types/Students.types';
+import { getMentorStudents } from '../../services/Studentsservice';
+import { extractStudentsData } from '../../services/Studentsservice';
 
+// Helper 
+function isApiErrorResponse(res: unknown): res is { error: string } {
+  if (res == null || typeof res !== 'object') return false;
+  const obj = res as Record<string, unknown>;
+  return typeof obj.error === 'string' && obj.error.length > 0;
+}
+
+//  Component
 const StudentsList: FC = () => {
   const navigate = useNavigate();
+  const token = useAuthStore((s) => s.token);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const allStudents: Student[] = [
-    { id: '1', name: 'shahd walid', email: 'shahd@gmail.com', avatar: 'https://i.pravatar.cc/150?img=1', activeMentorships: 2, completedMentorships: 3 },
-    { id: '2', name: 'elsayed elseedeek', email: 'elsayed@gmail.com', avatar: 'https://i.pravatar.cc/150?img=2', activeMentorships: 2, completedMentorships: 3 },
-    { id: '3', name: 'rahma ismail', email: 'rahma@gmail.com', avatar: 'https://i.pravatar.cc/150?img=3', activeMentorships: 2, completedMentorships: 3 },
-    { id: '4', name: 'toka nagy', email: 'toka@gmail.com', avatar: 'https://i.pravatar.cc/150?img=4', activeMentorships: 2, completedMentorships: 3 },
-    { id: '5', name: 'shahd walid', email: 'shahd@gmail.com', avatar: 'https://i.pravatar.cc/150?img=5', activeMentorships: 2, completedMentorships: 3 },
-    { id: '6', name: 'omar medhat', email: 'omar@gmail.com', avatar: 'https://i.pravatar.cc/150?img=6', activeMentorships: 2, completedMentorships: 3 },
-    { id: '7', name: 'hazem saeed', email: 'hazem@gmail.com', avatar: 'https://i.pravatar.cc/150?img=7', activeMentorships: 2, completedMentorships: 3 },
-    { id: '8', name: 'Albert flora', email: 'Albert@gmail.com', avatar: 'https://i.pravatar.cc/150?img=8', activeMentorships: 2, completedMentorships: 3 },
-  ];
+  // API state
+  const [students, setStudents] = useState<Student[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredStudents = useMemo(() => {
-    if (!searchQuery.trim()) return allStudents;
-    return allStudents.filter(student =>
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, allStudents]);
-
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
-
-  const currentStudents = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredStudents.slice(startIndex, startIndex + itemsPerPage);
-  }, [currentPage, itemsPerPage, filteredStudents]);
-
+  //  Auth guard 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, itemsPerPage]);
+    const timer = setTimeout(() => {
+      if (!useAuthStore.getState().token) navigate('/login');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
+  //  Fetch from API
+  useEffect(() => {
+    if (!isHydrated || !token) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getMentorStudents(currentPage - 1, itemsPerPage) // API is 0-indexed
+      .then((res) => {
+        if (cancelled) return;
+
+        if (isApiErrorResponse(res)) {
+          setError((res as { error: string }).error);
+          return;
+        }
+
+        const extracted = extractStudentsData(res);
+        console.log(`📚 Students: ${extracted.content.length} / ${extracted.totalElements} total`);
+
+        // Map to the Student type already used in your components
+        const mapped: Student[] = extracted.content.map((s) => ({
+          id: String(s.id),
+          name: s.name,
+          email: s.email,
+          avatar: s.avatar,
+          activeMentorships: s.activeMentorships,
+          completedMentorships: s.completedMentorships,
+        }));
+
+        setStudents(mapped);
+        setTotalItems(extracted.totalElements);
+        setTotalPages(extracted.totalPages || 1);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          const msg = (err as { message?: string })?.message ?? 'Failed to load students';
+          setError(msg);
+          console.error('❌ Students fetch error:', err);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [isHydrated, token, currentPage, itemsPerPage]);
+
+  // Reset to page 1 on search 
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (val: number) => {
+    setItemsPerPage(val);
+    setCurrentPage(1);
+  };
+
+  // ── Client-side filter 
+  const displayedStudents = searchQuery.trim()
+    ? students.filter(
+        (s) =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.email.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : students;
+
+  // Render 
   return (
     <DashLayout pageTitle="Dashboard / Students">
       <div className="bg-[#F7F7F8] min-h-screen p-3 md:p-8">
         <div className="max-w-[1400px] mx-auto space-y-4 md:space-y-6">
 
-          {/* Header & Search - Stacked on Mobile */}
+          {/* Header & Search */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h1 className="text-xl md:text-2xl font-bold text-[#1A1C1E]">Students List</h1>
             <div className="w-full sm:w-72">
-              <StudentSearch
-                value={searchQuery}
-                onChange={setSearchQuery}
-              />
+              <StudentSearch value={searchQuery} onChange={handleSearch} />
             </div>
           </div>
 
+          {/* Error Banner */}
+          {error && (
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="font-semibold">{error}</p>
+                <button
+                  onClick={() => { setError(null); setCurrentPage(1); }}
+                  className="mt-1 text-xs font-semibold underline hover:no-underline"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm transition-all">
             <div className="w-full">
-              {filteredStudents.length > 0 ? (
+
+              {/* Loading Skeleton */}
+              {loading ? (
+                <div className="p-6 space-y-3 animate-pulse">
+                  {[...Array(itemsPerPage)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-200" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-gray-200 rounded w-1/4" />
+                        <div className="h-3 bg-gray-200 rounded w-1/3" />
+                      </div>
+                      <div className="h-3 bg-gray-200 rounded w-12" />
+                      <div className="h-3 bg-gray-200 rounded w-12" />
+                      <div className="h-8 bg-gray-200 rounded-xl w-24" />
+                    </div>
+                  ))}
+                </div>
+
+              ) : displayedStudents.length > 0 ? (
                 <StudentsTable
-                  students={currentStudents}
+                  students={displayedStudents}
                   onViewProfile={(id) => navigate(`/mentor/students/${id}`)}
                 />
               ) : (
@@ -74,26 +175,27 @@ const StudentsList: FC = () => {
                     <span className="text-2xl">🔍</span>
                   </div>
                   <p className="text-gray-400 font-medium text-sm md:text-base">
-                    No students found matching your search.
+                    {searchQuery ? 'No students found matching your search.' : 'No students yet.'}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Pagination  */}
-            {filteredStudents.length > 0 && (
+            {/* Pagination */}
+            {!loading && displayedStudents.length > 0 && (
               <div className="p-3 md:p-6 border-t border-gray-50">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
                   itemsPerPage={itemsPerPage}
-                  totalItems={filteredStudents.length}
+                  totalItems={totalItems}
                   onPageChange={setCurrentPage}
-                  onItemsPerPageChange={(val) => setItemsPerPage(val)}
+                  onItemsPerPageChange={handleItemsPerPageChange}
                 />
               </div>
             )}
           </div>
+
         </div>
       </div>
     </DashLayout>

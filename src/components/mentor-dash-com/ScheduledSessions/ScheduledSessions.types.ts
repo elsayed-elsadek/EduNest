@@ -6,6 +6,7 @@ export interface Session {
   startTime: string;
   endTime: string;
   type: 'live' | 'qa' | 'course';
+  date?: string;
 }
 
 export interface ScheduledSessionsProps {

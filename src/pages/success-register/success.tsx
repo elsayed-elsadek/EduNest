@@ -10,7 +10,13 @@ const Success: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNext = () => {
-    navigate("/dashboard");
+    const registrationType = localStorage.getItem("registrationType");
+    if (registrationType === "mentor") {
+      navigate("/mentor/dashboard");
+    } else {
+      navigate("/dashboard");
+    }
+    localStorage.removeItem("registrationType");
   };
 
   return (

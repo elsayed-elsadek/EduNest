@@ -2,14 +2,13 @@
 import type { FC } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Search, Bell, ChevronDown, Menu, X, User, Settings, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // استيراد Navigate للتحكم في المسارات
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuthStore } from '../../../../store/authStore';
 import type { MentorNavbarProps } from './MentorNavbar.types';
 
 const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
   pageTitle = 'Dashboard',
-  userName,
-  userRole = "Mentor",
-  userAvatar,
   notificationCount = 0,
   onNotificationClick,
   onProfileClick,
@@ -21,7 +20,37 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
+  const logout = useAuthStore((s) => s.logout);
+  const userEmail = useAuthStore((s) => s.userEmail);
+  const userName = useAuthStore((s) => s.userName);
+  const userAvatar = useAuthStore((s) => s.userAvatar);
 
+  // Local cached avatar to prevent flicker when `userAvatar` briefly becomes empty
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(userAvatar || null);
+
+  const firstName = userName?.trim().split(/\s+/)[0] || 'Mentor';
+
+  // Preload and commit avatar when available
+  useEffect(() => {
+    if (!userAvatar) return;
+    const img = new Image();
+    img.src = userAvatar;
+    img.onload = () => setAvatarSrc(userAvatar);
+    // if image fails to load, keep previous avatarSrc
+    // no need to cleanup the Image object
+  }, [userAvatar]);
+
+  const handleLogout = () => {
+    setIsProfileMenuOpen(false);
+    logout();
+    toast.success('You have been logged out. See you soon!', {
+      duration: 2000,
+      position: 'top-center',
+    
+      
+    });
+    navigate('/', { replace: true });
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -77,9 +106,18 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
           >
             <Menu size={18} />
           </button>
-          <h1 className="text-xs md:text-sm font-bold text-[#0c2d48] truncate block">
-            {pageTitle}
-          </h1>
+          <h2 className="text-md truncate flex items-center gap-1">
+            {pageTitle.split('/').map((part, index) => (
+              <span key={index} className="flex items-center gap-1">
+                <span className={index === 0 ? 'font-bold' : ' text-gray-500 '}>
+                  {part.trim()}
+                </span>
+                {index < pageTitle.split('/').length - 1 && (
+                  <span className="font-light text-gray-400">/</span>
+                )}
+              </span>
+            ))}
+          </h2>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-4 md:gap-6 flex-shrink-0">
@@ -128,21 +166,21 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
               className="flex items-center gap-1.5 sm:gap-3 px-1.5 sm:px-3 py-1.5 h-[42px] rounded-lg border border-gray-200/50 hover:bg-gray-50 transition-colors"
             >
               <div className="w-[28px] h-[28px] sm:w-[30px] sm:h-[30px] rounded-full bg-blue-500 flex-shrink-0 overflow-hidden">
-                {userAvatar ? (
-                  <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt={userName} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-white text-[11px] sm:text-[12px] flex items-center justify-center h-full font-bold">
-                    {userName?.charAt(0) || "U"}
+                    {firstName?.charAt(0) || "U"}
                   </span>
                 )}
               </div>
 
               <div className="text-left hidden lg:flex flex-col justify-center">
                 <p className="text-[11px] font-semibold text-gray-900 leading-tight truncate max-w-[80px]">
-                  {userName}
+                  {firstName}
                 </p>
-                <p className="text-[9px] text-gray-500 font-medium leading-tight">
-                  {userRole}
+                <p className="text-[9px] text-gray-500 font-medium leading-tight truncate max-w-[120px]">
+                  {userEmail}
                 </p>
               </div>
               <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 transition-transform flex-shrink-0 ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
@@ -174,7 +212,7 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
 
                 {/* Logout */}
                 <button
-                  onClick={() => handleMenuAction('/logout')}
+                  onClick={handleLogout}
                   className="w-full px-4 py-2.5 text-left text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-medium"
                 >
                   <LogOut size={14} />

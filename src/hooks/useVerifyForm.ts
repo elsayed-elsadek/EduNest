@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { verifyOtp, sendOtp } from "../services/authService";
 import toast from "react-hot-toast";
+import { useAuthStore } from "../store/authStore";
+import { getFirstNameFromToken } from "../utils/jwt";
 
 export const useVerifyForm = () => {
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
@@ -33,6 +35,23 @@ export const useVerifyForm = () => {
       setSuccessMessage("Code verified successfully!");
       setErrorMessage(""); // clear error on success
       toast.success("Email verified successfully!");
+
+      // Extract token from response if available
+      if (response && typeof response === 'object') {
+        const responseObj = response as Record<string, unknown>;
+        const jwt = responseObj.jwt || responseObj.token || (responseObj.apiResponse as Record<string, unknown>)?.jwt;
+        
+        if (jwt && typeof jwt === 'string') {
+          // Extract user info from token
+          const userName = getFirstNameFromToken(jwt);
+          useAuthStore.getState().setAuth({
+            token: jwt,
+            userName: userName || '',
+            userEmail: email,
+            userRole: '',
+          });
+        }
+      }
 
       // Clear email from localStorage
       localStorage.removeItem("registrationEmail");

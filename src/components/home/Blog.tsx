@@ -1,8 +1,16 @@
 import React from 'react';
 
+interface BlogProps {
+  dummyBlogs: Array<{
+    imageSrc: string;
+    title: string;
+    date: string;
+    comments: number;
+    description: string;
+  }>;
+}
 
-
-const Blog: React.FC = ({dummyBlogs}) => {
+const Blog: React.FC<BlogProps> = ({ dummyBlogs }) => {
 
 
   return (

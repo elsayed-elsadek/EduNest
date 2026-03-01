@@ -1,6 +1,5 @@
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface MentorSidebarProps {
-  userName: string;
-  userEmail: string;
-  userAvatar?: string;
+ //read from api
 }

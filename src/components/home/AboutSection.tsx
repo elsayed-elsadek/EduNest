@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 
 type StatCard = {
-  icon: never; 
+  icon: any;
   value: string;
   label: string;
 };

@@ -3,7 +3,7 @@ import { useState, type FC } from 'react';
 import DashLayout from '../../components/layout/Dash-layout';
 import SettingItem from '../../components/mentor-setting-com/SettingItem';
 import SettingToggle from '../../components/mentor-setting-com/SettingToggle';
-import { Mail, Lock, Bell, Moon, MessageSquare, Trash2, Edit2 } from 'lucide-react';
+import { Mail, Lock, Moon, Trash2, Edit2 } from 'lucide-react';
 import type { SettingsData } from '../../types/mentor-settings.types';
 
 const Settings: FC = () => {
@@ -32,12 +32,12 @@ const Settings: FC = () => {
   return (
     <DashLayout pageTitle="Settings">
 
-      <div className="bg-[#F7F8FA] min-h-screen py-6 px-4 md:py-10 md:px-16">
+      <div className="bg-[#F7F8FA] min-h-screen py-4 px-3 md:py-6 md:px-12">
 
         <div className="max-w-[1400px] mx-auto bg-white rounded-2xl md:rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
 
           {/* Header: */}
-          <div className="bg-white border-b border-gray-100 px-6 py-6 md:px-12 md:py-8">
+          <div className="bg-white border-b border-gray-100 px-4 py-4 md:px-8 md:py-6">
             <h1 className="text-xl md:text-2xl font-bold text-[#1A1C1E]">
               Account Setting
             </h1>
@@ -84,27 +84,8 @@ const Settings: FC = () => {
 
               {/* Notifications Section */}
               <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 space-y-1">
-                <SettingToggle
-                  label="Email Notifications"
-                  description="Receive notifications via email"
-                  checked={settings.emailNotifications}
-                  onChange={() => handleToggle('emailNotifications')}
-                  icon={<Mail className="w-5 h-5" />}
-                />
-                <SettingToggle
-                  label="Push Notifications"
-                  description="Receive push notifications in browser"
-                  checked={settings.pushNotifications}
-                  onChange={() => handleToggle('pushNotifications')}
-                  icon={<Bell className="w-5 h-5" />}
-                />
-                <SettingToggle
-                  label="Weekly Digest"
-                  description="Get a summary of your weekly activity"
-                  checked={settings.weeklyDigest}
-                  onChange={() => handleToggle('weeklyDigest')}
-                  icon={<MessageSquare className="w-5 h-5" />}
-                />
+                
+              
                 <SettingToggle
                   label="Dark Mode"
                   description="Switch between light and dark"
@@ -112,6 +93,32 @@ const Settings: FC = () => {
                   onChange={() => handleToggle('darkMode')}
                   icon={<Moon className="w-5 h-5" />}
                 />
+              </div>
+
+              {/* Deactivate Account Card */}
+              <div className="bg-yellow-50/40 rounded-2xl border border-yellow-100 p-6 md:p-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                  <div className="flex items-start gap-4 md:gap-5">
+                    <div className="p-3 bg-yellow-50 rounded-2xl flex-shrink-0">
+                      <Trash2 className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900">
+                        Deactivate Account
+                      </h3>
+                      <p className="text-xs md:text-sm text-gray-500 mt-1 max-w-md leading-relaxed">
+                        Temporarily disable your account. You can reactivate anytime by logging in again.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => alert('Deactivate clicked')}
+                    className="w-full sm:w-auto px-8 py-3 text-sm font-bold text-yellow-600 border border-yellow-200 rounded-2xl hover:bg-yellow-600 hover:text-white transition-all text-center"
+                  >
+                    Deactivate
+                  </button>
+                </div>
               </div>
 
               {/* Delete Account: */}

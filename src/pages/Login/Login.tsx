@@ -1,8 +1,9 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useLogin } from "../../hooks/useLogin";
+import { useAuthStore } from "../../store/authStore";
 
 
 const Login: React.FC = () => {
@@ -15,6 +16,18 @@ const Login: React.FC = () => {
     handleInputChange,
     handleSubmit
   } = useLogin();
+
+  // Load saved email and rememberMe state on component mount
+  useEffect(() => {
+    const lastEmail = useAuthStore.getState().lastEmail;
+    const rememberMe = useAuthStore.getState().rememberMe;
+    
+    if (lastEmail && rememberMe) {
+      console.log('📧 Loading saved email from Remember Me:', lastEmail);
+      handleInputChange('email', lastEmail);
+      handleInputChange('rememberMe', true);
+    }
+  }, []);
 
 
   const emailRegex = /^\S+@\S+\.\S+$/;

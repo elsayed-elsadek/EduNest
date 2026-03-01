@@ -55,9 +55,9 @@ export const useForgetPassForm = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const backendMessage =
-        error?.response?.data?.errorMessages?.error ||
-        error?.response?.data?.message ||
-        error?.message ||
+      error?.response?.data?.errorMessages?.["User Search"] || 
+      error?.response?.data?.message || 
+      error?.message || 
         "Something went wrong while sending reset email.";
 
       toast.error(backendMessage);

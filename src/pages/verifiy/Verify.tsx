@@ -26,10 +26,13 @@ export const Verify: React.FC = () => {
   } = useVerifyForm();
 
   useEffect(() => {
-    // Get email from localStorage
+    // Get email from localStorage (يبقى محفوظ حتى بعد الـ refresh)
     const storedEmail = localStorage.getItem("registrationEmail") || "";
     setEmail(storedEmail);
-  }, []);
+    if (!storedEmail) {
+      navigate("/register", { replace: true });
+    }
+  }, [navigate]);
 
   // Timer effect
   useEffect(() => {

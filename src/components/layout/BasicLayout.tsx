@@ -2,7 +2,6 @@ import React from "react";
 import ImageWithOverlay from "../common/ImageWithOverlay";
 import logo from "../../assets/edunestlogo.png";
 import { Link } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
 
 interface Props {
   children: React.ReactNode;
@@ -53,21 +52,6 @@ export const BasicLayout: React.FC<Props> = ({ children, scroll = false }) => {
       <div className="hidden md:flex w-full md:w-1/2 h-screen sticky top-0 z-10">
         <ImageWithOverlay />
       </div>
-
-      <Toaster
-  position="top-center"
-  reverseOrder={false}
-  toastOptions={{
-    duration: 4000,
-    success: {
-      className: 'bg-white text-green-800 border border-green-100',
-    },
-    error: {
-      className: 'bg-white text-red-800 border border-red-100',
-    },
-  }}
-/>
-
 
     </div>
   );

@@ -49,3 +49,8 @@ export interface AuthResponse {
   [key: string]: unknown;
 }
 
+export interface ApiError {
+  errorMessages?: {
+    error?: string;
+  };
+}
