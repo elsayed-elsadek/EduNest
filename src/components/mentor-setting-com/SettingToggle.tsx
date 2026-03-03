@@ -19,7 +19,7 @@ const SettingToggle: FC<SettingToggleProps> = ({
           </div>
         )}
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-[#1A1C1E]">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
             {label}
           </h3>
           <p className="text-xs text-gray-500 mt-1 leading-relaxed">
@@ -54,3 +54,5 @@ const SettingToggle: FC<SettingToggleProps> = ({
 };
 
 export default SettingToggle;
+
+

@@ -24,7 +24,7 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
       <div className="flex flex-col md:flex-row items-center md:items-center gap-5">
 
         <div className="relative shrink-0">
-          <div className="w-24 h-24 rounded-xl overflow-hidden p-[3px] bg-[#FACC15]">
+          <div className="w-24 h-24 rounded-xl overflow-hidden p-[3px] bg-yellow-400 dark:bg-yellow-600">
             <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-50">
               {avatar ? (
                 <img
@@ -33,7 +33,7 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-[#1A1C1E] text-white text-2xl font-bold">
+                <div className="w-full h-full flex items-center justify-center bg-gray-900 dark:bg-gray-700 text-white text-2xl font-bold">
                   {firstName.charAt(0)}{lastName.charAt(0)}
                 </div>
               )}
@@ -43,14 +43,14 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
 
         {/* info section */}
         <div className="flex-1 text-center md:text-left">
-          <h2 className="text-lg md:text-xl font-bold text-[#1A1C1E]">
+          <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
             {firstName} {lastName}
           </h2>
           <p className="text-xs md:text-sm text-gray-500 font-medium">
             {title}
           </p>
           <div className="inline-block mt-1 px-2 py-0.5 bg-gray-50 rounded-md">
-            <p className="text-[11px] md:text-xs font-bold text-[#1A1C1E] uppercase tracking-wider">
+            <p className="text-[11px] md:text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">
               {experience}
             </p>
           </div>
@@ -66,3 +66,5 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({
 };
 
 export default ProfileHeader;
+
+

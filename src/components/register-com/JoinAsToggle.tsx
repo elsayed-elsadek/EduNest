@@ -11,7 +11,7 @@ export const JoinAsToggle: React.FC<Props> = ({ joinAs, setJoinAs }) => {
   const baseStyles =
     "flex-1 sm:flex-auto h-11 sm:h-12 px-6 sm:px-8 rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center font-Poppins hover:scale-[1.05] active:scale-95 shadow-sm border-2";
 
-  const activeStyles = "bg-gradient-to-r from-[#154d71] to-[#33a1e0] text-white shadow-md";
+  const activeStyles = "btn-primary-gradient text-white shadow-md";
   const inactiveStyles =
     "bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:bg-gray-50";
 
@@ -49,4 +49,7 @@ export const JoinAsToggle: React.FC<Props> = ({ joinAs, setJoinAs }) => {
     </div>
   );
 };
+
+
+
 

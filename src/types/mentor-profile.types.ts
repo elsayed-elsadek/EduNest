@@ -16,7 +16,6 @@ export interface MentorProfileApiData {
 export interface UpdateMentorProfileRequest {
   firstName:         string;
   lastName:          string;
-  email:             string;
   bio:               string;
   jobTitle:          string;
   yearsOfExperience: number;

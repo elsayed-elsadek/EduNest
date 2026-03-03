@@ -66,3 +66,5 @@ const MessageBubble: FC<MessageBubbleProps> = ({ message, isOwn, userName, userA
 };
 
 export default MessageBubble;
+
+

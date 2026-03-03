@@ -17,31 +17,85 @@ html {
   text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
-
-
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background: #fff;
+  background: #f7f7f8;
   color: #222;
   line-height: 1.6;
   overflow-x: hidden;
 }
 
-img,
-picture,
-video,
-canvas {
+/* smooth theme transitions */
+html, body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+:root {
+  --sidebar-bg: #0c2d48;
+  --active-bg:   #f7f7f8;; /* نفس لون بادي اللايت */
+
+  /* Primary gradient colors */
+  --primary-from: #154d71;
+  --primary-via: #2a7fa8;
+  --primary-to: #33a1e0;
+  --primary-500: #0f5e8b;
+  --primary-dark: #0f3550;
+
+  /* Blue gradient */
+  --blue-from: #33A1E0;
+  --blue-to: #2176AE;
+}
+
+.dark {
+  --dark-bg: #0b1220;
+  --dark-card: #0f1724;
+  --dark-border: #1f2937;
+  --dark-muted: #9ca3af;
+  --dark-text: #e5e7eb;
+
+  --sidebar-bg: #071627;
+  --active-bg: #0b1220; /* نفس لون بادي الدارك */
+  --accent: #d4af37;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+.dark .bg-white { background-color: var(--dark-card) !important; }
+.dark .bg-white\/95 { background-color: rgba(15,23,36,0.95) !important; }
+.dark .bg-gray-50 { background-color: var(--dark-bg) !important; }
+.dark .bg-gray-100 { background-color: var(--dark-card) !important; }
+.dark .bg-white\/70 { background-color: rgba(15,23,36,0.7) !important; }
+.dark .bg-\[\#F7F7F8\] { background-color: var(--dark-bg) !important; }
+.dark .bg-\[\#F7F8FA\] { background-color: var(--dark-bg) !important; }
+
+.dark .text-gray-900, .dark .text-gray-800 { color: var(--dark-text) !important; }
+.dark .text-gray-600 { color: var(--dark-muted) !important; }
+.dark .text-gray-500 { color: var(--dark-muted) !important; }
+.dark .text-gray-400 { color: #94a3b8 !important; }
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-50 { border-color: var(--dark-border) !important; }
+
+.dark .shadow-sm { box-shadow: none !important; }
+.dark .bg-gradient-to-br { background-image: none !important; }
+
+/* ============================================
+   GLOBAL ELEMENTS
+   ============================================ */
+img, picture, video, canvas {
   display: block;
   max-width: 100%;
 }
 
-ul,
-ol {
-  list-style: none;
-}
+ul, ol { list-style: none; }
 
 a {
   text-decoration: none;
@@ -53,32 +107,31 @@ a {
   outline-offset: 2px;
 }
 
-/* /global CSS settings */
+/* ============================================
+   COLORS & UTILITIES
+   ============================================ */
+.blueTextColor { color: rgba(28, 110, 164, 1); }
+.blueBGColor   { background-color: rgba(28, 110, 164, 1); }
 
-
-/* colors */
-.blueTextColor {
-  color: rgba(28, 110, 164, 1);
-}
-
-.blueBGColor {
-  background-color: rgba(28, 110, 164, 1);
-}
-
-/* utility for hero image to keep JSX tidy */
 .hero-image {
   @apply w-[360px] h-[400px] rounded-[30px] overflow-hidden;
 }
 
-.text-primary {
-  color: #0f5e8b;
+.text-primary { color: var(--primary-500); }
+.bg-primary   { background-color: var(--primary-500); }
+
+.btn-primary-gradient {
+  background-image: linear-gradient(90deg, var(--primary-from), var(--primary-via), var(--primary-to));
+}
+.btn-primary { background-color: var(--primary-500); }
+
+.btn-blue-gradient {
+  background-image: linear-gradient(90deg, var(--blue-from), var(--blue-to));
 }
 
-.bg-primary {
-  background-color: #0f5e8b;
-}
-
-/* home page */
+/* ============================================
+   HOME PAGE
+   ============================================ */
 .mentor {
   position: relative;
   display: inline-block;
@@ -102,7 +155,6 @@ a {
   transform: rotate(-20deg);
 }
 
-
 .mentor::after {
   content: '';
   position: absolute;
@@ -117,116 +169,68 @@ a {
   transform: rotate(20deg);
 }
 
-/* Mentorships */
-/* .mentorships-header{
-  position: relative; 
-  display: inline-block;
-  padding: 10px 20px;
-  font-weight: bold;
-  margin-bottom: 20px;
-
-}
-
-.mentorships-header::before {
-  content: "";
-  position: absolute;
-  bottom: -145px;
-  left: 33%;
-  transform: translateX(-50%);
-  width: 250px;
-  height: 130px;
-  font-weight: bolder;
-  border-radius: 0 0 450px 400px;
-  border-top: none;
-  border-right: 3px solid #3b719f;
-  transform: rotate(-130deg);
-  overflow: hidden;
-} */
-
-/* logo strip */
-
-/* تحديد الحركة (Keyframes) */
+/* ============================================
+   LOGO STRIP / MARQUEE
+   ============================================ */
 @keyframes marquee {
-  from {
-    transform: translateX(0%); 
-  }
-  to {
-    transform: translateX(-100%); 
-  }
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-100%); }
 }
 
-/* التنسيق الأساسي لشريط الشعارات المتحرك */
 .marquee-container {
-  overflow: hidden; 
+  overflow: hidden;
   white-space: nowrap;
 }
 
 .marquee-content {
   display: flex;
-  animation: marquee 30s linear infinite; 
+  animation: marquee 30s linear infinite;
   width: max-content;
 }
 
-/* إيقاف الحركة عند الـ Hover */
 .marquee-container:hover .marquee-content {
   animation-play-state: paused;
 }
 
-:root {
-  --sidebar-bg: #0c2d48;
-  --active-bg: #f7f7f8;
-}
+/* ============================================
+   SIDEBAR INVERTED CURVES
+   ============================================ */
 
-.relative.flex.items-center.bg-\[\#F7F7F8\] {
-  overflow: visible;
-}
-
-
-.inverted-curve-top {
+.inverted-curve-top,
+.inverted-curve-bottom {
   position: absolute;
-  top: -20px; 
   right: 0;
   width: 20px;
   height: 20px;
   background-color: transparent;
   pointer-events: none;
+  z-index: 10;
+}
+
+.inverted-curve-top {
+  top: -20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 8px 8px 0 0 var(--active-bg);
+}
+
+.inverted-curve-bottom {
+  bottom: -20px;
+  border-top-right-radius: 20px;
+  box-shadow: 8px -8px 0 0 var(--active-bg);
 }
 
 .inverted-curve-top::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--sidebar-bg); 
-  border-bottom-right-radius: 20px; 
-  box-shadow: 5px 5px 0 5px var(--active-bg); 
-}
-
-
-.inverted-curve-bottom {
-  position: absolute;
-  bottom: -20px; 
-  right: 0;
-  width: 20px;
-  height: 20px;
-  background-color: transparent;
-  pointer-events: none;
+  inset: 0;
+  background-color: var(--sidebar-bg);
+  border-bottom-right-radius: 20px;
 }
 
 .inverted-curve-bottom::after {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-color: var(--sidebar-bg);
-  border-top-right-radius: 20px; 
-  box-shadow: 5px -5px 0 5px var(--active-bg); 
+  border-top-right-radius: 20px;
 }
-
-
-
-

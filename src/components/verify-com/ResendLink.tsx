@@ -19,3 +19,6 @@ export const ResendLink: React.FC<Props> = ({ onClick, disabled = false, timer =
     </p>
   );
 };
+
+
+

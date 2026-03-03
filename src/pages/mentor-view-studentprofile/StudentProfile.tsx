@@ -184,7 +184,7 @@ const StudentProfile: FC = () => {
               <div className="px-6"><hr className="border-gray-50" /></div>
               <SocialMediaSection socialMedia={socialMedia} />
               <div className="mt-auto p-6">
-                <button className="w-full py-3 bg-[#f0f7ff] text-[#e89d1a] rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#e6effc] transition-colors">
+                <button className="w-full py-3 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
                   <span>🏆</span> Award badges
                 </button>
               </div>
@@ -218,3 +218,5 @@ const StudentProfile: FC = () => {
 };
 
 export default StudentProfile;
+
+

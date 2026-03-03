@@ -75,7 +75,7 @@ const ReviewsList: FC<ReviewsListProps> = ({
     <div className="bg-white rounded-2xl p-5 border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-bold text-[#1e3a5f]">
+        <h2 className="text-base font-bold text-primary dark:text-blue-400">
           Reviews from Students
         </h2>
         
@@ -109,3 +109,5 @@ const ReviewsList: FC<ReviewsListProps> = ({
 };
 
 export default ReviewsList;
+
+

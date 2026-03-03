@@ -14,7 +14,7 @@ const MentorshipTable: FC<MentorshipTableProps> = ({ mentorships, onDetails, onA
     <div className="w-full overflow-x-auto custom-scrollbar">
 
       <table className="w-full min-w-[500px] border-collapse text-left">
-        <thead className="bg-[#F9FAFB] border-b border-gray-100">
+        <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
           <tr>
             <th className="py-5 px-4 md:px-6 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-[40%] md:w-[30%]">
               Mentorships
@@ -57,3 +57,5 @@ const MentorshipTable: FC<MentorshipTableProps> = ({ mentorships, onDetails, onA
 };
 
 export default MentorshipTable;
+
+

@@ -55,3 +55,6 @@ export const ForgetPassEmailInput: React.FC<Props> = ({ value, onChange, error }
     </div>
   );
 };
+
+
+

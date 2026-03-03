@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/edunestlogo.png";
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '../context/useTheme';
 
 const navItems = [
   { label: "Home", target: "home" },
@@ -26,6 +28,7 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeNavItem, setActiveNavItem] = useState("home");
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const handleNavClick = (target: string) => {
     setActiveNavItem(target);
     scrollToSection(target);
@@ -33,9 +36,9 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="w-full sticky top-0 z-40 bg-white/70 backdrop-blur-md">
+    <header className="w-full sticky top-0 z-40 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-        <div className="flex items-center justify-between bg-[#6FB7D61A] shadow-sm backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3">
+          <div className="flex items-center justify-between bg-white/5 dark:bg-transparent shadow-sm backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3">
           {/* Logo */}
           <div
             className="flex items-center gap-3 cursor-pointer h-10"
@@ -45,15 +48,15 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop navigation */}
-          <nav className="hidden lg:flex items-center gap-8 text-sm text-gray-600 flex-1 justify-center">
+          <nav className="hidden lg:flex items-center gap-8 text-sm text-gray-600 dark:text-gray-300 flex-1 justify-center">
             {navItems.map((item) => (
               <button
                 key={item.target}
                 onClick={() => handleNavClick(item.target)}
                 className={`relative transition text-sm ${
                   activeNavItem === item.target
-                    ? "text-[#0f5e8b] font-medium"
-                    : "hover:text-[#0f5e8b]"
+                    ? "text-primary font-medium"
+                    : "hover:text-primary"
                 }`}
               >
                 {item.label}
@@ -63,8 +66,15 @@ const Navbar: React.FC = () => {
 
           {/* Desktop right actions */}
           <div className="hidden lg:flex items-center gap-4 ml-auto">
+            {/* Theme toggle */}
+            <button onClick={toggleTheme}
+              className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-200 transition"
+              aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             <Link to="/login">
-              <button className="text-sm text-gray-600 hover:text-[#0f5e8b] transition font-semibold">
+              <button className="text-sm text-gray-600 dark:text-gray-200 hover:text-primary transition font-semibold">
                 Sign in
               </button>
             </Link>
@@ -72,7 +82,7 @@ const Navbar: React.FC = () => {
               onClick={() => {
                 navigate("/register");
               }}
-              className="px-4 py-2 bg-[#0f5e8b] text-white rounded-full text-sm hover:bg-[#0d4a6e] transition"
+              className="px-4 py-2 bg-primary text-white rounded-full text-sm hover:opacity-90 transition"
             >
               Register Now
             </button>
@@ -80,13 +90,13 @@ const Navbar: React.FC = () => {
 
           {/* Mobile/medium trigger */}
           <button
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-full border border-[#bcd7ee] text-[#0f5e8b] bg-white/90 shadow-sm"
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 text-primary bg-white/90 dark:bg-gray-800/90 dark:border-gray-700 shadow-sm"
             onClick={() => setIsOpen((prev) => !prev)}
             aria-label="Toggle navigation"
           >
             <span
               className={`relative flex items-center justify-center w-5 h-5 rounded-full transition-colors ${
-                isOpen ? "bg-[#0f5e8b] text-white" : "bg-transparent"
+                isOpen ? "bg-primary text-white" : "bg-transparent"
               }`}
             >
               {isOpen ? (
@@ -114,8 +124,8 @@ const Navbar: React.FC = () => {
         <div
           className={`lg:hidden overflow-hidden transition-all duration-200 ease-out ${
             isOpen ? "max-h-96 mt-2" : "max-h-0"
-          }`}
-        >
+          }`}>
+          <div className="bg-white/95 dark:bg-gray-800/95 shadow-md rounded-2xl px-4 py-4 space-y-2">
           <div className="bg-white/95 shadow-md rounded-2xl px-4 py-4 space-y-2">
             {navItems.map((item) => (
               <button
@@ -123,25 +133,32 @@ const Navbar: React.FC = () => {
                 onClick={() => handleNavClick(item.target)}
                 className={`w-full text-left px-2 py-2 text-sm rounded-lg ${
                   activeNavItem === item.target
-                    ? "text-[#0f5e8b] bg-[#e3f1fb] font-medium"
-                    : "text-gray-700 hover:text-[#0f5e8b] hover:bg-[#e3f1fb]"
+                    ? "text-primary bg-blue-50 font-medium"
+                    : "text-gray-700 hover:text-primary hover:bg-blue-50"
                 }`}
               >
                 {item.label}
               </button>
             ))}
 
-            <div className="border-t border-gray-100 pt-3 mt-1 flex flex-col gap-2">
-              <Link to="/login">
-                <button className="w-full text-sm text-gray-600 text-left hover:text-[#0f5e8b] p-2 font-semibold rounded-lg">
-                  Sign in
+            <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-1 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <button onClick={toggleTheme}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-200 transition"
+                  aria-label="Toggle theme">
+                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                 </button>
-              </Link>
+                <Link to="/login">
+                  <button className="text-sm text-gray-600 dark:text-gray-200 text-left hover:text-primary p-2 font-semibold rounded-lg">
+                    Sign in
+                  </button>
+                </Link>
+              </div>
               <button
                 onClick={() => {
                   navigate("/register");
                 }}
-                className="w-full px-3 py-2 bg-[#0f5e8b] text-white rounded-full text-sm hover:bg-[#0d4a6e]"
+                className="w-full px-3 py-2 bg-primary text-white rounded-full text-sm hover:opacity-90"
               >
                 Register Now
               </button>
@@ -149,8 +166,12 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       </div>
+      </div>
     </header>
   );
 };
 
 export default Navbar;
+
+
+

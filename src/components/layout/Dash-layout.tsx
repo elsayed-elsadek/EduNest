@@ -33,7 +33,7 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
   if (!token) return null;
 
   return (
-    <div className="flex min-h-screen bg-[#F7F7F8] overflow-hidden relative">
+    <div className="flex min-h-screen bg-[#f7f7f8] dark:bg-[var(--dark-bg)] overflow-hidden relative transition-colors duration-300">
 
       {/* 1. Sidebar Container */}
       <div
@@ -73,3 +73,6 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
     </div>
   );
 }
+
+
+

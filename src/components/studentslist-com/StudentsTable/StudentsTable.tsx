@@ -13,7 +13,7 @@ const StudentsTable: FC<StudentsTableProps> = ({ students, onViewProfile }) => {
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full min-w-[400px] border-collapse text-left">
-          <thead className="bg-[#F9FAFB] border-b border-gray-100">
+          <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
             <tr>
               <th className="py-4 px-4 md:px-6 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                 Student Name
@@ -62,3 +62,5 @@ const StudentsTable: FC<StudentsTableProps> = ({ students, onViewProfile }) => {
 };
 
 export default StudentsTable;
+
+

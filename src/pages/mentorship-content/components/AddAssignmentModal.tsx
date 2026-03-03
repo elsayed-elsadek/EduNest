@@ -95,7 +95,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter assignment name....."
             required
           />
@@ -106,7 +106,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter assignment description......."
           />
         </div>
@@ -116,7 +116,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             type="datetime-local"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -127,7 +127,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
               min={0}
               value={totalPoints}
               onChange={(e) => setTotalPoints(Number(e.target.value) || 0)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
               placeholder="Set total points"
             />
           </div>
@@ -138,7 +138,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
               min={0}
               value={minPassPoints}
               onChange={(e) => setMinPassPoints(Number(e.target.value) || 0)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
               placeholder="Set pass points"
             />
           </div>
@@ -150,7 +150,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             min={0}
             value={estimatedMinutes ?? ''}
             onChange={(e) => setEstimatedMinutes(e.target.value ? Number(e.target.value) : undefined)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="e.g. 120"
           />
         </div>
@@ -160,7 +160,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             type="url"
             value={attachmentUrl}
             onChange={(e) => setAttachmentUrl(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Link to file"
           />
         </div>
@@ -175,7 +175,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 py-2.5 rounded-xl bg-[#154d71] text-white font-medium disabled:opacity-60"
+            className="flex-1 py-2.5 rounded-xl bg-primary text-white font-medium disabled:opacity-60"
           >
             {submitting ? 'Saving...' : isEditing ? 'Update Assignment' : 'Save Assignment'}
           </button>
@@ -186,3 +186,6 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
 };
 
 export default AddAssignmentModal;
+
+
+

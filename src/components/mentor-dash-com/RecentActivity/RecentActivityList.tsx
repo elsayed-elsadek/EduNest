@@ -44,7 +44,7 @@ const RecentActivityList: FC<RecentActivityListProps> = ({
   return (
     <div className="bg-white rounded-2xl p-5 border border-gray-200">
       {/* Header */}
-      <h2 className="text-base font-bold text-[#1e3a5f] mb-4">
+      <h2 className="text-base font-bold text-primary dark:text-blue-400 mb-4">
         {title}
       </h2>
 
@@ -70,3 +70,5 @@ const RecentActivityList: FC<RecentActivityListProps> = ({
 };
 
 export default RecentActivityList;
+
+

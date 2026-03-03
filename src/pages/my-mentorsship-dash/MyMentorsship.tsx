@@ -135,13 +135,13 @@ const MentorshipsList: FC = () => {
   return (
     <DashLayout pageTitle="Dashboard / My Mentorships">
     
-      <div className="bg-[#F7F7F8] min-h-screen px-0 md:px-8 md:pt-4 pb-8">
+      <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-screen px-0 md:px-8 md:pt-4 pb-8">
         
         {/* Header Section: Add button */}
         <div className="flex justify-end mb-6 px-4 md:px-0 pt-4 md:pt-0">
           <button
             onClick={() => navigate('/mentor/mentorships/create')}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 h-[44px] px-6 rounded-xl text-white text-sm font-bold bg-gradient-to-r from-[#154d71] via-[#2a7fa8] to-[#33a1e0] shadow-md transition-all active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 h-[44px] px-6 rounded-xl text-white text-sm font-bold btn-primary-gradient shadow-md transition-all active:scale-95"
           >
             <Plus className="w-5 h-5" />
             <span>Create New</span>
@@ -153,9 +153,9 @@ const MentorshipsList: FC = () => {
           {/* Table Header / Title */}
           <div className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 md:border-none">
             <div>
-              <h1 className="text-lg md:text-xl font-bold text-[#1A1C1E]">Mentorships List</h1>
+              <h1 className="text-lg md:text-xl font-bold text-gray-900">Mentorships List</h1>
               <p className="text-sm text-gray-400 mt-1">
-                Total <span className="text-[#1A1C1E] font-bold">{totalElements}</span>
+                Total <span className="text-gray-900 font-bold">{totalElements}</span>
               </p>
             </div>
 
@@ -264,3 +264,5 @@ const MentorshipsList: FC = () => {
 };
 
 export default MentorshipsList;
+
+

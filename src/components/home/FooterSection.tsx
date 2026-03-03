@@ -24,13 +24,13 @@ const supportLinks = [
 
 const FooterSection: React.FC = () => {
   return (
-    <footer className="bg-[#0b2944] pt-40 pb-6 text-white relative">
+    <footer className="bg-[var(--primary-dark)] dark:bg-gray-900 pt-40 pb-6 text-white relative">
 
       <div className="absolute inset-x-0 top-[-5%] sm:-top-20  max-w-4xl mx-auto px-4">
         <div className="bg-white text-gray-900 rounded-xl shadow-2xl p-10 text-center relative overflow-hidden">
 
           <svg
-            className="absolute top-0 left-0 w-48 h-48 opacity-30 text-[#0f5e8b]"
+            className="absolute top-0 left-0 w-48 h-48 opacity-30 text-primary dark:text-blue-400"
             viewBox="0 0 200 200"
             fill="currentColor"
           >
@@ -47,7 +47,7 @@ const FooterSection: React.FC = () => {
 
             <a
               href="/register"
-              className="py-3 px-10 inline-block bg-[#0f5e8b] text-white rounded-2xl font-semibold hover:bg-[#147fb8] transition"
+              className="py-3 px-10 inline-block bg-primary dark:bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 dark:hover:bg-blue-700 transition"
             >
               Register Now
             </a>
@@ -60,7 +60,7 @@ const FooterSection: React.FC = () => {
 
           <div className="md:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 cursor-pointer ">
-              <div className="w-10 h-10 bg-[#0f5e8b] rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 bg-primary dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
                 E
               </div>
               <span className="font-semibold text-lg">EduNest</span>
@@ -73,14 +73,14 @@ const FooterSection: React.FC = () => {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-gray-300">
                 <FontAwesomeIcon icon={faEnvelope} className="text-gray-300" />
-                <a href="mailto:EduNest123@gmail.com" className="hover:text-[#147fb8] transition">
+                <a href="mailto:EduNest123@gmail.com" className="hover:text-blue-400 transition">
                   EduNest123@gmail.com
                 </a>
               </div>
 
               <div className="flex items-center gap-2 text-gray-300">
                 <FontAwesomeIcon icon={faPhone} className="text-gray-300" />
-                <a href="tel:+4588435849" className="hover:text-[#147fb8] transition">
+                <a href="tel:+4588435849" className="hover:text-blue-400 transition">
                   +458 843 5849
                 </a>
               </div>
@@ -92,7 +92,7 @@ const FooterSection: React.FC = () => {
                   <a
                     key={i}
                     href="#"
-                    className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[#147fb8] rounded-full transition"
+                    className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
                   >
                     <FontAwesomeIcon icon={icon} className="text-white" />
                   </a>
@@ -108,7 +108,7 @@ const FooterSection: React.FC = () => {
                 <li key={i}>
                   <a
                     href={`#${item.id}`}
-                    className="text-gray-400 hover:text-[#147fb8] text-sm transition duration-500"
+                    className="text-gray-400 hover:text-blue-400 text-sm transition duration-500"
                   >
                     {item.name}
                   </a>
@@ -145,3 +145,6 @@ const FooterSection: React.FC = () => {
 };
 
 export default FooterSection;
+
+
+

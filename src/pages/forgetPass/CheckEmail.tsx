@@ -147,7 +147,7 @@ const CheckEmail: React.FC = () => {
           {code.map((c, i) => (
             <input
               key={i}
-              ref={(el) => (inputRefs.current[i] = el)}
+           ref={(el) => { inputRefs.current[i] = el; }}
               type="text"
               inputMode="numeric"
               maxLength={1}
@@ -202,7 +202,7 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
 }) => {
   return (
     <button
-      className="px-6 py-3 mt-4 rounded-lg bg-gradient-to-r from-[#154d71] to-[#33a1e0] 
+      className="px-6 py-3 mt-4 rounded-lg btn-primary-gradient 
                  text-white font-semibold text-sm 
                  hover:opacity-90 transition
                  disabled:opacity-60 disabled:cursor-not-allowed
@@ -232,9 +232,12 @@ const ResendLink: React.FC<ResendLinkProps> = ({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="text-sm text-[#0f5e8b] font-medium hover:underline disabled:text-gray-400"
+      className="text-sm text-primary font-medium hover:underline disabled:text-gray-400"
     >
       {disabled ? `Resend code in ${timer}s` : "Resend code"}
     </button>
   );
 };
+
+
+

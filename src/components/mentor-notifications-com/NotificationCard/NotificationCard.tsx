@@ -54,11 +54,11 @@ const NotificationCard: FC<NotificationCardProps> = ({
 
           <div className="flex-1 min-w-0 pr-4">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-[15px] sm:text-[16px] font-bold text-[#1E293B] truncate">
+              <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-800 dark:text-gray-200 truncate">
                 {notification.title}
               </h3>
               {notification.isNew && (
-                <span className="px-2 py-0.5 bg-[#E0F2FE] text-[#0369A1] text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0">
+                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0">
                   New
                 </span>
               )}
@@ -79,7 +79,7 @@ const NotificationCard: FC<NotificationCardProps> = ({
             {notification.actionLabel && (
               <button
                 onClick={() => onAction?.(notification.id)}
-                className="flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-[#154d71] via-[#2a7fa8] to-[#33a1e0] text-white rounded-xl hover:shadow-lg transition-all active:scale-95 text-sm font-bold h-[40px] w-[110px] shrink-0"
+                className="flex items-center justify-center gap-2 px-6 py-2 btn-primary-gradient text-white rounded-xl hover:shadow-lg transition-all active:scale-95 text-sm font-bold h-[40px] w-[110px] shrink-0"
               >
                 <span className="truncate">{notification.actionLabel}</span>
                 {notification.actionLabel.toLowerCase() === 'join' ? (
@@ -97,3 +97,5 @@ const NotificationCard: FC<NotificationCardProps> = ({
 };
 
 export default NotificationCard;
+
+

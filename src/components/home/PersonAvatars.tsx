@@ -23,3 +23,6 @@ const PersonAvatars: React.FC<Props> = ({ avatars }) => {
 };
 
 export default React.memo(PersonAvatars);
+
+
+

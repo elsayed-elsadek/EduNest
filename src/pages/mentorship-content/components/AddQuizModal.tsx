@@ -73,7 +73,7 @@ const AddQuizModal: FC<AddQuizModalProps> = ({ weekId, editingItem, onClose, onS
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter quiz name ......"
             required
           />
@@ -84,7 +84,7 @@ const AddQuizModal: FC<AddQuizModalProps> = ({ weekId, editingItem, onClose, onS
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter quiz description ......"
             required
           />
@@ -96,7 +96,7 @@ const AddQuizModal: FC<AddQuizModalProps> = ({ weekId, editingItem, onClose, onS
             min={1}
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value) || 1)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Set time duration"
             required
           />
@@ -105,7 +105,7 @@ const AddQuizModal: FC<AddQuizModalProps> = ({ weekId, editingItem, onClose, onS
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium">
             {isEditing ? 'Cancel' : 'Cancel'}
           </button>
-          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-[#154d71] text-white font-medium disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-primary text-white font-medium disabled:opacity-60">
             {submitting ? 'Saving...' : isEditing ? 'Update Quiz' : 'Save'}
           </button>
         </div>
@@ -115,3 +115,6 @@ const AddQuizModal: FC<AddQuizModalProps> = ({ weekId, editingItem, onClose, onS
 };
 
 export default AddQuizModal;
+
+
+

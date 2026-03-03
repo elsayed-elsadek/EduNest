@@ -123,7 +123,7 @@ const EnrolledMentorshipsTable: FC<EnrolledMentorshipsTableProps> = ({ mentorshi
       {/* ── Desktop View ── */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-100 text-[#7E8299]">
+          <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
                 Mentorship Name
@@ -216,3 +216,5 @@ const EnrolledMentorshipsTable: FC<EnrolledMentorshipsTableProps> = ({ mentorshi
 };
 
 export default EnrolledMentorshipsTable;
+
+

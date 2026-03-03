@@ -10,3 +10,6 @@ export const ForgetPassHeader: React.FC = () => (
     </p>
   </div>
 );
+
+
+

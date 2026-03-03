@@ -71,11 +71,11 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
 
 
   return (
-    <nav className="bg-white border-b border-gray-200/50 h-[65px] flex items-center px-4 md:px-8 sticky top-0 z-30">
+    <nav className="bg-white dark:bg-[var(--dark-bg)] border-b border-gray-200/50 dark:border-gray-700/50 h-[65px] flex items-center px-4 md:px-8 sticky top-0 z-30">
 
       {/* 1. Mobile Search Overlay */}
       {isMobileSearchOpen && (
-        <div className="absolute inset-0 bg-white z-50 flex items-center px-4 md:hidden">
+        <div className="absolute inset-0 bg-white dark:bg-[var(--dark-bg)] z-50 flex items-center px-4 md:hidden">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -84,12 +84,12 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
               placeholder="Search here..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-[45px] pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none"
+              className="w-full h-[45px] pl-10 pr-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none"
             />
           </div>
           <button
             onClick={() => setIsMobileSearchOpen(false)}
-            className="ml-3 p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+            className="ml-3 p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
           >
             <X size={20} />
           </button>
@@ -102,18 +102,18 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-1.5 bg-[#0c2d48] text-white rounded-md flex-shrink-0"
+            className="lg:hidden p-1.5 bg-[var(--sidebar-bg)] dark:bg-gray-800 text-white rounded-md flex-shrink-0"
           >
             <Menu size={18} />
           </button>
-          <h2 className="text-md truncate flex items-center gap-1">
+          <h2 className="text-md truncate flex items-center gap-1 text-gray-900 dark:text-gray-100">
             {pageTitle.split('/').map((part, index) => (
               <span key={index} className="flex items-center gap-1">
-                <span className={index === 0 ? 'font-bold' : ' text-gray-500 '}>
+                <span className={index === 0 ? 'font-bold' : ' text-gray-500 dark:text-gray-400'}>
                   {part.trim()}
                 </span>
                 {index < pageTitle.split('/').length - 1 && (
-                  <span className="font-light text-gray-400">/</span>
+                  <span className="font-light text-gray-400 dark:text-gray-500">/</span>
                 )}
               </span>
             ))}
@@ -128,18 +128,18 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <Search className="w-4 h-4 text-gray-400" strokeWidth={2} />
               </div>
-              <input
+                <input
                 type="text"
                 placeholder="search here"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-40 lg:w-72 h-[35px] pl-9 pr-4 py-1 bg-gray-50 border border-gray-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+                className="w-40 lg:w-72 h-[35px] pl-9 pr-4 py-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-[11px] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
               />
             </div>
 
             <button
               onClick={() => setIsMobileSearchOpen(true)}
-              className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-full flex items-center justify-center"
+              className="md:hidden p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full flex items-center justify-center"
             >
               <Search size={18} />
             </button>
@@ -151,7 +151,7 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
               onNotificationClick?.();
               navigate('/mentor/notifications');
             }}
-            className="relative h-[32px] w-[32px] sm:h-[34px] sm:w-[34px] flex items-center justify-center rounded-lg border border-gray-200/50 hover:bg-gray-50 flex-shrink-0"
+            className="relative h-[32px] w-[32px] sm:h-[34px] sm:w-[34px] flex items-center justify-center rounded-lg border border-gray-200/50 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 flex-shrink-0"
           >
             <Bell className="w-4 h-4 text-gray-700" strokeWidth={2} />
             {notificationCount > 0 && (
@@ -163,7 +163,7 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
           <div className="relative" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center gap-1.5 sm:gap-3 px-1.5 sm:px-3 py-1.5 h-[42px] rounded-lg border border-gray-200/50 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 sm:gap-3 px-1.5 sm:px-3 py-1.5 h-[42px] rounded-lg border border-gray-200/50 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="w-[28px] h-[28px] sm:w-[30px] sm:h-[30px] rounded-full bg-blue-500 flex-shrink-0 overflow-hidden">
                 {avatarSrc ? (
@@ -176,10 +176,10 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
               </div>
 
               <div className="text-left hidden lg:flex flex-col justify-center">
-                <p className="text-[11px] font-semibold text-gray-900 leading-tight truncate max-w-[80px]">
+                <p className="text-[11px] font-semibold text-gray-900 dark:text-gray-100 leading-tight truncate max-w-[80px]">
                   {firstName}
                 </p>
-                <p className="text-[9px] text-gray-500 font-medium leading-tight truncate max-w-[120px]">
+                <p className="text-[9px] text-gray-500 dark:text-gray-400 font-medium leading-tight truncate max-w-[120px]">
                   {userEmail}
                 </p>
               </div>
@@ -228,3 +228,5 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
 };
 
 export default MentorNavbar;
+
+

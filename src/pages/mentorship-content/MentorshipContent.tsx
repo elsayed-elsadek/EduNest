@@ -385,7 +385,7 @@ const MentorshipContent: FC = () => {
 
   return (
     <DashLayout pageTitle="My Mentorships / Create Content">
-      <div className="bg-[#F7F7F8] min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 pb-8">
+      <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 pb-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -396,7 +396,7 @@ const MentorshipContent: FC = () => {
             <button
               type="button"
               onClick={() => navigate(`/mentor/mentorships/${mentorshipId}`)}
-              className="shrink-0 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-[#154d71] hover:bg-gray-50"
+              className="shrink-0 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-primary hover:bg-gray-50"
             >
               Back to Details
             </button>
@@ -437,7 +437,7 @@ const MentorshipContent: FC = () => {
                         value={editingModuleTitle}
                         onChange={(e) => setEditingModuleTitle(e.target.value)}
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-1 px-2 py-1 rounded border border-[#154d71] focus:ring-2 focus:ring-[#154d71] font-semibold text-gray-900"
+                        className="flex-1 px-2 py-1 rounded border border-[var(--primary-from)] focus:ring-2 focus:ring-[var(--primary-from)] font-semibold text-gray-900"
                         autoFocus
                       />
                     ) : (
@@ -459,7 +459,7 @@ const MentorshipContent: FC = () => {
                         <button
                           type="button"
                           onClick={() => handleSaveModuleTitle(idx)}
-                          className="px-2 py-1 text-xs font-medium text-white bg-[#154d71] rounded hover:bg-[#0f3550]"
+                          className="px-2 py-1 text-xs font-medium text-white bg-primary rounded hover:bg-[var(--primary-dark)]"
                         >
                           Save
                         </button>
@@ -469,7 +469,7 @@ const MentorshipContent: FC = () => {
                         <button
                           type="button"
                           onClick={() => handleEditModule(idx)}
-                          className="p-1.5 text-gray-400 hover:text-[#154d71]"
+                          className="p-1.5 text-gray-400 hover:text-primary"
                           aria-label="Edit module"
                         >
                           <PenLine className="w-4 h-4" />
@@ -504,7 +504,7 @@ const MentorshipContent: FC = () => {
                           <button
                             type="button"
                             onClick={() => openEditModal(item.type, idx, item)}
-                            className="p-1.5 text-gray-400 hover:text-[#154d71]"
+                            className="p-1.5 text-gray-400 hover:text-primary"
                             aria-label="Edit"
                           >
                             <PenLine className="w-4 h-4" />
@@ -526,35 +526,35 @@ const MentorshipContent: FC = () => {
                       <button
                         type="button"
                         onClick={() => openModal('lecture', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#154d71] text-white text-sm font-medium hover:bg-[#0f3550]"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
                       >
                         <Plus className="w-4 h-4" /> Add Lecture
                       </button>
                       <button
                         type="button"
                         onClick={() => openModal('quiz', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#154d71] text-white text-sm font-medium hover:bg-[#0f3550]"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
                       >
                         <Plus className="w-4 h-4" /> Add Quiz
                       </button>
                       <button
                         type="button"
                         onClick={() => openModal('assignment', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#154d71] text-white text-sm font-medium hover:bg-[#0f3550]"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
                       >
                         <Plus className="w-4 h-4" /> Add Assignment
                       </button>
                       <button
                         type="button"
                         onClick={() => openModal('session', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#154d71] text-white text-sm font-medium hover:bg-[#0f3550]"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
                       >
                         <Plus className="w-4 h-4" /> Schedule Session
                       </button>
                       <button
                         type="button"
                         onClick={() => openModal('project', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#154d71] text-white text-sm font-medium hover:bg-[#0f3550]"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
                       >
                         <Plus className="w-4 h-4" /> Add Project
                       </button>
@@ -570,7 +570,7 @@ const MentorshipContent: FC = () => {
             type="button"
             onClick={handleAddModule}
             disabled={loading}
-            className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-gray-200 text-gray-600 hover:border-[#154d71] hover:text-[#154d71] hover:bg-[#154d71]/5 transition disabled:opacity-50"
+            className="mt-6 w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-gray-200 text-gray-600 hover:border-[var(--primary-from)] hover:text-primary hover:bg-[var(--primary-from)]/5 transition disabled:opacity-50"
           >
             <Plus className="w-5 h-5" />
             {loading ? 'Adding...' : 'Add Module'}
@@ -590,7 +590,7 @@ const MentorshipContent: FC = () => {
               type="button"
               onClick={handlePublish}
               disabled={!!actionLoading}
-              className="px-5 py-2.5 rounded-xl bg-[#154d71] text-white font-medium hover:bg-[#0f3550] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-[var(--primary-dark)] disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {actionLoading === 'publish' ? 'Publishing...' : 'Publish'}
             </button>
@@ -754,3 +754,6 @@ const MentorshipContent: FC = () => {
 
 
 export default MentorshipContent;
+
+
+

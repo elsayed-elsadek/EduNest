@@ -15,7 +15,7 @@ const ServiceCard: React.FC<Props> = ({ title, description, icon }) => {
 
     grid  gap-4 relative items-center">
       {/* small icon box */}
-      <div className="flex-shrink-0 w-12 h-12 rounded-md bg-[#f1f6fb] flex items-center justify-center text-[#0f5e8b] text-lg shadow-sm">
+      <div className="flex-shrink-0 w-12 h-12 rounded-md bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary dark:text-blue-400 text-lg shadow-sm">
       <FontAwesomeIcon icon={icon} className='text-2xl'/>
       </div>
 
@@ -31,3 +31,6 @@ const ServiceCard: React.FC<Props> = ({ title, description, icon }) => {
 };
 
 export default React.memo(ServiceCard);
+
+
+

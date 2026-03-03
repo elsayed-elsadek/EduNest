@@ -4,12 +4,13 @@ import App from './App'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import { Toaster } from 'react-hot-toast'
+import { ThemeProvider } from './context/ThemeContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-    
-    <Toaster
+      <ThemeProvider>
+        <Toaster
       position="top-right"
       reverseOrder={false}
       gutter={12}
@@ -54,7 +55,11 @@ createRoot(document.getElementById('root')!).render(
       }}
     />
 
-    <App />
+        <App />
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>,
 )
+
+
+

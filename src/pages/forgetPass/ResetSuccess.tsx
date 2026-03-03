@@ -45,7 +45,7 @@ const ResetSuccess: React.FC = () => {
             w-full max-w-sm sm:max-w-md
             h-10 sm:h-12 lg:h-14
             rounded-lg sm:rounded-xl
-            bg-gradient-to-r from-[#154d71] via-[#2a7fa8] to-[#33a1e0]
+            btn-primary-gradient
             text-white
             font-semibold
             text-xs sm:text-sm lg:text-base
@@ -72,3 +72,5 @@ const ResetSuccess: React.FC = () => {
 };
 
 export default ResetSuccess; 
+
+

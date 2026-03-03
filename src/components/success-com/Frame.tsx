@@ -43,7 +43,7 @@ export const Frame: React.FC = () => {
           <span className="text-black">
             students and sharing your expertise on
           </span>
-          <span className="block mt-2 font-semibold text-[#154d71]">
+          <span className="block mt-2 font-semibold text-primary">
             EduNest
           </span>
         </p>
@@ -51,3 +51,6 @@ export const Frame: React.FC = () => {
     </div>
   );
 };
+
+
+

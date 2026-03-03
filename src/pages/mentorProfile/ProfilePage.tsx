@@ -2,9 +2,6 @@
 
 import type { FC, ChangeEvent } from 'react';
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { useAuthStore } from '../../store/authStore';
 import DashLayout from '../../components/layout/Dash-layout';
 import ProfileSection from '../../components/mentor-profile-com/ProfileSection';
 import { useMentorProfile } from '../../hooks/Usementorprofile';
@@ -37,7 +34,7 @@ const EditModal: FC<EditModalProps> = ({ title, onClose, onSave, saving, childre
           Cancel
         </button>
         <button onClick={onSave} disabled={saving}
-          className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#154d71] to-[#33a1e0]  text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50">
+          className="px-5 py-2 rounded-xl btn-primary-gradient text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50">
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
@@ -78,10 +75,6 @@ const ensureHttps = (url?: string): string => {
 const ProfilePage: FC = () => {
   const { profile, loading, saving, error, success, saveProfile, uploadImage } = useMentorProfile();
   const imageInputRef = useRef<HTMLInputElement>(null);
-
-  const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
-
   // edit states
   const [editMode, setEditMode] = useState<'personal' | 'bio' | 'links' | null>(null);
 
@@ -111,24 +104,14 @@ const ProfilePage: FC = () => {
     const payload: UpdateMentorProfileRequest = {
       firstName:         form.firstName,
       lastName:          form.lastName,
-      email:             form.email,
       bio:               form.bio,
       jobTitle:          form.jobTitle,
       yearsOfExperience: Number(form.yearsOfExperience),
       linkedInLink:      form.linkedInLink,
       githubLink:        form.githubLink,
     };
-    const emailChanged = !!profile && profile.email !== form.email;
     await saveProfile(payload);
     setEditMode(null);
-
-    if (emailChanged) {
-      // Immediately logout and redirect to login page with a success toast
-      toast.success(`Email updated successfully. Please login with ${form.email}`);
-      // clear auth and redirect to the login page
-      logout();
-      navigate('/login', { replace: true });
-    }
   };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +121,7 @@ const ProfilePage: FC = () => {
 
   if (loading) return (
     <DashLayout pageTitle="Profile">
-      <div className="bg-[#F7F7F8] min-h-screen px-4 md:px-8 pt-4 pb-8">
+      <div className="bg-gray-50 min-h-screen px-4 md:px-8 pt-4 pb-8">
         <div className="max-w-[1200px] mx-auto">
           <div className="bg-white rounded-[32px] p-6 md:p-10 shadow-sm animate-pulse space-y-6">
             <div className="h-8 w-40 bg-gray-100 rounded-xl" />
@@ -153,12 +136,12 @@ const ProfilePage: FC = () => {
 
   return (
     <DashLayout pageTitle="Profile">
-      <div className="bg-[#F7F7F8] min-h-screen px-4 md:px-8 pt-4 pb-8">
+      <div className="bg-gray-50 min-h-screen px-4 md:px-8 pt-4 pb-8">
         <div className="max-w-[1200px] mx-auto">
           <div className="bg-white rounded-[32px] p-6 md:p-10 shadow-sm border border-gray-50">
 
             <div className="flex items-center justify-between mb-8">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#1A1C1E]">My Profile</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Profile</h1>
               {/* Success / Error toasts */}
               {success && (
                 <span className="text-sm font-semibold text-green-600 bg-green-50 px-4 py-2 rounded-xl">
@@ -241,23 +224,23 @@ const ProfilePage: FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                   <div>
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">First Name</label>
-                    <p className="text-sm font-bold text-[#1A1C1E]">{profile?.firstName || '—'}</p>
+                    <p className="text-sm font-bold text-gray-900">{profile?.firstName || '—'}</p>
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Last Name</label>
-                    <p className="text-sm font-bold text-[#1A1C1E]">{profile?.lastName || '—'}</p>
+                    <p className="text-sm font-bold text-gray-900">{profile?.lastName || '—'}</p>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
-                    <p className="text-sm font-bold text-[#1A1C1E]">{profile?.email || '—'}</p>
+                    <p className="text-sm font-bold text-gray-900">{profile?.email || '—'}</p>
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Job Title</label>
-                    <p className="text-sm font-bold text-[#1A1C1E]">{profile?.title || '—'}</p>
+                    <p className="text-sm font-bold text-gray-900">{profile?.title || '—'}</p>
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Experience</label>
-                    <p className="text-sm font-bold text-[#1A1C1E]">{profile?.experience || '—'}</p>
+                    <p className="text-sm font-bold text-gray-900">{profile?.experience || '—'}</p>
                   </div>
                 </div>
               </ProfileSection>
@@ -276,7 +259,7 @@ const ProfilePage: FC = () => {
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">LinkedIn</label>
                     {profile?.links?.linkedin
                       ? <a href={ensureHttps(profile.links.linkedin)} target="_blank" rel="noopener noreferrer"
-                          className="text-sm text-[#2176AE] font-medium break-all hover:underline">
+                          className="text-sm text-blue-600 font-medium break-all hover:underline">
                           {profile.links.linkedin}
                         </a>
                       : <p className="text-sm text-gray-400">—</p>
@@ -286,7 +269,7 @@ const ProfilePage: FC = () => {
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">GitHub</label>
                     {profile?.links?.github
                       ? <a href={ensureHttps(profile.links.github)} target="_blank" rel="noopener noreferrer"
-                          className="text-sm text-[#2176AE] font-medium break-all hover:underline">
+                          className="text-sm text-blue-600 font-medium break-all hover:underline">
                           {profile.links.github}
                         </a>
                       : <p className="text-sm text-gray-400">—</p>
@@ -307,7 +290,10 @@ const ProfilePage: FC = () => {
             <Field label="First Name" value={form.firstName} onChange={(v) => setForm(f => ({ ...f, firstName: v }))} />
             <Field label="Last Name"  value={form.lastName}  onChange={(v) => setForm(f => ({ ...f, lastName:  v }))} />
           </div>
-          <Field label="Email"     value={form.email}    onChange={(v) => setForm(f => ({ ...f, email:    v }))} type="email" />
+          {/* Email field is read-only (cannot be changed via backend) */}
+          <div className="opacity-60 pointer-events-none">
+            <Field label="Email (Cannot be changed)" value={form.email} onChange={() => {}} type="email" />
+          </div>
           <Field label="Job Title" value={form.jobTitle} onChange={(v) => setForm(f => ({ ...f, jobTitle: v }))} placeholder="e.g. React Developer" />
           <Field label="Years of Experience" value={String(form.yearsOfExperience)}
             onChange={(v) => setForm(f => ({ ...f, yearsOfExperience: Number(v) }))} type="number" />
@@ -337,3 +323,5 @@ const ProfilePage: FC = () => {
 };
 
 export default ProfilePage;
+
+

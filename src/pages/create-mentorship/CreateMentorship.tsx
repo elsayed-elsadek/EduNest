@@ -20,7 +20,7 @@ const CreateMentorship: FC = () => {
 
   return (
     <DashLayout pageTitle="My Mentorships / Create New">
-      <div className="bg-[#F7F7F8] min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 pb-8 sm:pb-10">
+      <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 py-4 pb-8 sm:pb-10">
         <div className="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto w-full">
           <MentorshipHeader onBack={() => navigate(-1)} />
 
@@ -78,7 +78,7 @@ const CreateMentorship: FC = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full sm:w-auto min-h-[44px] sm:h-11 px-8 py-2.5 rounded-xl sm:rounded-2xl bg-[#154d71] text-white text-sm font-semibold shadow-md hover:bg-[#0f3550] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 transition"
+                className="w-full sm:w-auto min-h-[44px] sm:h-11 px-8 py-2.5 rounded-xl sm:rounded-2xl bg-primary text-white text-sm font-semibold shadow-md hover:bg-[var(--primary-dark)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 transition"
               >
                 {submitting ? 'Saving...' : 'Save'}
               </button>
@@ -91,3 +91,6 @@ const CreateMentorship: FC = () => {
 };
 
 export default CreateMentorship;
+
+
+

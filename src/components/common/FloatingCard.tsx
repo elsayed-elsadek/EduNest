@@ -30,3 +30,6 @@ const FloatingCard: React.FC<FloatingCardProps> = ({ img, title, subtitle, icon,
 };
 
 export default React.memo(FloatingCard);
+
+
+
