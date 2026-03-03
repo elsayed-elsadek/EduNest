@@ -43,7 +43,7 @@ const StatCard: FC<StatCardProps> = ({
     {value}
   </div>
 
-  <div className="text-[#1e3a5f] flex-shrink-0 bg-gray-50 p-2 rounded-lg transition-all group-hover:scale-110">
+  <div className="text-primary dark:text-blue-400 flex-shrink-0 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg transition-all group-hover:scale-110">
     <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 flex items-center justify-center">
        {icon}
     </div>
@@ -56,3 +56,5 @@ const StatCard: FC<StatCardProps> = ({
 
 
 export default StatCard;
+
+

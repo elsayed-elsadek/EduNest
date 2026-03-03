@@ -10,11 +10,13 @@ const Success: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNext = () => {
+    
     const registrationType = localStorage.getItem("registrationType");
     if (registrationType === "mentor") {
       navigate("/mentor/dashboard");
     } else {
-      navigate("/dashboard");
+      navigate("/mentor/dashboard");
+     
     }
     localStorage.removeItem("registrationType");
   };
@@ -37,11 +39,11 @@ const Success: React.FC = () => {
               flex items-center justify-center gap-3
               w-full sm:w-[180px] h-[52px] sm:h-[56px] md:h-[60px]
               rounded-2xl
-              bg-[#1c6ea4]
+              bg-blue-600 dark:bg-blue-500
               border border-transparent
               shadow-md
               transition-all duration-300 ease-in-out
-              hover:bg-white hover:border-[#1c6ea4] hover:shadow-lg
+              hover:bg-white hover:border-blue-600 hover:shadow-lg dark:hover:bg-gray-900
               active:scale-95
             "
           >
@@ -52,13 +54,13 @@ const Success: React.FC = () => {
                 tracking-wide
                 text-white
                 transition-colors duration-300
-                group-hover:text-[#1c6ea4]
+                group-hover:text-blue-600
               "
             >
               Next
             </span>
 
-           <FontAwesomeIcon icon={faArrowRight} className=" text-white group-hover:text-[#1c6ea4]  w-4 h-4 sm:w-5 sm:h-5
+           <FontAwesomeIcon icon={faArrowRight} className=" text-white group-hover:text-blue-600  w-4 h-4 sm:w-5 sm:h-5
                 transition-transform duration-300
                 group-hover:translate-x-1" />
           </button>
@@ -69,3 +71,6 @@ const Success: React.FC = () => {
 };
 
 export default Success;
+
+
+

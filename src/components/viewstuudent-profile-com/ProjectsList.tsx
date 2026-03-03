@@ -164,3 +164,5 @@ const ProjectsList: FC<ProjectsListProps> = ({ projects, badgesCount = 0 }) => {
 };
 
 export default ProjectsList;
+
+

@@ -18,3 +18,6 @@ const HeroImage: React.FC<Props> = ({ src, alt = 'Hero image showing students', 
 };
 
 export default React.memo(HeroImage);
+
+
+

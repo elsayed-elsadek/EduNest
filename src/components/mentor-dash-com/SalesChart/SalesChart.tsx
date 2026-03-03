@@ -221,3 +221,5 @@ const SalesChart: FC<SalesChartProps> = ({
 };
 
 export default SalesChart;
+
+

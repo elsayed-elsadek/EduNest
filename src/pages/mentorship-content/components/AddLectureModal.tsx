@@ -67,7 +67,7 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71] focus:border-transparent"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)] focus:border-transparent"
             placeholder="Enter lecture name..."
             required
           />
@@ -78,7 +78,7 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
             type="url"
             value={lectureUrl}
             onChange={(e) => setLectureUrl(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71] focus:border-transparent"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)] focus:border-transparent"
             placeholder="Enter link of video"
             required
           />
@@ -87,7 +87,7 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium">
             {isEditing ? 'Cancel' : 'Save as Draft'}
           </button>
-          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-[#154d71] text-white font-medium disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-primary text-white font-medium disabled:opacity-60">
             {submitting ? 'Saving...' : isEditing ? 'Update Lecture' : 'Save Lecture'}
           </button>
         </div>
@@ -97,3 +97,6 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
 };
 
 export default AddLectureModal;
+
+
+

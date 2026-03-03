@@ -36,3 +36,5 @@ const StudentSearch: FC<StudentSearchProps> = ({
 };
 
 export default StudentSearch;
+
+

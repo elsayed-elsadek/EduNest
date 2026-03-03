@@ -59,7 +59,7 @@ const MentorDash: React.FC = () => {
 
   return (
     <DashLayout pageTitle="Dashboard">
-      <div className="bg-[#F7F7F8] min-h-screen px-4 md:px-8 py-4">
+      <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-screen px-4 md:px-8 py-4">
         {!isHydrated ? (
           <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="text-center">
@@ -171,3 +171,6 @@ const MentorDash: React.FC = () => {
 };
 
 export default MentorDash;
+
+
+

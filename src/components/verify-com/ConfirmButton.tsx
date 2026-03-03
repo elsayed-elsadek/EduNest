@@ -13,7 +13,7 @@ export const ConfirmButton: React.FC<Props> = ({
 }) => {
   return (
     <button
-      className="px-6 py-3 mt-4 rounded-lg bg-gradient-to-r from-[#154d71] to-[#33a1e0] 
+      className="px-6 py-3 mt-4 rounded-lg btn-primary-gradient 
                  text-white font-semibold text-sm 
                  hover:opacity-90 transition
                  disabled:opacity-60 disabled:cursor-not-allowed
@@ -26,3 +26,6 @@ export const ConfirmButton: React.FC<Props> = ({
     </button>
   );
 };
+
+
+

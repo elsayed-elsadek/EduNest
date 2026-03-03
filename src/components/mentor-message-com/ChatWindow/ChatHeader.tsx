@@ -67,3 +67,5 @@ const ChatHeader: FC<ChatHeaderProps> = ({ chat, onBack, showBackButton }) => {
 };
 
 export default ChatHeader;
+
+

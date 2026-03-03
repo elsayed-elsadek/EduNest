@@ -91,7 +91,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter project name........"
             required
           />
@@ -102,7 +102,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
             type="text"
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Briefly explain the main goal of the project........"
             required
           />
@@ -113,7 +113,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
             type="text"
             value={brief}
             onChange={(e) => setBrief(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Write a brief overview of project's goals and scope"
             required
           />
@@ -124,7 +124,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
             type="url"
             value={descriptionUrl}
             onChange={(e) => setDescriptionUrl(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Paste PDF/Google Docs link......"
           />
         </div>
@@ -135,7 +135,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
               type="date"
               value={startAt}
               onChange={(e) => setStartAt(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
               required
             />
           </div>
@@ -145,7 +145,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
               type="date"
               value={endAt}
               onChange={(e) => setEndAt(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
               required
             />
           </div>
@@ -157,7 +157,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
             min={0}
             value={points}
             onChange={(e) => setPoints(Number(e.target.value) || 0)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Set total points"
           />
         </div>
@@ -165,7 +165,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium">
             {isEditing ? 'Cancel' : 'Save as Draft'}
           </button>
-          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-[#154d71] text-white font-medium disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-primary text-white font-medium disabled:opacity-60">
             {submitting ? 'Saving...' : isEditing ? 'Update Project' : 'Save Project'}
           </button>
         </div>
@@ -175,3 +175,6 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
 };
 
 export default AddProjectModal;
+
+
+

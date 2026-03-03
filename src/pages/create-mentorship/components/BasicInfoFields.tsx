@@ -71,8 +71,8 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
                                 type="button"
                                 onClick={() => setFieldValue('level', option.value)}
                                 className={`min-h-[44px] sm:min-h-[40px] px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-semibold transition select-none touch-manipulation ${isActive
-                                        ? 'bg-[#154d71] text-white border-[#154d71] shadow-sm'
-                                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#154d71]/40 active:bg-gray-50'
+                                        ? 'bg-primary text-white border-[var(--primary-from)] shadow-sm'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--primary-from)]/40 active:bg-gray-50'
                                     }`}
                             >
                                 {option.label}
@@ -133,3 +133,6 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
         </div>
     </>
 );
+
+
+

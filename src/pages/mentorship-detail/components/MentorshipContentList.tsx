@@ -39,7 +39,7 @@ const MentorshipContentList: FC<MentorshipContentListProps> = ({
                 <h3 className="font-semibold text-gray-900 text-lg">Mentorship Content</h3>
                 <button
                     onClick={onCreateContentClick}
-                    className="px-3 sm:px-4 py-2 bg-[#154d71] text-white text-sm font-medium rounded-xl hover:bg-[#0f3550] transition self-start sm:self-auto"
+                    className="px-3 sm:px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-[var(--primary-dark)] transition self-start sm:self-auto"
                 >
                     Edit Content
                 </button>
@@ -54,7 +54,7 @@ const MentorshipContentList: FC<MentorshipContentListProps> = ({
                     <p className="text-gray-500 mb-2">There are no weeks available yet.</p>
                     <button
                         onClick={onCreateContentClick}
-                        className="text-[#154d71] hover:underline text-sm font-medium"
+                        className="text-primary hover:underline text-sm font-medium"
                     >
                         Get started by creating your first week
                     </button>
@@ -69,7 +69,7 @@ const MentorshipContentList: FC<MentorshipContentListProps> = ({
                             <div key={week.id} className="flex items-start sm:items-center gap-4">
                                 {/* Circle node */}
                                 <div className="relative z-10 flex flex-col items-center">
-                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-[#154d71] text-[#154d71] shadow-sm">
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-[var(--primary-from)] text-primary shadow-sm">
                                         <span className="text-xs font-semibold">{wIdx + 1}</span>
                                     </div>
                                     {/* connector line for mobile */}
@@ -88,7 +88,7 @@ const MentorshipContentList: FC<MentorshipContentListProps> = ({
                                             <div className="hidden sm:flex items-center gap-2">
                                                 <button
                                                     onClick={() => onCreateContentClick()}
-                                                    className="px-3 py-1.5 bg-white border border-gray-200 text-xs rounded-md text-[#154d71] hover:bg-[#154d71]/5"
+                                                    className="px-3 py-1.5 bg-white border border-gray-200 text-xs rounded-md text-primary hover:bg-[var(--primary-from)]/5"
                                                 >
                                                     Add Content
                                                 </button>
@@ -133,3 +133,6 @@ const MentorshipContentList: FC<MentorshipContentListProps> = ({
 };
 
 export default MentorshipContentList;
+
+
+

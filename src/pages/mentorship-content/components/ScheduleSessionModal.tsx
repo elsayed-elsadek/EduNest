@@ -90,7 +90,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter session title..."
             required
           />
@@ -101,7 +101,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             required
           />
         </div>
@@ -114,7 +114,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
               max={23}
               value={hour}
               onChange={(e) => setHour(Number(e.target.value) || 0)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             />
           </div>
           <div>
@@ -125,7 +125,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
               max={59}
               value={minute}
               onChange={(e) => setMinute(Number(e.target.value) || 0)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#154d71]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             />
           </div>
         </div>
@@ -133,7 +133,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium">
             {isEditing ? 'Cancel' : 'Cancel'}
           </button>
-          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-[#154d71] text-white font-medium disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-[var(--primary-from)] text-white font-medium disabled:opacity-60">
             {submitting ? 'Saving...' : isEditing ? 'Update Session' : 'Schedule'}
           </button>
         </div>
@@ -143,3 +143,6 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
 };
 
 export default ScheduleSessionModal;
+
+
+

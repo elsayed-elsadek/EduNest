@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
 
-// const API_BASE_URL = 'https://arline-unbalked-hiram.ngrok-free.dev/'; //omar
-const API_BASE_URL = 'https://blake-glottologic-carlee.ngrok-free.dev/'; //hazem
+// const API_BASE_URL = 'https://arline-unbalked-hiram.ngrok-free.dev/'; //hazem
+const API_BASE_URL = 'https://blake-glottologic-carlee.ngrok-free.dev/'; //omar
 
 
 const api = axios.create({

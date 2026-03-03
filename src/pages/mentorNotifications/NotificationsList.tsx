@@ -42,7 +42,7 @@ const NotificationsList: FC = () => {
 
   return (
     <DashLayout pageTitle="Notifications" >
-      <div className="bg-[#F7F7F8] min-h-[calc(100vh-65px)] p-4">
+      <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-[calc(100vh-65px)] p-4">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="mb-4">
@@ -100,3 +100,5 @@ const NotificationsList: FC = () => {
 };
 
 export default NotificationsList;
+
+

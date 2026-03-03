@@ -21,3 +21,6 @@ export const Timer: React.FC<Props> = ({ initialSeconds }) => {
 
   return <div className="text-black text-base font-medium">{format}</div>;
 };
+
+
+

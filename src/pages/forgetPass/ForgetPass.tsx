@@ -31,7 +31,7 @@ const ForgetPass: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate("/login")}
-            className="text-[#0f5e8b] font-medium hover:underline transition"
+            className="text-primary font-medium hover:underline transition"
           >
             Sign In
           </button>
@@ -42,3 +42,5 @@ const ForgetPass: React.FC = () => {
 };
 
 export default ForgetPass;
+
+

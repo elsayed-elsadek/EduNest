@@ -115,12 +115,12 @@ const StudentsList: FC = () => {
   // Render 
   return (
     <DashLayout pageTitle="Dashboard / Students">
-      <div className="bg-[#F7F7F8] min-h-screen p-3 md:p-8">
+      <div className="bg-gray-50 min-h-screen p-3 md:p-8">
         <div className="max-w-[1400px] mx-auto space-y-4 md:space-y-6">
 
           {/* Header & Search */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 className="text-xl md:text-2xl font-bold text-[#1A1C1E]">Students List</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Students List</h1>
             <div className="w-full sm:w-72">
               <StudentSearch value={searchQuery} onChange={handleSearch} />
             </div>
@@ -203,3 +203,5 @@ const StudentsList: FC = () => {
 };
 
 export default StudentsList;
+
+

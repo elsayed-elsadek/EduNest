@@ -65,3 +65,5 @@ const ActivityItem: FC<ActivityItemProps> = ({ activity, onView }) => {
 };
 
 export default ActivityItem;
+
+

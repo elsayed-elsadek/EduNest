@@ -18,10 +18,13 @@ export const MentorshipHeader: FC<Props> = ({ onBack }) => (
         <button
             type="button"
             onClick={onBack}
-            className="flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-[#154d71] hover:bg-gray-50 active:scale-[0.98] shrink-0 md:border-0 md:bg-transparent md:min-h-0 md:px-0 md:py-0"
+            className="flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-primary hover:bg-gray-50 active:scale-[0.98] shrink-0 md:border-0 md:bg-transparent md:min-h-0 md:px-0 md:py-0"
         >
             <ArrowLeft size={20} className="shrink-0" />
             <span>Back</span>
         </button>
     </div>
 );
+
+
+

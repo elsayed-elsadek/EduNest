@@ -69,13 +69,13 @@ export const TagsInput: FC<Props> = ({ tags, onChange, error }) => {
                             handleAddTag();
                         }
                     }}
-                    className="flex-1 min-h-[44px] sm:h-11 px-4 rounded-xl sm:rounded-2xl border border-gray-200 bg-gray-50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#154d71] focus:bg-white"
+                    className="flex-1 min-h-[44px] sm:h-11 px-4 rounded-xl sm:rounded-2xl border border-gray-200 bg-gray-50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary-from)] focus:bg-white"
                     placeholder="Add tag and press Enter..."
                 />
                 <button
                     type="button"
                     onClick={handleAddTag}
-                    className="min-h-[44px] sm:h-11 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#154d71] text-white text-sm font-semibold shadow-sm hover:bg-[#0f3550] active:scale-[0.98] transition shrink-0"
+                    className="min-h-[44px] sm:h-11 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[var(--primary-from)] text-white text-sm font-semibold shadow-sm hover:bg-[var(--primary-dark)] active:scale-[0.98] transition shrink-0"
                 >
                     + Add now
                 </button>
@@ -86,3 +86,6 @@ export const TagsInput: FC<Props> = ({ tags, onChange, error }) => {
         </div>
     );
 };
+
+
+

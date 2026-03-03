@@ -72,7 +72,7 @@ const CalendarWidget: FC<CalendarWidgetProps> = ({
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h3 className="text-sm sm:text-base font-bold text-[#0c2d48]">
+        <h3 className="text-sm sm:text-base font-bold text-[var(--sidebar-bg)] dark:text-gray-200">
           {monthName} <span className="text-gray-400 font-medium">{year}</span>
         </h3>
         <div className="flex items-center gap-1">
@@ -190,3 +190,5 @@ const CalendarWidget: FC<CalendarWidgetProps> = ({
 };
 
 export default CalendarWidget;
+
+

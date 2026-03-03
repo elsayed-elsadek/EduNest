@@ -22,11 +22,11 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
       {/* 1. Mentorship Info */}
       <td className="py-4 px-4 md:px-6">
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#FFF4ED] flex items-center justify-center flex-shrink-0 group-hover:bg-white transition-colors">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
             <span className="text-base md:text-xl">{mentorship.icon}</span>
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[12px] md:text-sm font-bold text-[#1A1C1E] line-clamp-1 leading-tight">
+            <h3 className="text-[12px] md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 leading-tight">
               {mentorship.title}
             </h3>
             <p className="hidden md:block text-[11px] text-gray-400 font-medium mt-0.5">
@@ -41,8 +41,8 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
         <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-1.5">
           <span className="text-[9px] text-gray-400 font-bold md:hidden uppercase">Rating</span>
           <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 fill-[#F9A63A] text-[#F9A63A]" />
-            <span className="text-[12px] md:text-sm font-bold text-[#1A1C1E]">
+            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 dark:fill-yellow-500 dark:text-yellow-500\" />
+            <span className="text-[12px] md:text-sm font-bold text-gray-900 dark:text-gray-100">
               {mentorship.rating.toFixed(1)}
             </span>
           </div>
@@ -50,7 +50,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
       </td>
 
       {/* 3. Total Enroll */}
-      <td className="hidden sm:table-cell py-4 px-4 md:px-6 font-bold text-[#1A1C1E] text-sm">
+      <td className="hidden sm:table-cell py-4 px-4 md:px-6 font-bold text-gray-900 dark:text-gray-100 text-sm">
         {mentorship.totalEnrolled}
       </td>
 
@@ -58,7 +58,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
       <td className="py-4 px-3 md:px-6">
         <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-1.5">
           <span className="text-[9px] text-gray-400 font-bold md:hidden uppercase">Revenue</span>
-          <span className="text-[12px] md:text-sm font-bold text-[#1A1C1E]">
+          <span className="text-[12px] md:text-sm font-bold text-gray-900 dark:text-gray-100">
             ${mentorship.revenue}
           </span>
         </div>
@@ -74,14 +74,14 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => onDetails(mentorship.id)}
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#DCEEFA] text-[#2176AE] hover:bg-[#2176AE] hover:text-white transition-all"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all"
           >
             <Eye className="w-4 h-4" />
             <span className="text-xs font-bold">Details</span>
           </button>
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="p-1.5 rounded-lg border border-[#DCEEFA] text-[#2176AE] hover:bg-gray-50 transition-colors focus:outline-none">
+            <Menu.Button className="p-1.5 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:outline-none">
               <MoreVertical className="w-4 h-4" />
             </Menu.Button>
 
@@ -141,3 +141,5 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
 };
 
 export default MentorshipTableRow;
+
+

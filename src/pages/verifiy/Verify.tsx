@@ -123,3 +123,6 @@ export const Verify: React.FC = () => {
     </BasicLayout>
   );
 };
+
+
+

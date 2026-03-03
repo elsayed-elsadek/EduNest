@@ -7,10 +7,10 @@ import { SERVICES } from '../../utils/constants';
 const ServicesSection: React.FC = () => {
   
   return (
-    <section className="py-12 bg-[#0f3b4b] text-white max-h-full lg:max-h-[700px]">
+    <section className="py-12 bg-[var(--primary-from)] dark:bg-gray-900 text-white max-h-full lg:max-h-[700px]">
 
       <div className="flex items-center justify-center mb-6">
-        <span className="px-5 py-2 bg-yellow-100 font-bold text-[#CF9B1D] rounded-full text-sm">
+        <span className="px-5 py-2 bg-yellow-100 dark:bg-yellow-900/30 font-bold text-yellow-700 dark:text-yellow-400 rounded-full text-sm">
           Our Services
         </span>
       </div>
@@ -29,7 +29,7 @@ const ServicesSection: React.FC = () => {
           <div>
 
             <div className="flex items-center justify-start mb-6  flex-col">
-              <span className="mentor px-5 py-2 bg-yellow-100 font-bold text-[#CF9B1D] rounded-full text-sm">For Mentors</span>
+              <span className="mentor px-5 py-2 bg-yellow-100 dark:bg-yellow-900/30 font-bold text-yellow-700 dark:text-yellow-400 rounded-full text-sm">For Mentors</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -42,7 +42,7 @@ const ServicesSection: React.FC = () => {
           {/* Students column */}
           <div>
             <div className="flex items-center justify-end mb-6 flex-col">
-              <span className="px-5 py-2 mentor bg-yellow-100 font-bold text-[#CF9B1D] rounded-full text-sm">For Students</span>
+              <span className="px-5 py-2 mentor bg-yellow-100 dark:bg-yellow-900/30 font-bold text-yellow-700 dark:text-yellow-400 rounded-full text-sm">For Students</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {SERVICES.students.map((s, idx) => (
@@ -58,3 +58,6 @@ const ServicesSection: React.FC = () => {
 };
 
 export default React.memo(ServicesSection);
+
+
+

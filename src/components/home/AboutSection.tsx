@@ -103,3 +103,5 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
 };
 
 export default AboutSection;
+
+

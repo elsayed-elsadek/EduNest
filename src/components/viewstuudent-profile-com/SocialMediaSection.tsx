@@ -61,3 +61,5 @@ const SocialMediaSection: FC<SocialMediaSectionProps> = ({ socialMedia }) => {
 };
 
 export default SocialMediaSection;
+
+

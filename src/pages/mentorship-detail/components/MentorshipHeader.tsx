@@ -38,7 +38,7 @@ const MentorshipHeader: FC<MentorshipHeaderProps> = ({
                     onClick={() => setActiveTab('overview')}
                     className={`flex items-center gap-3 w-full sm:w-auto px-5 py-3 
        rounded-xl text-sm font-medium transition ${activeTab === 'overview'
-                            ? 'bg-gray-100 border-l-4 border-[#154d71] text-[#154d71]'
+                            ? 'bg-gray-100 border-l-4 border-[var(--primary-from)] text-primary'
                             : 'bg-white hover:bg-gray-100 border-l-4 border-transparent text-gray-700'
                         }`}
                 >
@@ -51,7 +51,7 @@ const MentorshipHeader: FC<MentorshipHeaderProps> = ({
                     onClick={() => setActiveTab('dashboard')}
                     className={`flex items-center gap-3 w-full sm:w-auto px-5 py-3 
        rounded-xl text-sm font-medium transition ${activeTab === 'dashboard'
-                            ? 'bg-gray-100 border-l-4 border-[#154d71] text-[#154d71]'
+                            ? 'bg-gray-100 border-l-4 border-[var(--primary-from)] text-primary'
                             : 'bg-white hover:bg-gray-100 border-l-4 border-transparent text-gray-700'
                         }`}
                 >
@@ -76,3 +76,6 @@ const MentorshipHeader: FC<MentorshipHeaderProps> = ({
 };
 
 export default MentorshipHeader;
+
+
+

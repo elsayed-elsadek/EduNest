@@ -1,10 +1,16 @@
 
 
 export interface SettingsData {
-  email: string;
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  weeklyDigest: boolean;
+  email:   string;
+
   darkMode: boolean;
-  messageNotifications: boolean;
+
 }
+
+// Step 1: just newEmail
+export interface ChangeEmailRequest        { newEmail: string; }
+// Step 2: otpCode to confirm
+export interface ConfirmEmailChangeRequest { otpCode: string; }
+
+export interface ChangePasswordRequest { oldPassword: string; newPassword: string; confirmPassword: string; }
+export interface ConfirmDeleteRequest  { otp: string; }

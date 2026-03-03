@@ -76,3 +76,5 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({ student, onMail, onChat }) => {
 };
 
 export default ProfileHeader;
+
+

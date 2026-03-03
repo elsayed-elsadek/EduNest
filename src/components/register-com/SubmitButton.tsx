@@ -28,7 +28,7 @@ export const SubmitButton: React.FC<Props> = ({
         rounded-lg sm:rounded-xl
         gap-2
         px-4 sm:px-6 md:px-8
-        bg-gradient-to-r from-[#154d71] via-[#2a7fa8] to-[#33a1e0]
+        btn-primary-gradient
         text-white
         font-semibold
         text-sm sm:text-base
@@ -62,4 +62,7 @@ export const SubmitButton: React.FC<Props> = ({
     </button>
   );
 };
+
+
+
 

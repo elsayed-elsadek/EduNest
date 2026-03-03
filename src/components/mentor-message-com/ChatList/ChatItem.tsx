@@ -78,3 +78,5 @@ const ChatItem: FC<ChatItemProps> = ({ chat, isActive, onClick }) => {
 };
 
 export default ChatItem;
+
+

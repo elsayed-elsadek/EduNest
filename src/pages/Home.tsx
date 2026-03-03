@@ -39,7 +39,7 @@ const Home: React.FC = () => {
 
             <div className="mt-8 flex items-center gap-4 flex-wrap">
               <Link to="/register" className="px-5 py-2 blueBGColor text-white rounded-full font-medium">Become a mentor</Link>
-              <Link to="/register" className="px-5 py-2 border border-[#bcd7ee] rounded-full blueTextColor font-medium">Join now</Link>
+              <Link to="/register" className="px-5 py-2 border border-blue-200 rounded-full text-blue-700 dark:text-blue-400 font-medium">Join now</Link>
             </div>
 
             <div className="mt-6 flex items-center gap-3">
@@ -146,3 +146,6 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
+
+
