@@ -79,7 +79,7 @@ const NotificationCard: FC<NotificationCardProps> = ({
             {notification.actionLabel && (
               <button
                 onClick={() => onAction?.(notification.id)}
-                className="flex items-center justify-center gap-2 px-6 py-2 btn-primary-gradient text-white rounded-xl hover:shadow-lg transition-all active:scale-95 text-sm font-bold h-[40px] w-[110px] shrink-0"
+                className="flex items-center justify-center gap-2 px-6 py-2 bg-primary text-white rounded-xl hover:shadow-lg transition-all active:scale-95 text-sm font-bold h-[40px] w-[110px] shrink-0"
               >
                 <span className="truncate">{notification.actionLabel}</span>
                 {notification.actionLabel.toLowerCase() === 'join' ? (

@@ -6,6 +6,8 @@ import DashLayout from '../../components/layout/Dash-layout';
 import NotificationTabs from '../../components/mentor-notifications-com/NotificationTabs/NotificationTabs';
 import NotificationCard from '../../components/mentor-notifications-com/NotificationCard/NotificationCard';
 import type { Notification } from '../../types/mentornotification.types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
 
 const NotificationsList: FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
@@ -80,7 +82,7 @@ const NotificationsList: FC = () => {
             ) : (
               <div className="bg-white rounded-2xl p-12 text-center">
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                  <span className="text-4xl">🔔</span>
+                  <FontAwesomeIcon icon={faBell} className='text-2xl' />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   No notifications

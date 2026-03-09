@@ -4,10 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DashLayout from '../../components/layout/Dash-layout';
 import {
   getMentorshipDetail,
-  getMentorshipStats,
-  getTopLearners,
-  getMentorshipReviews,
+  getFullMentorshipDashboard,
 } from '../../services/mentorDashboardService';
+import type { MentorshipStats } from '../../services/mentorDashboardService';
 import {
   getWeeksByMentorship,
   getWeekContents,
@@ -30,12 +29,13 @@ const MentorshipDetail: FC = () => {
   const token = useAuthStore((s) => s.token);
 
   const [mentorship, setMentorship] = useState<MentorshipApiResponse | null>(null);
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
+  const [stats, setStats] = useState<MentorshipStats | null>(null);
   const [topLearners, setTopLearners] = useState<Learner[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'dashboard'>('overview');
+  const [mentorshipDashboardStudents, setMentorshipDashboardStudents] = useState<Student[]>([]);
 
   const [weeks, setWeeks] = useState<WeekData[] | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
@@ -60,26 +60,19 @@ const MentorshipDetail: FC = () => {
         const data = await getMentorshipDetail(mentorshipId);
         setMentorship(data);
 
-        // try getting stats, top learners and reviews (fail silently)
+        // get unified dashboard data
         try {
-          const s = await getMentorshipStats(mentorshipId);
-          setStats(s as Record<string, unknown>);
+          const dashResponse = await getFullMentorshipDashboard(mentorshipId, { reviewsSize: 6, topSize: 3 });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const dash = (dashResponse as any)?.apiResponse?.dashboard;
+          if (dash) {
+            setStats(dash.stats as MentorshipStats);
+            setTopLearners((dash.topLearners?.content || []) as Learner[]);
+            setReviews((dash.reviews?.content || []) as Review[]);
+            setMentorshipDashboardStudents((dash.studentsRanks?.content || []) as Student[]);
+          }
         } catch (e) {
-          console.warn('Could not load mentorship stats', e);
-        }
-
-        try {
-          const learners = await getTopLearners(String(mentorshipId));
-          setTopLearners(Array.isArray(learners) ? learners : []);
-        } catch (e) {
-          console.warn('Could not load top learners', e);
-        }
-
-        try {
-          const rev = await getMentorshipReviews(String(mentorshipId));
-          setReviews(Array.isArray(rev) ? rev : []);
-        } catch (e) {
-          console.warn('Could not load reviews', e);
+          console.warn('Could not load unified mentorship dashboard stats', e);
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load mentorship details';
@@ -158,14 +151,18 @@ const MentorshipDetail: FC = () => {
   }
 
   // derive counts (fallback to stats or mentorship fields)
-  const totalLessons = ((stats?.['lessons'] ?? mentorship?.lessonsCount) as number | string | undefined) ?? 0;
-  const totalQuizzes = ((stats?.['quizzes'] ?? mentorship?.quizzesCount) as number | string | undefined) ?? 0;
-  const totalAssignments = ((stats?.['assignments'] ?? mentorship?.assignmentsCount) as number | string | undefined) ?? 0;
-  const totalSessions = ((stats?.['sessions'] ?? mentorship?.sessionsCount) as number | string | undefined) ?? 0;
+  const totalLessons = Number(stats?.totalLessons ?? (mentorship as any)?.lessonsCount ?? 0) || 0;
+  const totalQuizzes = Number(stats?.totalQuizzes ?? (mentorship as any)?.quizzesCount ?? 0) || 0;
+  const totalAssignments = Number(stats?.totalAssignments ?? (mentorship as any)?.assignmentsCount ?? 0) || 0;
+  const totalSessions = Number(stats?.totalSessions ?? (mentorship as any)?.sessionsCount ?? 0) || 0;
 
   const mentorshipRecord = mentorship as unknown as Record<string, unknown> | null;
   const rawStudents = (mentorshipRecord?.students ?? mentorshipRecord?.enrolledUsers) as unknown;
-  const students: Student[] = Array.isArray(rawStudents) ? (rawStudents as Student[]) : [];
+  const students: Student[] = mentorshipDashboardStudents.length > 0
+    ? mentorshipDashboardStudents
+    : Array.isArray(rawStudents)
+      ? (rawStudents as Student[])
+      : [];
 
   return (
     <DashLayout pageTitle="My Mentorships / Details">
@@ -188,6 +185,7 @@ const MentorshipDetail: FC = () => {
                   totalQuizzes={totalQuizzes}
                   totalAssignments={totalAssignments}
                   totalSessions={totalSessions}
+                  mentorshipId={mentorshipId || ''}
                 />
 
                 <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">

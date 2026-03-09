@@ -28,6 +28,12 @@ import EditMentorship from './pages/edit-mentorship/EditMentorship.tsx';
 import StudentProfile from './pages/mentor-view-studentprofile/StudentProfile.tsx'
 import CreateMentorship from './pages/create-mentorship/CreateMentorship.tsx';
 import MentorshipContent from './pages/mentorship-content/MentorshipContent.tsx';
+import MentorshipSessions from './pages/mentorship-sessions/MentorshipSessions.tsx';
+import MentorshipQuizzes from './pages/mentorship-quizzes/MentorshipQuizzes.tsx';
+import QuizDetail from './pages/mentorship-quizzes/QuizDetail.tsx';
+import QuizQuestions from './pages/mentorship-quizzes/QuizQuestions.tsx';
+import MentorshipTasks from './pages/mentorship-tasks/MentorshipTasks.tsx';
+import TaskDetail from './pages/mentorship-tasks/TaskDetail.tsx';
 import { useAuthStore } from './store/authStore.ts';
 import { ProtectedRoute } from './routes';
 
@@ -47,7 +53,7 @@ function App() {
       console.log('🔐 Auto-login enabled - Redirecting to dashboard');
       navigate('/mentor/dashboard', { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on component mount
 
   const showNavbar = ["/"].includes(
@@ -78,12 +84,18 @@ function App() {
           <Route path="/mentor/mentorships/create" element={<CreateMentorship />} />
           <Route path="/mentor/mentorships/:id" element={<MentorshipDetail />} />
           <Route path="/mentor/mentorships/:id/content" element={<MentorshipContent />} />
+          <Route path="/mentor/mentorships/:id/sessions" element={<MentorshipSessions />} />
+          <Route path="/mentor/mentorships/:id/quizzes" element={<MentorshipQuizzes />} />
+<Route path="/mentor/mentorships/:id/quizzes/:quizId" element={<QuizDetail />} />
+          <Route path="/mentor/mentorships/:id/quizzes/:quizId/questions" element={<QuizQuestions />} />
+          <Route path="/mentor/mentorships/:id/tasks" element={<MentorshipTasks />} />
+          <Route path="/mentor/mentorships/:id/tasks/:taskId" element={<TaskDetail />} />
           <Route path="/mentor/mentorships/:id/edit" element={<EditMentorship />} />
           <Route path="/mentor/students" element={<StudentsList />} />
           <Route path="/mentor/messages" element={<Messages />} />
           <Route path="/mentor/notifications" element={<NotificationsList />} />
           <Route path="/mentor/profile" element={<ProfilePage />} />
-            <Route path="/mentor/students/:id" element={<StudentProfile />} />
+          <Route path="/mentor/students/:id" element={<StudentProfile />} />
           <Route path="/mentor/settings" element={<Setting />} />
         </Route>
 

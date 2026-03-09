@@ -74,14 +74,14 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => onDetails(mentorship.id)}
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary dark:hover:text-white transition-all hover:bg-blue-50 "
           >
             <Eye className="w-4 h-4" />
             <span className="text-xs font-bold">Details</span>
           </button>
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="p-1.5 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:outline-none">
+            <Menu.Button className="p-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary dark:hover:text-white transition-colors focus:outline-none">
               <MoreVertical className="w-4 h-4" />
             </Menu.Button>
 

@@ -15,20 +15,20 @@ import type { Mentorship } from '../../types/mentorship.types';
 function mapApiMentorshipToUi(item: unknown): Mentorship {
   const m = item as Record<string, unknown>;
   const status = String(m.status ?? 'DRAFT').toUpperCase();
-  
+
   // Map status: ACTIVE/PUBLISHED -> active, DRAFT -> draft, COMPLETED -> completed
-  const uiStatus = 
-    status === 'ACTIVE' || status === 'PUBLISHED' ? 'active' : 
-    status === 'DRAFT' ? 'draft' : 
-    status === 'COMPLETED' ? 'completed' : 
-    'draft';
-  
+  const uiStatus =
+    status === 'ACTIVE' || status === 'PUBLISHED' ? 'active' :
+      status === 'DRAFT' ? 'draft' :
+        status === 'COMPLETED' ? 'completed' :
+          'draft';
+
   // Try to get date from various possible fields
   const created = m.createdAt ?? m.createdDate ?? m.created_at ?? m.uploadDate ?? new Date().toISOString();
   const dateStr = typeof created === 'string'
     ? new Date(created).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
     : '—';
-  
+
   return {
     id: String(m.id ?? ''),
     title: String(m.title ?? 'Untitled'),
@@ -114,11 +114,11 @@ const MentorshipsList: FC = () => {
                   toast.success('Mentorship deleted successfully');
                 })
                 .catch((err: unknown) => {
-     const axiosErr = err as { response?: { data?: { errorMessages?: { error?: string } } } };
-  const msg = axiosErr.response?.data?.errorMessages?.error ?? 'Failed to delete mentorship';
-  console.error('❌ Error deleting mentorship:', msg);
-  setError(msg);
-  toast.error(msg);
+                  const axiosErr = err as { response?: { data?: { errorMessages?: { error?: string } } } };
+                  const msg = axiosErr.response?.data?.errorMessages?.error ?? 'Failed to delete mentorship';
+                  console.error('❌ Error deleting mentorship:', msg);
+                  setError(msg);
+                  toast.error(msg);
                 });
             }}
             className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
@@ -134,14 +134,14 @@ const MentorshipsList: FC = () => {
 
   return (
     <DashLayout pageTitle="Dashboard / My Mentorships">
-    
+
       <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-screen px-0 md:px-8 md:pt-4 pb-8">
-        
+
         {/* Header Section: Add button */}
         <div className="flex justify-end mb-6 px-4 md:px-0 pt-4 md:pt-0">
           <button
             onClick={() => navigate('/mentor/mentorships/create')}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 h-[44px] px-6 rounded-xl text-white text-sm font-bold btn-primary-gradient shadow-md transition-all active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 h-[44px] px-6 rounded-xl text-white text-sm font-bold bg-primary shadow-md transition-all active:scale-95"
           >
             <Plus className="w-5 h-5" />
             <span>Create New</span>
@@ -149,7 +149,7 @@ const MentorshipsList: FC = () => {
         </div>
 
         <div className="bg-white rounded-none md:rounded-3xl border-y md:border border-gray-100 shadow-sm overflow-hidden">
-          
+
           {/* Table Header / Title */}
           <div className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 md:border-none">
             <div>
@@ -186,7 +186,7 @@ const MentorshipsList: FC = () => {
           </div>
 
           {/* Table */}
-    
+
           {loading ? (
             <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
               <div className="relative w-14 h-14">
@@ -235,27 +235,27 @@ const MentorshipsList: FC = () => {
               mentorships={filteredMentorships}
               onDetails={(id) => navigate(`/mentor/mentorships/${id}`)}
               onAction={(type, id) => {
-              if (type === 'edit') {
-                navigate(`/mentor/mentorships/${id}/edit`);
-              } else if (type === 'delete') {
-                confirmAndDeleteMentorship(String(id));
-              }
-            }}
+                if (type === 'edit') {
+                  navigate(`/mentor/mentorships/${id}/edit`);
+                } else if (type === 'delete') {
+                  confirmAndDeleteMentorship(String(id));
+                }
+              }}
             />
           )}
 
           {/* Footer / Pagination: Padding  */}
           {!loading && !error && totalElements > 0 && (
-          <div className="p-4 md:p-6 border-t border-gray-50">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={totalElements}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={(val) => setItemsPerPage(Number(val))}
-            />
-          </div>
+            <div className="p-4 md:p-6 border-t border-gray-50">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={totalElements}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(val) => setItemsPerPage(Number(val))}
+              />
+            </div>
           )}
         </div>
       </div>

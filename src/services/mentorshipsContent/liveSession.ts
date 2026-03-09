@@ -44,6 +44,44 @@ export const deleteLiveSession = async (sessionId: number): Promise<void> => {
     await handleRequest(api.delete<unknown>(`api/v1/liveSession/delete/${sessionId}`));
 };
 
+export interface MentorshipPaginatedItems<T = unknown> {
+    content: T[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+}
+
+export interface LiveSession {
+    id: number;
+    title: string;
+    mentorshipTitle: string;
+    weekTitle: string;
+    sessionStartDate: string;
+}
+
+export interface LiveSessionsResponse {
+    apiResponse: {
+        "Sessions fetched successfully": MentorshipPaginatedItems<LiveSession>;
+    };
+}
+
+/** Get all live sessions for a specific mentorship */
+export const getAllLiveSessionsForMentorship = async (
+    mentorshipId: number,
+    page: number = 0,
+    size: number = 5
+): Promise<MentorshipPaginatedItems<LiveSession>> => {
+    const raw = await handleRequest(
+        api.get<LiveSessionsResponse>('api/v1/liveSession/mentorship', {
+            params: { mentorshipId, page, size },
+        })
+    );
+    const data = raw as LiveSessionsResponse;
+
+    return data.apiResponse["Sessions fetched successfully"];
+};
+
 /** Update a live session by its ID */
 export interface UpdateLiveSessionPayload {
     title?: string;
@@ -69,4 +107,49 @@ export const updateLiveSession = async (sessionId: number, payload: UpdateLiveSe
         return res;
     }
     return raw;
+};
+
+// --- New Live Session Endpoints ---
+
+export interface SessionActionResponse {
+    apiResponse: Record<string, LiveSessionInfo>;
+}
+
+export interface LiveSessionInfo {
+    sessionId: number;
+    sessionTitle: string;
+    sessionStartDate: string;
+    sessionStatus: string; // 'LIVE', 'ENDED', etc.
+    meetingUrl: string;
+}
+
+/**
+ * Start a live session by session ID
+ */
+export const startLiveSession = async (sessionId: number): Promise<LiveSessionInfo> => {
+    const raw = await handleRequest(api.post<SessionActionResponse>(`api/v1/liveSession/start/${sessionId}`));
+    const data = raw as SessionActionResponse;
+    const responseKey = Object.keys(data.apiResponse)[0];
+    return data.apiResponse[responseKey];
+};
+
+/**
+ * End an ongoing live session by session ID
+ */
+export const endLiveSession = async (sessionId: number): Promise<LiveSessionInfo> => {
+    const raw = await handleRequest(api.post<SessionActionResponse>(`api/v1/liveSession/end/${sessionId}`));
+    const data = raw as SessionActionResponse;
+    const responseKey = Object.keys(data.apiResponse)[0];
+    return data.apiResponse[responseKey];
+};
+
+/**
+ * Join a live session using session ID
+ */
+export const joinLiveSession = async (sessionId: number): Promise<LiveSessionInfo> => {
+    // Expected to return meeting info if LIVE, might throw error if ended
+    const raw = await handleRequest(api.get<SessionActionResponse>(`api/v1/liveSession/join/${sessionId}`));
+    const data = raw as SessionActionResponse;
+    const responseKey = Object.keys(data.apiResponse)[0];
+    return data.apiResponse[responseKey];
 };

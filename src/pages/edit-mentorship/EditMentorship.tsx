@@ -22,9 +22,12 @@ const EditMentorship: FC = () => {
   const [formData, setFormData] = useState<MentorshipFormData>({
     title: '',
     description: '',
-    level: 'All Levels',
+    category: '',
+    difficultyLevel: 'ALL_LEVEL',
     price: 0,
-    status: 'draft',
+    whatWillLearn: [],
+    tags: [],
+    duration: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -55,11 +58,14 @@ const EditMentorship: FC = () => {
         }
 
         setFormData({
-          title: mentorship.title ?? '',
-          description: mentorship.description ?? '',
-          level: (mentorship.difficultyLevel as string) ?? 'ALL_LEVEL',
+          title: (mentorship.title && mentorship.title !== 'string') ? mentorship.title : '',
+          description: (mentorship.description && mentorship.description !== 'string') ? mentorship.description : '',
+          category: (mentorship.category && mentorship.category !== 'string') ? mentorship.category : '',
+          difficultyLevel: (mentorship.difficultyLevel as string) ?? 'ALL_LEVEL',
           price: Number(mentorship.price ?? 0),
-          status: (mentorship.status as string) ?? 'draft',
+          whatWillLearn: Array.isArray(mentorship.whatWillLearn) ? mentorship.whatWillLearn.filter((item) => item !== 'string') : [],
+          tags: Array.isArray(mentorship.tags) ? mentorship.tags.filter((item) => item !== 'string') : [],
+          duration: Number(mentorship.duration ?? 0),
         });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load mentorship';
@@ -75,9 +81,18 @@ const EditMentorship: FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    setFormData((prev) => {
+      if (name === 'price' || name === 'duration') {
+        return { ...prev, [name]: parseFloat(value) || 0 };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const handleArrayInputChange = (arrayName: 'whatWillLearn' | 'tags', value: string) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'price' ? parseFloat(value) || 0 : value,
+      [arrayName]: value.split(',').map((item) => item.trim()).filter((item) => item),
     }));
   };
 
@@ -95,9 +110,12 @@ const EditMentorship: FC = () => {
       const payload: Partial<MentorshipApiResponse> = {
         title: formData.title,
         description: formData.description,
-        difficultyLevel: formData.level as MentorshipApiResponse['difficultyLevel'],
+        category: formData.category,
+        difficultyLevel: formData.difficultyLevel as MentorshipApiResponse['difficultyLevel'],
         price: formData.price,
-        status: formData.status as MentorshipApiResponse['status'],
+        whatWillLearn: formData.whatWillLearn,
+        tags: formData.tags,
+        duration: formData.duration,
       };
 
       await updateMentorship(mentorshipId, payload);
@@ -120,8 +138,13 @@ const EditMentorship: FC = () => {
   if (loading) {
     return (
       <DashLayout pageTitle="Edit Mentorship">
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-gray-500">Loading...</div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-blue-50">
+              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+            <p className="text-gray-600 font-medium">Loading mentorship details...</p>
+          </div>
         </div>
       </DashLayout>
     );
@@ -130,8 +153,20 @@ const EditMentorship: FC = () => {
   if (error) {
     return (
       <DashLayout pageTitle="Edit Mentorship">
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-red-500">{error}</div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md">
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-red-50">
+              <span className="text-3xl">⚠️</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2.5 bg-blue-500 text-white font-semibold rounded-xl hover:bg-blue-600 transition-all duration-200"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </DashLayout>
     );
@@ -139,15 +174,18 @@ const EditMentorship: FC = () => {
 
   return (
     <DashLayout pageTitle="Edit Mentorship">
-      <div className="max-w-2xl mx-auto p-6">
-        <EditMentorshipHeader />
-        <EditMentorshipForm
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-          submitting={submitting}
-          onCancel={handleCancel}
-        />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <EditMentorshipHeader />
+          <EditMentorshipForm
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleArrayInputChange={handleArrayInputChange}
+            handleSubmit={handleSubmit}
+            submitting={submitting}
+            onCancel={handleCancel}
+          />
+        </div>
       </div>
     </DashLayout>
   );
