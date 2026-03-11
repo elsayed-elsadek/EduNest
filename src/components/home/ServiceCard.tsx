@@ -1,13 +1,38 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
+import { Lightbulb, BookOpen, Users, GraduationCap, Award, Globe, MessageCircle, Video, Zap, Calendar, ArrowRightLeft, Route, TrendingUp, Briefcase, Check, Star, Laptop, Trophy } from 'lucide-react';
+
+// Icon mapping from string icon names to Lucide components
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Users': Users,
+  'BookOpen': BookOpen,
+  'Calendar': Calendar,
+  'ArrowRightLeft': ArrowRightLeft,
+  'Route': Route,
+  'TrendingUp': TrendingUp,
+  'Briefcase': Briefcase,
+  'Check': Check,
+  'Star': Star,
+  'Laptop': Laptop,
+  'Trophy': Trophy,
+  'GraduationCap': GraduationCap,
+  'Award': Award,
+  'Globe': Globe,
+  'MessageCircle': MessageCircle,
+  'Video': Video,
+  'Zap': Zap,
+  'Lightbulb': Lightbulb,
+};
 
 type Props = {
-  icon: never ,
+  icon: string;
   title: string;
   description: string;
 };
 
 const ServiceCard: React.FC<Props> = ({ title, description, icon }) => {
+  // Get the icon component from the map, default to Lightbulb
+  const IconComponent = iconMap[icon] || Lightbulb;
+
   return (
     <div 
     className="bg-white rounded-2xl w-full shadow-lg p-6 
@@ -16,7 +41,7 @@ const ServiceCard: React.FC<Props> = ({ title, description, icon }) => {
     grid  gap-4 relative items-center">
       {/* small icon box */}
       <div className="flex-shrink-0 w-12 h-12 rounded-md bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary dark:text-blue-400 text-lg shadow-sm">
-      <FontAwesomeIcon icon={icon} className='text-2xl'/>
+      <IconComponent className='text-2xl' />
       </div>
 
       <div>

@@ -28,10 +28,13 @@ body {
   overflow-x: hidden;
 }
 
+
 /* smooth theme transitions */
 html, body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
+
+
 
 /* ============================================
    CSS VARIABLES
@@ -115,6 +118,11 @@ a {
 
 .hero-image {
   @apply w-[360px] h-[400px] rounded-[30px] overflow-hidden;
+}
+img {
+
+  aspect-ratio: 1024 / 1034;
+  /* object-fit: cover; */
 }
 
 .text-primary { color: var(--primary-500); }

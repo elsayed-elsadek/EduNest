@@ -23,12 +23,13 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
       <td className="py-4 px-4 md:px-6">
         <div className="flex items-center gap-2 md:gap-3">
           <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
-            <span className="text-base md:text-xl">{mentorship.icon}</span>
+            <span className="text-base md:text-xl cursor-pointer" 
+             onClick={() => onDetails(mentorship.id)}>{mentorship.icon}</span>
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[12px] md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 leading-tight">
-              {mentorship.title}
-            </h3>
+            <h3 className="text-[12px] cursor-pointer md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 leading-tight"
+            onClick={() => onDetails(mentorship.id)}>
+              {mentorship.title} </h3>
             <p className="hidden md:block text-[11px] text-gray-400 font-medium mt-0.5">
               {mentorship.level}
             </p>
@@ -74,6 +75,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => onDetails(mentorship.id)}
+            aria-label={`View details of ${mentorship.title}`}
             className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary dark:hover:text-white transition-all hover:bg-blue-50 "
           >
             <Eye className="w-4 h-4" />
@@ -81,7 +83,10 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
           </button>
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="p-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary dark:hover:text-white transition-colors focus:outline-none">
+            <Menu.Button 
+              aria-label="More options for mentorship"
+              className="p-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
               <MoreVertical className="w-4 h-4" />
             </Menu.Button>
 
@@ -113,6 +118,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
                   {({ active }) => (
                     <button
                       onClick={() => onAction('edit', mentorship.id)}
+                      aria-label={`Edit ${mentorship.title}`}
                       className={`${active ? 'bg-gray-50' : ''} flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-gray-700 gap-2`}
                     >
                       <Edit2 className="w-3.5 h-3.5" /> Edit Mentorship
@@ -125,6 +131,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
                   {({ active }) => (
                     <button
                       onClick={() => onAction('delete', mentorship.id)}
+                      aria-label={`Delete ${mentorship.title}`}
                       className={`${active ? 'bg-red-50' : ''} flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-red-600 gap-2`}
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Delete

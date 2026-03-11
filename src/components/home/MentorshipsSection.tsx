@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 
 type Mentorship = {
   title: string;
@@ -15,7 +15,7 @@ type Props = {
   mentorships: Mentorship[];
 };
 
-const MentorshipsCarousel: React.FC<Props> = ({ mentorships }) => {
+const MentorshipsCarousel: React.FC<Props> = memo(({ mentorships }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedTag, setSelectedTag] = useState<string>('All');
 
@@ -165,7 +165,7 @@ const MentorshipsCarousel: React.FC<Props> = ({ mentorships }) => {
       </div>
     </section>
   );
-};
+});
 
 export default MentorshipsCarousel;
 

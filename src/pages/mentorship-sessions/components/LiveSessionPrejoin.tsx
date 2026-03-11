@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, Video, VideoOff, Settings, Users, Image as ImageIcon, PhoneOff } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, Users, PhoneOff } from 'lucide-react';
 import type { LiveSessionInfo } from '../../../services/mentorshipsContent/liveSession';
 
 interface LiveSessionPrejoinProps {
@@ -52,7 +52,7 @@ const LiveSessionPrejoin: React.FC<LiveSessionPrejoinProps> = ({ sessionInfo, on
                 activeStream.getTracks().forEach(track => track.stop());
             }
         };
-    }, [videoEnabled, micEnabled]);
+    }, [videoEnabled, micEnabled, stream]);
 
     const toggleVideo = () => setVideoEnabled(!videoEnabled);
     const toggleMic = () => setMicEnabled(!micEnabled);

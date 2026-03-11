@@ -92,46 +92,44 @@ export const createTask = async (
   attachmentFile?: File
 ): Promise<unknown> => {
 
-  const body = {
-    title: payload.title,
-    weekId: payload.weekId,
-    description: payload.description || null,
-    points: payload.points,
-    passPoints: payload.passPoints,
-    estimatedMinutes: payload.estimatedMinutes || null,
-    dueAt: payload.dueAt || null,
-    attachmentUrl: payload.attachmentUrl || null,
-    status: payload.status || 'DRAFT'
-  };
-
   try {
+    // Use multipart/form-data with "req" key containing JSON string (like Postman)
+    const formData = new FormData();
 
-    // إذا يوجد ملف → multipart/form-data
+    const jsonBody = {
+      title: payload.title,
+      weekId: payload.weekId,
+      description: payload.description || null,
+      points: payload.points,
+      passPoints: payload.passPoints,
+      estimatedMinutes: payload.estimatedMinutes || null,
+      dueAt: payload.dueAt || null,
+      attachmentUrl: payload.attachmentUrl || null,
+      status: payload.status || 'DRAFT'
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(jsonBody)], {
+      type: 'application/json'
+    });
+
+    formData.append("req", jsonBlob);
+
+    // Append file if exists
     if (attachmentFile) {
-
-      const formData = new FormData();
-
-      formData.append(
-        "req",
-        new Blob([JSON.stringify(body)], { type: "application/json" })
-      );
-
       formData.append("attachment", attachmentFile);
-
-      const raw = await handleRequest(
-        api.post("api/v1/task", formData)
-      );
-
-      return raw;
     }
 
-    // بدون ملف → JSON
     const raw = await handleRequest(
-      api.post("api/v1/task", body)
+      api.post("api/v1/task", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
     );
 
     return raw;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
 
     console.error("Create Task Error:", error?.response?.data || error);
@@ -154,13 +152,43 @@ export const updateTask = async (
 ): Promise<unknown> => {
 
   try {
+    const formData = new FormData();
+
+    const jsonBody = {
+      title: payload.title,
+      description: payload.description,
+      points: payload.points,
+      passPoints: payload.passPoints,
+      estimatedMinutes: payload.estimatedMinutes,
+      dueAt: payload.dueAt,
+      attachmentUrl: payload.attachmentUrl,
+      status: payload.status
+    };
+
+    // Remove undefined fields
+    Object.keys(jsonBody).forEach(key => {
+      if (jsonBody[key as keyof typeof jsonBody] === undefined) {
+        delete jsonBody[key as keyof typeof jsonBody];
+      }
+    });
+
+    const jsonBlob = new Blob([JSON.stringify(jsonBody)], {
+      type: 'application/json'
+    });
+
+    formData.append("req", jsonBlob);
 
     const raw = await handleRequest(
-      api.patch(`api/v1/task/${id}`, payload)
+      api.patch(`api/v1/task/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
     );
 
     return raw;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
 
     console.error("Update Task Error:", error?.response?.data || error);

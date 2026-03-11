@@ -4,11 +4,12 @@ import type { MentorshipFormData } from '../types';
 interface Props {
     formData: MentorshipFormData;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setFieldValue: (field: keyof MentorshipFormData, value: any) => void;
     fieldErrors: Record<string, string>;
 }
 
-export const EntryPeriodFields: FC<Props> = ({ formData, onChange, setFieldValue, fieldErrors }) => (
+export const EntryPeriodFields: FC<Props> = ({ formData, onChange, fieldErrors }) => (
     <div className="space-y-4">
         <div>
             <p className="text-xs font-semibold text-gray-500 tracking-wide mb-2">

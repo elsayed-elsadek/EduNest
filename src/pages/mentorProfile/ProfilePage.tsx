@@ -168,7 +168,9 @@ const ProfilePage: FC = () => {
                   <div className="w-24 h-24 rounded-2xl border-2 border-yellow-400 overflow-hidden bg-gray-100">
                     {profile?.avatar ? (
                       <img src={profile.avatar} alt="avatar"
-                        className="w-full h-full object-cover" />
+                      width={96} height={96}
+                          fetchPriority="high"
+                        className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-50">
                         👤

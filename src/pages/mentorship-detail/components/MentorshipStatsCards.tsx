@@ -1,74 +1,93 @@
-import type { FC } from 'react';
-import { Book, FileText, Activity, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import type { FC } from "react";
+import { Book, FileText, Activity, Users, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface MentorshipStatsCardsProps {
-    totalLessons: string | number;
-    totalQuizzes: string | number;
-    totalAssignments: string | number;
-    totalSessions: string | number;
-    mentorshipId: string | number;
+  totalLessons: string | number;
+  totalQuizzes: string | number;
+  totalAssignments: string | number;
+  totalSessions: string | number;
+  mentorshipId: string | number;
 }
 
 const MentorshipStatsCards: FC<MentorshipStatsCardsProps> = ({
-    totalLessons,
-    totalQuizzes,
-    totalAssignments,
-    totalSessions,
-    mentorshipId,
+  totalLessons,
+  totalQuizzes,
+  totalAssignments,
+  totalSessions,
+  mentorshipId,
 }) => {
-    return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white rounded-lg p-4 shadow flex items-center gap-3">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                    <Book className="text-blue-500" />
-                </div>
-                <div>
-                    <p className=" text-gray-500">Total Lessons</p>
-                    <p className="font-bold">{String(totalLessons)}</p>
-                </div>
+  const cards = [
+    {
+      title: "Total Lessons",
+      value: totalLessons,
+      icon: Book,
+    },
+    {
+      title: "Total Quizzes",
+      value: totalQuizzes,
+      icon: FileText,
+      link: `/mentor/mentorships/${mentorshipId}/quizzes`,
+    },
+    {
+      title: "Total Assignments",
+      value: totalAssignments,
+      icon: Activity,
+      link: `/mentor/mentorships/${mentorshipId}/tasks`,
+    },
+    {
+      title: "Total Sessions",
+      value: totalSessions,
+      icon: Users,
+      link: `/mentor/mentorships/${mentorshipId}/sessions`,
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+      {cards.map((card, index) => {
+        const Icon = card.icon;
+
+        const content = (
+          <div className="flex items-center gap-3 w-full">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <Icon className="text-blue-500 w-5 h-5" />
             </div>
 
-            <Link to={`/mentor/mentorships/${mentorshipId}/quizzes`} className="bg-white rounded-lg p-4 shadow flex items-center gap-3 hover:shadow-md transition-shadow cursor-pointer block">
-                <div className="flex items-center gap-3 w-full">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                        <FileText className="text-blue-500" />
-                    </div>
-                    <div>
-                        <p className=" text-gray-500">Total Quizzes</p>
-                        <p className=" font-bold">{String(totalQuizzes)}</p>
-                    </div>
-                </div>
-            </Link>
+            <div className="flex-1">
+              <p className="text-sm text-gray-500">{card.title}</p>
+              <p className="text-lg font-bold">{String(card.value)}</p>
+            </div>
 
-            <Link to={`/mentor/mentorships/${mentorshipId}/tasks`} className="bg-white rounded-lg p-4 shadow flex items-center gap-3 hover:shadow-md transition-shadow cursor-pointer block">
-                <div className="flex items-center gap-3 w-full">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                        <Activity className="text-blue-500" />
-                    </div>
-                    <div>
-                        <p className=" text-gray-500">Total Assignments</p>
-                        <p className=" font-bold">{String(totalAssignments)}</p>
-                    </div>
-                </div>
-            </Link>
+            {card.link && (
+              <ChevronRight className="text-gray-400 w-5 h-5" />
+            )}
+          </div>
+        );
 
-            <Link to={`/mentor/mentorships/${mentorshipId}/sessions`} className="bg-white rounded-lg p-4 shadow flex items-center gap-3 hover:shadow-md transition-shadow cursor-pointer block">
-                <div className="flex items-center gap-3 w-full">
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                        <Users className="text-blue-500" />
-                    </div>
-                    <div>
-                        <p className=" text-gray-500">Total Sessions</p>
-                        <p className=" font-bold">{String(totalSessions)}</p>
-                    </div>
-                </div>
+        if (card.link) {
+          return (
+            <Link
+              key={index}
+              to={card.link}
+              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
+            >
+              {content}
             </Link>
-        </div>
-    );
+          );
+        }
+
+        return (
+          <div
+            key={index}
+            className="bg-white rounded-xl p-4 shadow-sm"
+          >
+            {content}
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 export default MentorshipStatsCards;
-
-
-

@@ -41,14 +41,17 @@ export const useLogin = () => {
     setLoading(true);
     try {
       const data = await loginUser(formData.email, formData.password);
-
-      const jwt = data?.apiResponse?.jwt;
-      const statusMessage = data?.apiResponse?.status || "Logged in successfully!";
+      
+      // Type assertion for API response
+      const responseObj = data as Record<string, unknown>;
+      const apiResponse = responseObj?.apiResponse as Record<string, unknown> | undefined;
+      
+      const jwt = apiResponse?.jwt as string | undefined;
+      const statusMessage = apiResponse?.status as string | undefined || "Logged in successfully!";
 
       if (jwt) {
         toast.success(statusMessage);
-        const apiRes = data?.apiResponse as Record<string, unknown> | undefined;
-        const user = (apiRes?.user ?? data?.user) as Record<string, unknown> | undefined;
+        const user = (apiResponse?.user ?? responseObj?.user) as Record<string, unknown> | undefined;
         let userName = getFirstNameFromUser(user);
         if (!userName) userName = getFirstNameFromToken(jwt);
         if (!userName && user) {
@@ -123,3 +126,4 @@ export const useLogin = () => {
     handleSubmit,
   };
 };
+
