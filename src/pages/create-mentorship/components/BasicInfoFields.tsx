@@ -11,7 +11,7 @@ interface Props {
 
 export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, fieldErrors }) => (
     <>
-        {/* Title & Description */}
+        {/* Title & Subtitle & Description */}
         <div className="space-y-4">
             <div>
                 <label className="block text-xs font-semibold text-gray-500 tracking-wide mb-1.5 sm:mb-2">
@@ -29,6 +29,24 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
                 />
                 {fieldErrors.title && (
                     <p className="mt-1 text-xs text-red-600">{fieldErrors.title}</p>
+                )}
+            </div>
+
+            <div>
+                <label className="block text-xs font-semibold text-gray-500 tracking-wide mb-1.5 sm:mb-2">
+                    SUBTITLE
+                </label>
+                <input
+                    type="text"
+                    name="subtitle"
+                    value={formData.subtitle}
+                    onChange={onChange}
+                    className={`w-full min-h-[44px] sm:h-12 px-4 py-3 rounded-xl sm:rounded-2xl border text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#154d71] focus:bg-white ${fieldErrors.subtitle ? 'border-red-400 bg-red-50/50' : 'border-gray-200 bg-gray-50'
+                        }`}
+                    placeholder="Enter subtitle here..."
+                />
+                {fieldErrors.subtitle && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.subtitle}</p>
                 )}
             </div>
 

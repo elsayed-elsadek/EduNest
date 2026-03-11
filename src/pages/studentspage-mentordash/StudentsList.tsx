@@ -10,6 +10,8 @@ import Pagination from '../../components/common/Pagination/Pagination';
 import type { Student } from '../../types/Students.types';
 import { getMentorStudents } from '../../services/Studentsservice';
 import { extractStudentsData } from '../../services/Studentsservice';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 // Helper 
 function isApiErrorResponse(res: unknown): res is { error: string } {
@@ -172,7 +174,7 @@ const StudentsList: FC = () => {
               ) : (
                 <div className="p-12 md:p-20 text-center">
                   <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl">🔍</span>
+                    <FontAwesomeIcon icon={faSearch} className=''/>
                   </div>
                   <p className="text-gray-400 font-medium text-sm md:text-base">
                     {searchQuery ? 'No students found matching your search.' : 'No students yet.'}

@@ -6,8 +6,10 @@ import avatarDavid from '../assets/homePage/person1.webp';
 import avatarSarah from '../assets/homePage/person2.webp';
 import avatarKumar from '../assets/homePage/person3.webp';
 import avatarJohn from '../assets/homePage/person4.webp';
-import { faArrowTrendUp, faBook, faBriefcase, faCalendar, faCheck, faPeopleArrows, faRoad, faStar, faUserGroup, faUserTie } from '@fortawesome/free-solid-svg-icons';
-import { faLaptop, faTrophy, faUsers } from '@fortawesome/free-solid-svg-icons';
+import aboutUs1 from '../assets/homePage/aboutus1.webp';
+import aboutUs2 from '../assets/homePage/aboutus2.webp';
+import aboutUs3 from '../assets/homePage/aboutus3.webp';
+import blog1 from '../assets/homePage/blog1.webp';
 
 export const TEXTS = {
   heroTitle: 'Learn.Mentor. Grow',
@@ -20,18 +22,19 @@ export const COLORS = {
   primaryBg: 'bg-[#0f5e8b]'
 };
 
+// Using string-based icon names for dynamic lookup
 export const SERVICES = {
   mentors: [
-    { icon:faUserGroup, title: 'Manage Students Efficiently', desc: 'Track your mentees\' progress, review submissions, and provide instant feedback from your dashboard.' },
-    { icon:faBook, title: 'Create Mentorship Programs', desc: 'Design and publish mentorships easily — add descriptions, materials, quizzes, and assignments.' },
-    { icon:faCalendar, title: 'Flexible Schedule', desc: 'Organize your mentorship sessions according to your availability and connect with students globally.' },
-    { icon:faPeopleArrows ,title: 'Build a Professional Brand', desc: 'Showcase your experience and achievements to grow your visibility in the community.' },
+    { icon: 'Users', title: 'Manage Students Efficiently', desc: 'Track your mentees\' progress, review submissions, and provide instant feedback from your dashboard.' },
+    { icon: 'BookOpen', title: 'Create Mentorship Programs', desc: 'Design and publish mentorships easily — add descriptions, materials, quizzes, and assignments.' },
+    { icon: 'Calendar', title: 'Flexible Schedule', desc: 'Organize your mentorship sessions according to your availability and connect with students globally.' },
+    { icon: 'ArrowRightLeft', title: 'Build a Professional Brand', desc: 'Showcase your experience and achievements to grow your visibility in the community.' },
   ],
   students: [
-    { icon: faRoad , title: 'Skill-Based Learning Paths', desc: 'Access curated courses and quizzes that strengthen your technical and soft skills step by step.' },
-    {icon:faUserTie, title: 'Personalized Mentorships', desc: 'Get matched with mentors who align with your goals, skills, and learning pace.' },
-    {icon:faArrowTrendUp , title: 'Progress Tracking', desc: 'Monitor your improvement with detailed feedback and analytics after each session or assignment.' },
-    {icon:faBriefcase, title: 'Career Guidance', desc: 'Receive expert advice on how to advance your career and land opportunities in your chosen field.' },
+    { icon: 'Route', title: 'Skill-Based Learning Paths', desc: 'Access curated courses and quizzes that strengthen your technical and soft skills step by step.' },
+    { icon: 'Users', title: 'Personalized Mentorships', desc: 'Get matched with mentors who align with your goals, skills, and learning pace.' },
+    { icon: 'TrendingUp', title: 'Progress Tracking', desc: 'Monitor your improvement with detailed feedback and analytics after each session or assignment.' },
+    { icon: 'Briefcase', title: 'Career Guidance', desc: 'Receive expert advice on how to advance your career and land opportunities in your chosen field.' },
   ]
 };
 
@@ -44,18 +47,19 @@ export const MENTORSHIPS = [
 
 ];
 
+// Using string-based icon names
 export const ABOUT_STATS = [
-  { icon: faStar, value: '98%', label: 'Success Rate' },
-  { icon: faUserGroup, value: '15,000+', label: 'Active Students' },
-  { icon: faBook, value: '500+', label: 'Courses' },
-  { icon: faCheck, value: '150+', label: 'Expert Instructors' },
+  { icon: 'Star', value: '98%', label: 'Success Rate' },
+  { icon: 'Users', value: '15,000+', label: 'Active Students' },
+  { icon: 'BookOpen', value: '500+', label: 'Courses' },
+  { icon: 'Check', value: '150+', label: 'Expert Instructors' },
 ];
 
 export const ABOUT_IMAGES = [
-  '/src/assets/homePage/aboutus3.webp',
-  '/src/assets/homePage/aboutus1.webp',
-  '/src/assets/homePage/aboutus2.webp',
- '/src/assets/homePage/aboutus1.webp',
+  aboutUs3,
+  aboutUs1,
+  aboutUs2,
+  aboutUs1,
 ];
 
 
@@ -64,51 +68,51 @@ export const WHY_CHOOSE_US_FEATURES = [
   {
     title: 'Why Choose us?',
     description: 'We provide you with the best digital learning experience',
-    icon: faLaptop,
+    icon: 'Laptop',
     isIntro: true,
   },
   {
     title: 'Diverse Courses',
     description: 'Access the best training courses in various technical and creative fields',
-    icon: faBook,
+    icon: 'BookOpen',
   },
   {
     title: 'Professional Instructors',
     description: 'Learn from specialized experts with extensive practical experience',
-    icon: faUsers,
+    icon: 'Users',
   },
   {
     title: 'Certified Programs',
     description: 'Earn recognized certificates upon successful completion of courses',
-    icon: faTrophy,
+    icon: 'Trophy',
   },
 ];
 
 // blog
  export const dummyBlogs = [
   {
-    imageSrc: '/src/assets/homePage/blog1.webp',
+    imageSrc: blog1,
     date: 'May 01, 2026',
     comments: 10,
     title: 'How Mentorship Can Fast-Track',
     description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
   },
   {
-    imageSrc: '/src/assets/homePage/blog1.webp',
+    imageSrc: blog1,
     date: 'May 01, 2026',
     comments: 10,
     title: 'How Mentorship Can Fast-Track',
     description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
   },
   {
-    imageSrc: '/src/assets/homePage/blog1.webp',
+    imageSrc: blog1,
     date: 'May 01, 2026',
     comments: 10,
     title: 'How Mentorship Can Fast-Track',
     description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
   },
   {
-    imageSrc: '/src/assets/homePage/blog1.webp',
+    imageSrc: blog1,
     date: 'May 01, 2026',
     comments: 10,
     title: 'How Mentorship Can Fast-Track',

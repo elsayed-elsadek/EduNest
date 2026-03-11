@@ -1,7 +1,10 @@
 export interface MentorshipFormData {
     title: string;
     description: string;
-    level: string;
+    category: string;
+    difficultyLevel: string;
     price: number;
-    status: string;
+    whatWillLearn: string[];
+    tags: string[];
+    duration: number;
 }

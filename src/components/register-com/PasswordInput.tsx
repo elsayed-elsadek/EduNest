@@ -79,10 +79,7 @@ export const PasswordInput: React.FC<Props> = ({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.965 9.965 0 012.556-3.653M6.12 6.12a9.965 9.965 0 014.755-1.624c4.477 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.378 2.583M3 3l18 18"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
+              d="M3 3l18 18"
             />
           </svg>
         )}

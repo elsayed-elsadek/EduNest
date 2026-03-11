@@ -4,10 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DashLayout from '../../components/layout/Dash-layout';
 import {
   getMentorshipDetail,
-  getMentorshipStats,
-  getTopLearners,
-  getMentorshipReviews,
+  getFullMentorshipDashboard,
 } from '../../services/mentorDashboardService';
+import type { MentorshipStats } from '../../services/mentorDashboardService';
 import {
   getWeeksByMentorship,
   getWeekContents,
@@ -30,12 +29,13 @@ const MentorshipDetail: FC = () => {
   const token = useAuthStore((s) => s.token);
 
   const [mentorship, setMentorship] = useState<MentorshipApiResponse | null>(null);
-  const [stats, setStats] = useState<Record<string, unknown> | null>(null);
+  const [stats, setStats] = useState<MentorshipStats | null>(null);
   const [topLearners, setTopLearners] = useState<Learner[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'dashboard'>('overview');
+  const [mentorshipDashboardStudents, setMentorshipDashboardStudents] = useState<Student[]>([]);
 
   const [weeks, setWeeks] = useState<WeekData[] | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
@@ -57,34 +57,35 @@ const MentorshipDetail: FC = () => {
       try {
         setLoading(true);
         setError(null);
+
         const data = await getMentorshipDetail(mentorshipId);
         setMentorship(data);
 
-        // try getting stats, top learners and reviews (fail silently)
         try {
-          const s = await getMentorshipStats(mentorshipId);
-          setStats(s as Record<string, unknown>);
-        } catch (e) {
-          console.warn('Could not load mentorship stats', e);
-        }
+          const dashResponse = await getFullMentorshipDashboard(
+            mentorshipId,
+            { reviewsSize: 6, topSize: 3 }
+          );
 
-        try {
-          const learners = await getTopLearners(String(mentorshipId));
-          setTopLearners(Array.isArray(learners) ? learners : []);
-        } catch (e) {
-          console.warn('Could not load top learners', e);
-        }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const dash = (dashResponse as any)?.apiResponse?.dashboard;
 
-        try {
-          const rev = await getMentorshipReviews(String(mentorshipId));
-          setReviews(Array.isArray(rev) ? rev : []);
+          if (dash) {
+            setStats(dash.stats);
+            setTopLearners(dash.topLearners?.content || []);
+            setReviews(dash.reviews?.content || []);
+            setMentorshipDashboardStudents(dash.studentsRanks?.content || []);
+          }
         } catch (e) {
-          console.warn('Could not load reviews', e);
+          console.warn('Dashboard fetch failed', e);
         }
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to load mentorship details';
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Failed to load mentorship details';
+
         setError(message);
-        console.error('Error loading mentorship:', err);
       } finally {
         setLoading(false);
       }
@@ -93,31 +94,32 @@ const MentorshipDetail: FC = () => {
     const loadContent = async () => {
       try {
         setContentLoading(true);
+
         const fetchedWeeks = await getWeeksByMentorship(Number(mentorshipId));
 
-        // Fetch items for each week
         const weeksData: WeekData[] = await Promise.all(
           fetchedWeeks.map(async (week) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let items: any[] = [];
+
             try {
               items = await getWeekContents(week.id);
-              // Sort items by createdAt
+
               items.sort((a, b) => {
-                const dateA = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
-                const dateB = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
-                return dateA - dateB; // Ascending order
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return dateA - dateB;
               });
             } catch (e) {
-              console.warn(`Could not load contents for week ${week.id}`, e);
+              console.warn(`Week ${week.id} failed`, e);
             }
+
             return { week, items };
           })
         );
 
         setWeeks(weeksData);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
+      } catch {
         setContentError('Failed to load mentorship content');
       } finally {
         setContentLoading(false);
@@ -151,71 +153,78 @@ const MentorshipDetail: FC = () => {
     return (
       <DashLayout pageTitle="Mentorship Details">
         <div className="flex items-center justify-center h-screen">
-          <div className="text-red-500">{error || 'Mentorship not found'}</div>
+          <div className="text-red-500">
+            {error || 'Mentorship not found'}
+          </div>
         </div>
       </DashLayout>
     );
   }
 
-  // derive counts (fallback to stats or mentorship fields)
-  const totalLessons = ((stats?.['lessons'] ?? mentorship?.lessonsCount) as number | string | undefined) ?? 0;
-  const totalQuizzes = ((stats?.['quizzes'] ?? mentorship?.quizzesCount) as number | string | undefined) ?? 0;
-  const totalAssignments = ((stats?.['assignments'] ?? mentorship?.assignmentsCount) as number | string | undefined) ?? 0;
-  const totalSessions = ((stats?.['sessions'] ?? mentorship?.sessionsCount) as number | string | undefined) ?? 0;
+  const totalLessons = Number(stats?.totalLessons ?? 0);
+  const totalQuizzes = Number(stats?.totalQuizzes ?? 0);
+  const totalAssignments = Number(stats?.totalAssignments ?? 0);
+  const totalSessions = Number(stats?.totalSessions ?? 0);
 
-  const mentorshipRecord = mentorship as unknown as Record<string, unknown> | null;
-  const rawStudents = (mentorshipRecord?.students ?? mentorshipRecord?.enrolledUsers) as unknown;
-  const students: Student[] = Array.isArray(rawStudents) ? (rawStudents as Student[]) : [];
+  const students: Student[] =
+    mentorshipDashboardStudents.length > 0
+      ? mentorshipDashboardStudents
+      : [];
 
   return (
     <DashLayout pageTitle="My Mentorships / Details">
-      <div className="px-6 py-6 max-w-7xl mx-auto">
-        <div className="flex items-start gap-6 mb-6">
-          <div className="flex-1">
-            <MentorshipHeader
-              mentorship={mentorship}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              onOverviewClick={handleOverviewClick}
-              onCreateContentClick={handleCreateContentClick}
+
+      {/* Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:gap-6 mb-6">
+          <MentorshipHeader
+            mentorship={mentorship}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onOverviewClick={handleOverviewClick}
+            onCreateContentClick={handleCreateContentClick}
+          />
+        </div>
+
+        {/* Dashboard */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6">
+
+            <MentorshipStatsCards
+              totalLessons={totalLessons}
+              totalQuizzes={totalQuizzes}
+              totalAssignments={totalAssignments}
+              totalSessions={totalSessions}
+              mentorshipId={mentorshipId || ''}
             />
 
-            {/* Dashboard / Stats View */}
-            {activeTab === 'dashboard' && (
-              <>
-                <MentorshipStatsCards
-                  totalLessons={totalLessons}
-                  totalQuizzes={totalQuizzes}
-                  totalAssignments={totalAssignments}
-                  totalSessions={totalSessions}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <MentorshipReviews reviews={reviews} />
+              <MentorshipTopLearners topLearners={topLearners} />
+            </div>
 
-                <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <MentorshipReviews reviews={reviews} />
-                  <MentorshipTopLearners topLearners={topLearners} />
-                </div>
+            <div className="overflow-x-auto">
+              <MentorshipStudentsTable students={students} />
+            </div>
 
-                <MentorshipStudentsTable students={students} />
-              </>
-            )}
-
-            {/* Mentorship Content View */}
-            {activeTab === 'overview' && (
-              <MentorshipContentList
-                weeks={weeks}
-                loading={contentLoading}
-                error={contentError}
-                onCreateContentClick={handleCreateContentClick}
-              />
-            )}
           </div>
-        </div>
+        )}
+
+        {/* Overview */}
+        {activeTab === 'overview' && (
+          <MentorshipContentList
+            weeks={weeks}
+            loading={contentLoading}
+            error={contentError}
+            onCreateContentClick={handleCreateContentClick}
+          />
+        )}
+
       </div>
     </DashLayout>
   );
 };
 
 export default MentorshipDetail;
-
-
-

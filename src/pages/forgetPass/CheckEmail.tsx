@@ -132,9 +132,9 @@ const CheckEmail: React.FC = () => {
 
   return (
     <BasicLayout >
-       <div className="flex flex-col items-center gap-6 justify-center h-[65vh] ">
+      <div className="flex flex-col items-center gap-6 justify-center h-[65vh] ">
         {/* Vector / Illustration */}
-   <FontAwesomeIcon icon={faEnvelope} className="text-4xl text-blue-950"/>
+        <FontAwesomeIcon icon={faEnvelope} className="text-4xl text-blue-950" />
 
         {/* Heading */}
         <h1 className="text-2xl font-semibold">Enter the code</h1>
@@ -147,7 +147,7 @@ const CheckEmail: React.FC = () => {
           {code.map((c, i) => (
             <input
               key={i}
-           ref={(el) => { inputRefs.current[i] = el; }}
+              ref={(el) => { inputRefs.current[i] = el; }}
               type="text"
               inputMode="numeric"
               maxLength={1}
@@ -202,15 +202,15 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
 }) => {
   return (
     <button
-      className="px-6 py-3 mt-4 rounded-lg btn-primary-gradient 
+      className="px-6 py-3 mt-4 rounded-lg bg-primary 
                  text-white font-semibold text-sm 
                  hover:opacity-90 transition
                  disabled:opacity-60 disabled:cursor-not-allowed
                  w-1/3 mx-auto flex items-center justify-center"
       onClick={onClick}
-      disabled={loading || disabled} 
+      disabled={loading || disabled}
     >
-   
+
       {loading ? "Verifying..." : "Confirm"}
     </button>
   );

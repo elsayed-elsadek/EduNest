@@ -10,22 +10,22 @@ const ResetSuccess: React.FC = () => {
 
   return (
 
-    
+
     <div className="min-h-screen flex flex-col-reverse lg:flex-row w-full justify-center relative">
-  {/* logo */}
-          <Link to="/" className="inline-block absolute top-4 md:top-8 left-4 md:left-12  hover:opacity-80 transition-opacity duration-200">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-20 h-20 object-contain"
-            />
-          </Link>
+      {/* logo */}
+      <Link to="/" className="inline-block absolute top-4 md:top-8 left-4 md:left-12  hover:opacity-80 transition-opacity duration-200">
+        <img
+          src={logo}
+          alt="Logo"
+          className="w-20 h-20 object-contain"
+        />
+      </Link>
 
       {/* Left Side - Text Content */}
       <div className="flex flex-col gap-6 w-full lg:w-1/2 items-center justify-center px-4 sm:px-6 py-8 lg:py-0">
         {/* Success Icon */}
         <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-4 lg:flex items-center justify-center hidden">
-          <FontAwesomeIcon icon={faCheck} className="blueBGColor rounded-full p-3 sm:p-4 text-white text-lg sm:text-xl lg:text-2xl"/>
+          <FontAwesomeIcon icon={faCheck} className="blueBGColor rounded-full p-3 sm:p-4 text-white text-lg sm:text-xl lg:text-2xl" />
         </div>
 
         {/* Header */}
@@ -45,7 +45,7 @@ const ResetSuccess: React.FC = () => {
             w-full max-w-sm sm:max-w-md
             h-10 sm:h-12 lg:h-14
             rounded-lg sm:rounded-xl
-            btn-primary-gradient
+            bg-primary
             text-white
             font-semibold
             text-xs sm:text-sm lg:text-base
@@ -71,6 +71,6 @@ const ResetSuccess: React.FC = () => {
   );
 };
 
-export default ResetSuccess; 
+export default ResetSuccess;
 
 

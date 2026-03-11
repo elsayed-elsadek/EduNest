@@ -1,13 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faHome, faPhone } from '@fortawesome/free-solid-svg-icons';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import axios from 'axios';
 import { sendContact, type ContactData } from "../../services/contactService";
 import toast from 'react-hot-toast';
 
-const ContactUsSection: React.FC = () => {
+const ContactUsSection: React.FC = memo(() => {
   const [form, setForm] = useState<ContactData>({
     name: "",
     email: "",
@@ -91,14 +90,14 @@ const ContactUsSection: React.FC = () => {
 
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
-                <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 text-gray-600" />
+                <Mail className="w-5 h-5 text-gray-600" />
                 <a href="mailto:example@teamwebflow.com" className="text-base text-gray-800 hover:text-[#0f5e8b] transition-colors">
                   example@teamwebflow.com
                 </a>
               </div>
 
               <div className="flex items-start space-x-4">
-                <FontAwesomeIcon icon={faHome} className="w-5 h-5 text-gray-600 mt-1" />
+                <MapPin className="w-5 h-5 text-gray-600 mt-1" />
                 <address className="text-base text-gray-800 not-italic leading-relaxed">
                   4074 Ebert Summit Suite 375<br />
                   Lake Leonardchester
@@ -106,7 +105,7 @@ const ContactUsSection: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-4">
-                <FontAwesomeIcon icon={faPhone} className="w-5 h-5 text-gray-600" />
+                <Phone className="w-5 h-5 text-gray-600" />
                 <a href="tel:+441236547890" className="text-base text-gray-800 hover:text-[#0f5e8b] transition-colors">
                   +44 123 654 7890
                 </a>
@@ -192,7 +191,7 @@ const ContactUsSection: React.FC = () => {
       </div>
     </section>
   );
-};
+});
 
 export default ContactUsSection;
 

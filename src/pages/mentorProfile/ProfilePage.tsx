@@ -34,7 +34,7 @@ const EditModal: FC<EditModalProps> = ({ title, onClose, onSave, saving, childre
           Cancel
         </button>
         <button onClick={onSave} disabled={saving}
-          className="px-5 py-2 rounded-xl btn-primary-gradient text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50">
+          className="px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50">
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
@@ -88,27 +88,27 @@ const ProfilePage: FC = () => {
   const openEdit = (mode: 'personal' | 'bio' | 'links') => {
     if (!profile) return;
     setForm({
-      firstName:        profile.firstName,
-      lastName:         profile.lastName,
-      email:            profile.email,
-      bio:              profile.bio ?? '',
-      jobTitle:         profile.title ?? '',
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      email: profile.email,
+      bio: profile.bio ?? '',
+      jobTitle: profile.title ?? '',
       yearsOfExperience: parseInt(profile.experience) || 0,
-      linkedInLink:     profile.links?.linkedin ?? '',
-      githubLink:       profile.links?.github   ?? '',
+      linkedInLink: profile.links?.linkedin ?? '',
+      githubLink: profile.links?.github ?? '',
     });
     setEditMode(mode);
   };
 
   const handleSave = async () => {
     const payload: UpdateMentorProfileRequest = {
-      firstName:         form.firstName,
-      lastName:          form.lastName,
-      bio:               form.bio,
-      jobTitle:          form.jobTitle,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      bio: form.bio,
+      jobTitle: form.jobTitle,
       yearsOfExperience: Number(form.yearsOfExperience),
-      linkedInLink:      form.linkedInLink,
-      githubLink:        form.githubLink,
+      linkedInLink: form.linkedInLink,
+      githubLink: form.githubLink,
     };
     await saveProfile(payload);
     setEditMode(null);
@@ -168,7 +168,9 @@ const ProfilePage: FC = () => {
                   <div className="w-24 h-24 rounded-2xl border-2 border-yellow-400 overflow-hidden bg-gray-100">
                     {profile?.avatar ? (
                       <img src={profile.avatar} alt="avatar"
-                        className="w-full h-full object-cover" />
+                      width={96} height={96}
+                          fetchPriority="high"
+                        className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-50">
                         👤
@@ -259,9 +261,9 @@ const ProfilePage: FC = () => {
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">LinkedIn</label>
                     {profile?.links?.linkedin
                       ? <a href={ensureHttps(profile.links.linkedin)} target="_blank" rel="noopener noreferrer"
-                          className="text-sm text-blue-600 font-medium break-all hover:underline">
-                          {profile.links.linkedin}
-                        </a>
+                        className="text-sm text-blue-600 font-medium break-all hover:underline">
+                        {profile.links.linkedin}
+                      </a>
                       : <p className="text-sm text-gray-400">—</p>
                     }
                   </div>
@@ -269,9 +271,9 @@ const ProfilePage: FC = () => {
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">GitHub</label>
                     {profile?.links?.github
                       ? <a href={ensureHttps(profile.links.github)} target="_blank" rel="noopener noreferrer"
-                          className="text-sm text-blue-600 font-medium break-all hover:underline">
-                          {profile.links.github}
-                        </a>
+                        className="text-sm text-blue-600 font-medium break-all hover:underline">
+                        {profile.links.github}
+                      </a>
                       : <p className="text-sm text-gray-400">—</p>
                     }
                   </div>
@@ -288,11 +290,11 @@ const ProfilePage: FC = () => {
         <EditModal title="Edit Personal Information" onClose={() => setEditMode(null)} onSave={handleSave} saving={saving}>
           <div className="grid grid-cols-2 gap-4">
             <Field label="First Name" value={form.firstName} onChange={(v) => setForm(f => ({ ...f, firstName: v }))} />
-            <Field label="Last Name"  value={form.lastName}  onChange={(v) => setForm(f => ({ ...f, lastName:  v }))} />
+            <Field label="Last Name" value={form.lastName} onChange={(v) => setForm(f => ({ ...f, lastName: v }))} />
           </div>
           {/* Email field is read-only (cannot be changed via backend) */}
           <div className="opacity-60 pointer-events-none">
-            <Field label="Email (Cannot be changed)" value={form.email} onChange={() => {}} type="email" />
+            <Field label="Email (Cannot be changed)" value={form.email} onChange={() => { }} type="email" />
           </div>
           <Field label="Job Title" value={form.jobTitle} onChange={(v) => setForm(f => ({ ...f, jobTitle: v }))} placeholder="e.g. React Developer" />
           <Field label="Years of Experience" value={String(form.yearsOfExperience)}

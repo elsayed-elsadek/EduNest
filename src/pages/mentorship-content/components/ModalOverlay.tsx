@@ -13,7 +13,7 @@ const ModalOverlay: FC<ModalOverlayProps> = ({ onClose, title, children }) => (
       className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 ">
         <h2 className="text-lg font-bold text-gray-900">{title}</h2>
         <button type="button" onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
           <X className="w-5 h-5" />

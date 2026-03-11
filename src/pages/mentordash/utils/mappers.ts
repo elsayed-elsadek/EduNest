@@ -229,5 +229,5 @@ export function mapRevenueChart(raw: unknown): SalesData[] {
                 value,
             };
         })
-        .filter(d => d.month && d.value > 0);
+        .filter(d => d.month); // Allow 0 values to be displayed
 }
