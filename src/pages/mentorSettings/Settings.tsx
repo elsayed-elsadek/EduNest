@@ -69,7 +69,7 @@ const Input: FC<InputProps> = ({ label, value, onChange, type = 'text', placehol
 //Settings Page
 const Settings: FC = () => {
   const userEmail = useAuthStore((s) => s.userEmail);
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const {
     loading, error, success,
     handleRequestEmailChange,
@@ -82,17 +82,17 @@ const Settings: FC = () => {
 
   // modal states
   const [modal, setModal] = useState<'email' | 'email-otp' | 'password' | 'deactivate' | 'delete' | 'otp' | null>(null);
-  
+
 
   // form values
-  const [newEmail,        setNewEmail       ] = useState('');
-  const [emailOtp,        setEmailOtp       ] = useState('');
-  const [oldPassword,     setOldPassword    ] = useState('');
-  const [newPassword,     setNewPassword    ] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [emailOtp, setEmailOtp] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [otp,             setOtp            ] = useState('');
+  const [otp, setOtp] = useState('');
   const [deactivatePassword, setDeactivatePassword] = useState('');
-    const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
 
   const closeModal = () => {
@@ -139,7 +139,7 @@ const Settings: FC = () => {
             <h1 className="text-xl md:text-2xl font-bold text-[#1A1C1E] dark:text-white">Account Setting</h1>
             <div className="flex gap-2">
               {success && <span className="text-sm font-semibold text-green-600 bg-green-50 px-4 py-2 rounded-xl">{success}</span>}
-              {error   && <span className="text-sm font-semibold text-red-600   bg-red-50   px-4 py-2 rounded-xl">{error}</span>}
+              {error && <span className="text-sm font-semibold text-red-600   bg-red-50   px-4 py-2 rounded-xl">{error}</span>}
             </div>
           </div>
 
@@ -178,16 +178,16 @@ const Settings: FC = () => {
                 />
               </div>
 
-             {/* Dark Mode */}
-<div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6">
-  <SettingToggle
-    label="Dark Mode"
-    description="Switch between light and dark"
-    checked={theme === 'dark'} 
-    onChange={toggleTheme} 
-    icon={<Moon className="w-5 h-5" />}
-  />
-</div>
+              {/* Dark Mode */}
+              <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6">
+                <SettingToggle
+                  label="Dark Mode"
+                  description="Switch between light and dark"
+                  checked={theme === 'dark'}
+                  onChange={toggleTheme}
+                  icon={<Moon className="w-5 h-5" />}
+                />
+              </div>
 
               {/* Deactivate */}
               <div className="bg-yellow-50/40 rounded-2xl border border-yellow-100 p-6 md:p-8">
@@ -246,7 +246,7 @@ const Settings: FC = () => {
             <div className="flex gap-3 pt-2">
               <button onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600">Cancel</button>
               <button onClick={submitEmail} disabled={loading || !newEmail}
-                className="flex-1 py-2.5 rounded-xl btn-primary-gradient text-white text-sm font-semibold disabled:opacity-50">
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50">
                 {loading ? 'Sending OTP...' : 'Send OTP'}
               </button>
             </div>
@@ -274,7 +274,7 @@ const Settings: FC = () => {
             <div className="flex gap-3">
               <button onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600">Cancel</button>
               <button onClick={submitConfirmEmail} disabled={loading || emailOtp.length < 4}
-                className="flex-1 py-2.5 rounded-xl btn-primary-gradient text-white text-sm font-semibold disabled:opacity-50">
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50">
                 {loading ? 'Confirming...' : 'Confirm'}
               </button>
             </div>
@@ -286,14 +286,14 @@ const Settings: FC = () => {
       {modal === 'password' && (
         <Modal title="Change Password" onClose={closeModal}>
           <div className="space-y-4">
-            <Input label="Current Password"  value={oldPassword}     onChange={setOldPassword}     showToggle />
-            <Input label="New Password"      value={newPassword}     onChange={setNewPassword}     showToggle />
-            <Input label="Confirm Password"  value={confirmPassword} onChange={setConfirmPassword} showToggle />
+            <Input label="Current Password" value={oldPassword} onChange={setOldPassword} showToggle />
+            <Input label="New Password" value={newPassword} onChange={setNewPassword} showToggle />
+            <Input label="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} showToggle />
             {error && <p className="text-xs text-red-500">{error}</p>}
             <div className="flex gap-3 pt-2">
               <button onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600">Cancel</button>
               <button onClick={submitPassword} disabled={loading || !oldPassword || !newPassword || !confirmPassword}
-                className="flex-1 py-2.5 rounded-xl btn-primary-gradient text-white text-sm font-semibold disabled:opacity-50">
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50">
                 {loading ? 'Saving...' : 'Save'}
               </button>
             </div>

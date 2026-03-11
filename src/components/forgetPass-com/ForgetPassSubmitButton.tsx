@@ -16,7 +16,7 @@ export const ForgetPassSubmitButton: React.FC<Props> = ({ loading }) => {
         rounded-lg sm:rounded-xl
         gap-2
         px-4 sm:px-6 md:px-8
-        btn-primary-gradient
+        bg-primary
         text-white
         font-semibold
         text-sm sm:text-base

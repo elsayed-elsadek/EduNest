@@ -1,36 +1,61 @@
-import { useEffect } from 'react'
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import Home from './pages/Home'
-import Navbar from './components/Navbar'
-import './index.css'
-import BecomeMentor from './pages/BecomeMentor'
-import GetStarted from './pages/GetStarted'
-import NotFound from './pages/NotFound'
-import Login from "./pages/Login/Login.tsx";
-import Register from "./pages/register/Register.tsx";
-import { Verify } from "./pages/verifiy/Verify.tsx";
-import Success from "./pages/success-register/success.tsx";
-import Knowabout from "./pages/mentorinfo/Knowabout.tsx"
-import ForgetPass from "./pages/forgetPass/ForgetPass.tsx";
-import CheckEmail from "./pages/forgetPass/CheckEmail.tsx";
-import ResetPassword from "./pages/forgetPass/ResetPassword.tsx";
-import ResetSuccess from "./pages/forgetPass/ResetSuccess.tsx";
-import MentorDash from './pages/mentordash/MentorDash.tsx';
-import MyMentorships from './pages/my-mentorsship-dash/MyMentorsship.tsx';
-import StudentsList from './pages/studentspage-mentordash/StudentsList.tsx';
-import Messages from './pages/mentorMessages/Messages.tsx';
-import NotificationsList from './pages/mentorNotifications/NotificationsList.tsx';
-import ProfilePage from './pages/mentorProfile/ProfilePage.tsx';
-import Setting from './pages/mentorSettings/Settings.tsx';
-import MentorshipDetail from './pages/mentorship-detail/MentorshipDetail.tsx';
-import EditMentorship from './pages/edit-mentorship/EditMentorship.tsx';
-
-import StudentProfile from './pages/mentor-view-studentprofile/StudentProfile.tsx'
-import CreateMentorship from './pages/create-mentorship/CreateMentorship.tsx';
-import MentorshipContent from './pages/mentorship-content/MentorshipContent.tsx';
-import { useAuthStore } from './store/authStore.ts';
+import { useEffect, Suspense, lazy } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import Navbar from './components/Navbar';
+import './index.css';
+import { useAuthStore } from './store/authStore';
 import { ProtectedRoute } from './routes';
+import { queryClient } from './lib/queryClient';
 
+// Lazy load all page components for code splitting
+// This significantly reduces initial bundle size and improves FCP/LCP
+
+// Pages with default exports
+const Home = lazy(() => import('./pages/Home'));
+const BecomeMentor = lazy(() => import('./pages/BecomeMentor'));
+const GetStarted = lazy(() => import('./pages/GetStarted'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const Login = lazy(() => import('./pages/Login/Login'));
+const Register = lazy(() => import('./pages/register/Register'));
+const Success = lazy(() => import('./pages/success-register/success'));
+const Knowabout = lazy(() => import('./pages/mentorinfo/Knowabout'));
+const ForgetPass = lazy(() => import('./pages/forgetPass/ForgetPass'));
+const CheckEmail = lazy(() => import('./pages/forgetPass/CheckEmail'));
+const ResetPassword = lazy(() => import('./pages/forgetPass/ResetPassword'));
+const ResetSuccess = lazy(() => import('./pages/forgetPass/ResetSuccess'));
+
+// Named export - Verify
+const Verify = lazy(() => import('./pages/verifiy/Verify').then(m => ({ default: m.Verify })));
+
+// Protected routes - lazy loaded
+const MentorDash = lazy(() => import('./pages/mentordash/MentorDash'));
+const MyMentorships = lazy(() => import('./pages/my-mentorsship-dash/MyMentorsship'));
+const StudentsList = lazy(() => import('./pages/studentspage-mentordash/StudentsList'));
+const Messages = lazy(() => import('./pages/mentorMessages/Messages'));
+const NotificationsList = lazy(() => import('./pages/mentorNotifications/NotificationsList'));
+const ProfilePage = lazy(() => import('./pages/mentorProfile/ProfilePage'));
+const Setting = lazy(() => import('./pages/mentorSettings/Settings'));
+const MentorshipDetail = lazy(() => import('./pages/mentorship-detail/MentorshipDetail'));
+const EditMentorship = lazy(() => import('./pages/edit-mentorship/EditMentorship'));
+const StudentProfile = lazy(() => import('./pages/mentor-view-studentprofile/StudentProfile'));
+const CreateMentorship = lazy(() => import('./pages/create-mentorship/CreateMentorship'));
+const MentorshipContent = lazy(() => import('./pages/mentorship-content/MentorshipContent'));
+const MentorshipSessions = lazy(() => import('./pages/mentorship-sessions/MentorshipSessions'));
+const MentorshipQuizzes = lazy(() => import('./pages/mentorship-quizzes/MentorshipQuizzes'));
+const QuizDetail = lazy(() => import('./pages/mentorship-quizzes/QuizDetail'));
+const QuizQuestions = lazy(() => import('./pages/mentorship-quizzes/QuizQuestions'));
+const MentorshipTasks = lazy(() => import('./pages/mentorship-tasks/MentorshipTasks'));
+const TaskDetail = lazy(() => import('./pages/mentorship-tasks/TaskDetail'));
+
+// Loading fallback component - minimal to avoid layout shift
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="text-gray-500 text-sm">Loading...</p>
+    </div>
+  </div>
+);
 
 function App() {
   const location = useLocation();
@@ -44,62 +69,60 @@ function App() {
 
     // If user has valid token and Remember Me is enabled, redirect to dashboard
     if (token && rememberMe && lastEmail) {
-      console.log('🔐 Auto-login enabled - Redirecting to dashboard');
       navigate('/mentor/dashboard', { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on component mount
 
-  const showNavbar = ["/"].includes(
-    location.pathname
-  );
+  // Only show navbar on home page
+  const showNavbar = location.pathname === '/';
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       {showNavbar && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/become-mentor" element={<BecomeMentor />} />
-        <Route path="/start-Started" element={<GetStarted />} />
-        <Route path="*" element={<NotFound />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/verify" element={<Verify />} />
-        <Route path="/success" element={<Success />} />
-        <Route path="/know-about" element={<Knowabout />} />
-        <Route path="/forgot-password" element={<ForgetPass />} />
-        <Route path="/check-email" element={<CheckEmail />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/reset-success" element={<ResetSuccess />} />
-        {/* Protected Mentor Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/mentor/dashboard" element={<MentorDash />} />
-          <Route path="/mentor/mentorships" element={<MyMentorships />} />
-          <Route path="/mentor/mentorships/create" element={<CreateMentorship />} />
-          <Route path="/mentor/mentorships/:id" element={<MentorshipDetail />} />
-          <Route path="/mentor/mentorships/:id/content" element={<MentorshipContent />} />
-          <Route path="/mentor/mentorships/:id/edit" element={<EditMentorship />} />
-          <Route path="/mentor/students" element={<StudentsList />} />
-          <Route path="/mentor/messages" element={<Messages />} />
-          <Route path="/mentor/notifications" element={<NotificationsList />} />
-          <Route path="/mentor/profile" element={<ProfilePage />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/become-mentor" element={<BecomeMentor />} />
+          <Route path="/start-Started" element={<GetStarted />} />
+          <Route path="*" element={<NotFound />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify" element={<Verify />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/know-about" element={<Knowabout />} />
+          <Route path="/forgot-password" element={<ForgetPass />} />
+          <Route path="/check-email" element={<CheckEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-success" element={<ResetSuccess />} />
+          
+          {/* Protected Mentor Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/mentor/dashboard" element={<MentorDash />} />
+            <Route path="/mentor/mentorships" element={<MyMentorships />} />
+            <Route path="/mentor/mentorships/create" element={<CreateMentorship />} />
+            <Route path="/mentor/mentorships/:id" element={<MentorshipDetail />} />
+            <Route path="/mentor/mentorships/:id/content" element={<MentorshipContent />} />
+            <Route path="/mentor/mentorships/:id/sessions" element={<MentorshipSessions />} />
+            <Route path="/mentor/mentorships/:id/quizzes" element={<MentorshipQuizzes />} />
+            <Route path="/mentor/mentorships/:id/quizzes/:quizId" element={<QuizDetail />} />
+            <Route path="/mentor/mentorships/:id/quizzes/:quizId/questions" element={<QuizQuestions />} />
+            <Route path="/mentor/mentorships/:id/tasks" element={<MentorshipTasks />} />
+            <Route path="/mentor/mentorships/:id/tasks/:taskId" element={<TaskDetail />} />
+            <Route path="/mentor/mentorships/:id/edit" element={<EditMentorship />} />
+            <Route path="/mentor/students" element={<StudentsList />} />
+            <Route path="/mentor/messages" element={<Messages />} />
+            <Route path="/mentor/notifications" element={<NotificationsList />} />
+            <Route path="/mentor/profile" element={<ProfilePage />} />
             <Route path="/mentor/students/:id" element={<StudentProfile />} />
-          <Route path="/mentor/settings" element={<Setting />} />
-        </Route>
-
-
-
-
-
-        {/* <Route path="/dash-board" element={<Dashboard />} /> */}
-
-      </Routes>
-    </>
+            <Route path="/mentor/settings" element={<Setting />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </QueryClientProvider>
   );
 }
 
-
 export default App;
-
-
 

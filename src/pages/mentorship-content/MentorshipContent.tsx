@@ -22,10 +22,10 @@ import {
   deleteProject,
   deleteWeek,
   updateWeekTitle,
+  updateMentorshipStatus,
   type WeekResponse,
   type WeekContentItem,
 } from '../../services/mentorshipsContent';
-import { ApiValidationError, updateMentorship } from '../../services/mentorDashboardService';
 import { useAuthStore } from '../../store/authStore';
 
 import type { ContentType, ContentItem, ModuleState } from './types';
@@ -62,6 +62,14 @@ const MentorshipContent: FC = () => {
     moduleIdx?: number;
     itemIdx?: number;
   } | null>(null);
+
+  const contentButtons = [
+  { type: "lecture", label: "Add Lecture" },
+  { type: "quiz", label: "Add Quiz" },
+  { type: "assignment", label: "Add Assignment" },
+  { type: "session", label: "Schedule Session" },
+  { type: "project", label: "Add Project" },
+];
 
   useEffect(() => {
     if (!token) navigate('/login');
@@ -343,15 +351,11 @@ const MentorshipContent: FC = () => {
     if (!mentorshipId || mentorshipId <= 0) return;
     setActionLoading('draft');
     try {
-      await updateMentorship(mentorshipId, { status: 'DRAFT' });
+      await updateMentorshipStatus(mentorshipId, 'DRAFT');
       toast.success('Content saved as draft.');
       navigate(`/mentor/mentorships/${mentorshipId}`);
     } catch (err) {
-      if (err instanceof ApiValidationError) {
-        toast.error(err.message);
-      } else {
-        toast.error(err instanceof Error ? err.message : 'Failed to save as draft.');
-      }
+      toast.error(err instanceof Error ? err.message : 'Failed to save as draft.');
     } finally {
       setActionLoading(null);
     }
@@ -361,15 +365,11 @@ const MentorshipContent: FC = () => {
     if (!mentorshipId || mentorshipId <= 0) return;
     setActionLoading('publish');
     try {
-      await updateMentorship(mentorshipId, { status: 'PUBLISHED' });
+      await updateMentorshipStatus(mentorshipId, 'ACTIVE');
       toast.success('Mentorship published. Content is now visible.');
       navigate(`/mentor/mentorships/${mentorshipId}`);
     } catch (err) {
-      if (err instanceof ApiValidationError) {
-        toast.error(err.message);
-      } else {
-        toast.error(err instanceof Error ? err.message : 'Failed to publish.');
-      }
+      toast.error(err instanceof Error ? err.message : 'Failed to publish.');
     } finally {
       setActionLoading(null);
     }
@@ -522,43 +522,21 @@ const MentorshipContent: FC = () => {
                     </div>
 
                     {/* Add content buttons */}
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openModal('lecture', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
-                      >
-                        <Plus className="w-4 h-4" /> Add Lecture
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal('quiz', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
-                      >
-                        <Plus className="w-4 h-4" /> Add Quiz
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal('assignment', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
-                      >
-                        <Plus className="w-4 h-4" /> Add Assignment
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal('session', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
-                      >
-                        <Plus className="w-4 h-4" /> Schedule Session
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openModal('project', idx)}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
-                      >
-                        <Plus className="w-4 h-4" /> Add Project
-                      </button>
-                    </div>
+
+             <div className="flex flex-col sm:flex-row flex-wrap gap-2 justify-center sm:justify-start">
+  {contentButtons.map((btn) => (
+    <button
+      key={btn.type}
+      type="button"
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onClick={() => openModal(btn.type as any, idx)}
+      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-from)] text-white text-sm font-medium hover:bg-[var(--primary-dark)]"
+    >
+      <Plus className="w-4 h-4" />
+      {btn.label}
+    </button>
+  ))}
+</div>
                   </div>
                 )}
               </div>

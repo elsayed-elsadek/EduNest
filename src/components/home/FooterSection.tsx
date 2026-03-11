@@ -1,12 +1,5 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
-import {
-  faInstagram,
-  faLinkedinIn,
-  faFacebookF,
-  faTwitter,
-} from "@fortawesome/free-brands-svg-icons";
+import React, { memo } from "react";
+import { Mail, Phone, Instagram, Linkedin, Facebook, Twitter } from "lucide-react";
 
 const quickLinks = [
   { name: "Home", id: "home" },
@@ -22,7 +15,7 @@ const supportLinks = [
   { name: "Terms & Conditions", id: "terms" },
 ];
 
-const FooterSection: React.FC = () => {
+const FooterSection: React.FC = memo(() => {
   return (
     <footer className="bg-[var(--primary-dark)] dark:bg-gray-900 pt-40 pb-6 text-white relative">
 
@@ -72,14 +65,14 @@ const FooterSection: React.FC = () => {
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-gray-300">
-                <FontAwesomeIcon icon={faEnvelope} className="text-gray-300" />
+                <Mail className="w-4 h-4 text-gray-300" />
                 <a href="mailto:EduNest123@gmail.com" className="hover:text-blue-400 transition">
                   EduNest123@gmail.com
                 </a>
               </div>
 
               <div className="flex items-center gap-2 text-gray-300">
-                <FontAwesomeIcon icon={faPhone} className="text-gray-300" />
+                <Phone className="w-4 h-4 text-gray-300" />
                 <a href="tel:+4588435849" className="hover:text-blue-400 transition">
                   +458 843 5849
                 </a>
@@ -87,17 +80,30 @@ const FooterSection: React.FC = () => {
             </div>
 
             <div className="flex gap-3 mt-6">
-              {[faInstagram, faLinkedinIn, faFacebookF, faTwitter].map(
-                (icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
-                  >
-                    <FontAwesomeIcon icon={icon} className="text-white" />
-                  </a>
-                )
-              )}
+              <a
+                href="#"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+              >
+                <Instagram className="w-4 h-4 text-white" />
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+              >
+                <Linkedin className="w-4 h-4 text-white" />
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+              >
+                <Facebook className="w-4 h-4 text-white" />
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+              >
+                <Twitter className="w-4 h-4 text-white" />
+              </a>
             </div>
           </div>
 
@@ -142,7 +148,7 @@ const FooterSection: React.FC = () => {
       </div>
     </footer>
   );
-};
+});
 
 export default FooterSection;
 

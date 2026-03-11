@@ -1,7 +1,16 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { memo } from 'react';
 import { WHY_CHOOSE_US_FEATURES } from '../../utils/constants';
-const WhyChooseUsSection = () => {
+import { Laptop, BookOpen, Users, Trophy } from 'lucide-react';
 
+// Icon mapping for WhyChooseUs features
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Laptop': Laptop,
+  'BookOpen': BookOpen,
+  'Users': Users,
+  'Trophy': Trophy,
+};
+
+const WhyChooseUsSection = memo(() => {
   // بيانات الأقسام
  const features = WHY_CHOOSE_US_FEATURES;
 
@@ -9,15 +18,17 @@ const WhyChooseUsSection = () => {
     <div className="flex justify-center px-4 py-12 sm:px-6 lg:px-8 lg:mt-40 mt-10">
       {/* الـ Div الرئيسي الأزرق الداكن */}
       <div className="flex sm:w-full md:w-[80%] lg:w-[90%] max-w-6xl rounded-2xl shadow-2xl overflow-hidden bg-[var(--primary-from)] dark:bg-gray-900 text-white flex-col lg:flex-row">
-        {features.map((feature, index) => (
+        {features.map((feature, index) => {
+          const IconComponent = feature.icon ? iconMap[feature.icon] : null;
+          return (
           <div
             key={index}
             className={`flex-1 px-6 py-8 md:py-8 md:px-7 text-center lg:text-left flex flex-col gap-3 items-center lg:items-start justify-center min-h-[180px] lg:min-h-[220px]
                         ${index < features.length - 1 ? 'lg:border-r lg:border-white/20' : ''} border-b border-white/10 last:border-b-0 lg:border-b-0`}
           >
-            {feature.icon && (
+            {feature.icon && IconComponent && (
               <div className="text-2xl lg:text-3xl text-amber-400">
-                <FontAwesomeIcon icon={feature.icon}  />
+                <IconComponent />
               </div>
             )}
 
@@ -33,11 +44,12 @@ const WhyChooseUsSection = () => {
               </p>
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
     </div>
   );
-};
+});
 
 export default WhyChooseUsSection;
 

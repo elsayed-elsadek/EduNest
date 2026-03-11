@@ -11,6 +11,7 @@ export const useMentorshipForm = () => {
 
     const [formData, setFormData] = useState<MentorshipFormData>({
         title: '',
+        subtitle: '',
         description: '',
         level: 'ALL_LEVEL',
         category: '',
@@ -18,7 +19,6 @@ export const useMentorshipForm = () => {
         whatWillLearn: [],
         includes: [],
         tags: [],
-        entryPeriod: 'LIFETIME',
         duration: 0,
     });
 
@@ -71,13 +71,14 @@ export const useMentorshipForm = () => {
 
             const payload = {
                 title: formData.title,
+                subtitle: formData.subtitle,
                 description: formData.description,
                 category: formData.category || 'General',
                 difficultyLevel: formData.level,
                 price: formData.price,
                 whatWillLearn: [...formData.whatWillLearn, ...formData.includes],
                 tags: formData.tags,
-                duration: formData.entryPeriod === 'LIMITED' ? formData.duration || 0 : 0,
+                duration: formData.duration || 0,
             };
 
             const { mentorship, message } = await createMentorship(payload);

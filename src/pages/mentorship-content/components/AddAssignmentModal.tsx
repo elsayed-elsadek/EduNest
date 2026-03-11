@@ -1,6 +1,6 @@
 import { useState, type FC, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { createTask, updateTask, type UpdateTaskPayload } from '../../../services/mentorshipsContent';
+import { createTask as createTaskApi, updateTask, type UpdateTaskPayload } from '../../../services/mentorshipsContent';
 import { formatDateTimeLocal } from '../../../utils/helpers';
 import ModalOverlay from './ModalOverlay';
 import type { ApiError } from '../../../types/auth';
@@ -21,6 +21,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
   const [minPassPoints, setMinPassPoints] = useState(60);
   const [estimatedMinutes, setEstimatedMinutes] = useState<number | undefined>(undefined);
   const [attachmentUrl, setAttachmentUrl] = useState('');
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -56,8 +57,8 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
         toast.success('Assignment updated successfully');
         onSuccess({ type: 'assignment', title: title.trim(), isDraft: true, id: editingItem.id });
       } else {
-        // Create mode
-        await createTask({
+        // Create mode - pass file if selected
+        await createTaskApi({
           title: title.trim(),
           weekId,
           description: description.trim() || undefined,
@@ -67,7 +68,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
           dueAt: deadline ? formatDateTimeLocal(deadline) : undefined,
           attachmentUrl: attachmentUrl.trim() || undefined,
           status: 'DRAFT',
-        });
+        }, attachmentFile || undefined);
         toast.success('Assignment created successfully');
         onSuccess({ type: 'assignment', title: title.trim(), isDraft: true });
       }
@@ -155,14 +156,60 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-500 mb-1">ATTACHMENT URL (optional)</label>
-          <input
-            type="url"
-            value={attachmentUrl}
-            onChange={(e) => setAttachmentUrl(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
-            placeholder="Link to file"
-          />
+          <label className="block text-xs font-semibold text-gray-500 mb-1">ATTACHMENT (optional)</label>
+          <div className="space-y-2">
+            {/* URL Input */}
+            <input
+              type="url"
+              value={attachmentUrl}
+              onChange={(e) => {
+                setAttachmentUrl(e.target.value);
+                if (e.target.value) setAttachmentFile(null);
+              }}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
+              placeholder="Link to file (e.g., Google Drive)"
+            />
+            {/* OR separator */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="text-xs text-gray-400">OR</span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+            {/* File Upload */}
+            <div className="flex items-center gap-2">
+              <label className="flex-1 cursor-pointer">
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setAttachmentFile(file);
+                      setAttachmentUrl('');
+                    }
+                  }}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.txt,.zip,.rar"
+                />
+                <span className="flex items-center justify-center w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  {attachmentFile ? attachmentFile.name : 'Upload File'}
+                </span>
+              </label>
+              {attachmentFile && (
+                <button
+                  type="button"
+                  onClick={() => setAttachmentFile(null)}
+                  className="p-2 text-gray-400 hover:text-red-500"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
         <div className="flex gap-3 pt-2">
           <button
@@ -186,6 +233,4 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
 };
 
 export default AddAssignmentModal;
-
-
 

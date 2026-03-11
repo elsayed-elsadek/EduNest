@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).global = globalThis;
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'

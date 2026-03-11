@@ -1,19 +1,22 @@
 import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
 
-// const API_BASE_URL = 'https://arline-unbalked-hiram.ngrok-free.dev/'; //hazem
-const API_BASE_URL = 'https://blake-glottologic-carlee.ngrok-free.dev/'; //omar
+const API_BASE_URL = 'http://localhost:8080/'; 
 
+// Production mode check - only log in development
+const isDev = import.meta.env.DEV;
 
 const api = axios.create({
-  baseURL:API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': 'true',
   },
+  // Add timeout to prevent hanging requests
+  timeout: 15000,
 });
 
-// مسارات لا تحتاج توكن (تسجيل، لوجين، نسيت كلمة المرور)
+// Public auth paths that don't require token
 const PUBLIC_AUTH_PATHS = [
   'api/v1/register/mentor',
   'api/v1/register/student',
@@ -30,43 +33,42 @@ function isPublicAuthRequest(url: string | undefined): boolean {
   return PUBLIC_AUTH_PATHS.some((p) => path === p || path.startsWith(p + '/'));
 }
 
-// Add authorization token only for requests that need it (not register/login/forget-password)
+// Add authorization token only for requests that need it
 api.interceptors.request.use((config) => {
   if (isPublicAuthRequest(config.url)) {
-    console.log('📤 Public request (no token needed):', config.url);
+    if (isDev) {
+      console.log('📤 Public request (no token needed):', config.url);
+    }
     return config;
   }
   
   const token = getAuthToken();
-  console.log('🔐 Checking token for:', config.url);
-  console.log('   Token exists?', token ? 'YES ✅' : 'NO ❌');
-  if (token) {
-    console.log('   Token length:', token.length);
-    console.log('   Token starts with:', token.substring(0, 30) + '...');
-    console.log('   Token ends with:', '...' + token.substring(token.length - 30));
-  }
   
   if (token) {
     config.headers.Authorization = token;
-    console.log('   ✅ Authorization header set to: ' + token.substring(0, 20) + '...');
-  } else {
-    console.warn('   ⚠️ NO TOKEN FOUND - Request will fail with 401');
   }
+  
   return config;
 });
 
-// Add response interceptor to log errors
+// Response interceptor - minimal logging for production
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
+    if (isDev) {
+      console.log('✅ API Response:', response.status, response.config.url);
+    }
     return response;
   },
   (error) => {
-    const status = error.response?.status;
-    const url = error.config?.url;
-    console.error(`❌ API Error ${status} on ${url}:`, error.response?.data || error.message);
+    // Minimal error logging - only in development
+    if (isDev) {
+      const status = error.response?.status;
+      const url = error.config?.url;
+      console.error(`❌ API Error ${status} on ${url}`);
+    }
     return Promise.reject(error);
   }
 );
 
 export default api;
+

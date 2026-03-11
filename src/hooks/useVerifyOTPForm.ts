@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { verifyOTP } from "../services/api";
-import { useAuthStore } from "../store/useAuthStore";
+import { verifyOtp, sendOtp } from "../services/authService";
 
 export const useVerifyOTPForm = () => {
   const [code, setCode] = useState("");
@@ -9,7 +8,8 @@ export const useVerifyOTPForm = () => {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
   const [canResend, setCanResend] = useState(false);
 
-  const { registrationEmail, setError: setStoreError } = useAuthStore();
+  // Get email from localStorage
+  const registrationEmail = localStorage.getItem("registrationEmail") || "";
 
   const validateCode = (): boolean => {
     if (!code.trim()) {
@@ -34,27 +34,32 @@ export const useVerifyOTPForm = () => {
     setError(null);
 
     try {
-      const response = await verifyOTP({
-        email: registrationEmail,
-        code,
-      });
-
-      if (!response.success) {
-        const errorMsg = response.message || "OTP verification failed.";
-        setError(errorMsg);
-        setStoreError(errorMsg);
-        return false;
-      }
-
+      await verifyOtp(registrationEmail, code);
       return true;
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "An unexpected error occurred";
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } } };
+      const errorMsg = errObj.response?.data?.message || "An unexpected error occurred";
       setError(errorMsg);
-      setStoreError(errorMsg);
       return false;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!registrationEmail) {
+      setError("Email not found. Please register again.");
+      return;
+    }
+
+    try {
+      await sendOtp(registrationEmail);
+      setTimeLeft(600);
+      setCanResend(false);
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } } };
+      const errorMsg = errObj.response?.data?.message || "Failed to resend code";
+      setError(errorMsg);
     }
   };
 
@@ -74,6 +79,8 @@ export const useVerifyOTPForm = () => {
     setCanResend,
     validateCode,
     handleVerifyOTP,
+    handleResend,
     resetForm,
   };
 };
+

@@ -13,15 +13,15 @@ export const ConfirmButton: React.FC<Props> = ({
 }) => {
   return (
     <button
-      className="px-6 py-3 mt-4 rounded-lg btn-primary-gradient 
+      className="px-6 py-3 mt-4 rounded-lg bg-primary 
                  text-white font-semibold text-sm 
                  hover:opacity-90 transition
                  disabled:opacity-60 disabled:cursor-not-allowed
                  w-1/3 mx-auto flex items-center justify-center"
       onClick={onClick}
-      disabled={loading || disabled} 
+      disabled={loading || disabled}
     >
-   
+
       {loading ? "Verifying..." : "Confirm"}
     </button>
   );

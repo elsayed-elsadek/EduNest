@@ -1,0 +1,37 @@
+[33mc72847f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmy-new-branch[m[33m, [m[1;31morigin/my-new-branch[m[33m)[m HEAD@{0}: reset: moving to c72847f0035268ab0a0ed3b91a64e2eb79ab7521
+[33mc72847f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmy-new-branch[m[33m, [m[1;31morigin/my-new-branch[m[33m)[m HEAD@{1}: checkout: moving from master to my-new-branch
+[33mdcabfc0[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{2}: commit: update: add new changes in task-assiment -session
+[33m6cb7fd4[m[33m ([m[1;31morigin/master[m[33m)[m HEAD@{3}: pull origin master: Fast-forward
+[33m3c45efd[m HEAD@{4}: checkout: moving from my-new-branch to master
+[33mc72847f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmy-new-branch[m[33m, [m[1;31morigin/my-new-branch[m[33m)[m HEAD@{5}: commit: اضافة مينتور شيب وتعديلاها واضافه محتوي في كل مينتور شيب واضافة وييكس
+[33m40f8ca8[m[33m ([m[1;32mrecovery-branch[m[33m)[m HEAD@{6}: checkout: moving from my-new-branch to my-new-branch
+[33m40f8ca8[m[33m ([m[1;32mrecovery-branch[m[33m)[m HEAD@{7}: checkout: moving from my-new-branch to my-new-branch
+[33m40f8ca8[m[33m ([m[1;32mrecovery-branch[m[33m)[m HEAD@{8}: checkout: moving from my-new-branch to my-new-branch
+[33m40f8ca8[m[33m ([m[1;32mrecovery-branch[m[33m)[m HEAD@{9}: merge recovery-branch: Fast-forward
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{10}: checkout: moving from my-new-branch to my-new-branch
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{11}: checkout: moving from update-feature to my-new-branch
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{12}: checkout: moving from recovery-branch to update-feature
+[33m40f8ca8[m[33m ([m[1;32mrecovery-branch[m[33m)[m HEAD@{13}: commit: اول تعديلات في الداش بورد
+[33m3286918[m HEAD@{14}: reset: moving to HEAD
+[33m3286918[m HEAD@{15}: commit: Recovered lost work from stash
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{16}: reset: moving to HEAD
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{17}: checkout: moving from update-feature to recovery-branch
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{18}: reset: moving to HEAD~1
+[33m49a2d42[m[33m ([m[1;31morigin/update-feature[m[33m)[m HEAD@{19}: reset: moving to HEAD
+[33m49a2d42[m[33m ([m[1;31morigin/update-feature[m[33m)[m HEAD@{20}: checkout: moving from master to update-feature
+[33m3c45efd[m HEAD@{21}: reset: moving to HEAD
+[33m3c45efd[m HEAD@{22}: checkout: moving from master to master
+[33m3c45efd[m HEAD@{23}: pull origin master: Fast-forward
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{24}: checkout: moving from update-feature to master
+[33m49a2d42[m[33m ([m[1;31morigin/update-feature[m[33m)[m HEAD@{25}: commit: forget pass & login API
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{26}: checkout: moving from master to update-feature
+[33med83e6a[m[33m ([m[1;32mupdate-feature[m[33m)[m HEAD@{27}: pull origin master: Fast-forward
+[33m340ec76[m HEAD@{28}: checkout: moving from master to master
+[33m340ec76[m HEAD@{29}: commit (merge): register new user
+[33m5a48c5c[m HEAD@{30}: commit: حفظ التعديلات قبل السحب
+[33m527b0c6[m HEAD@{31}: checkout: moving from feature-a to master
+[33me275d4b[m[33m ([m[1;31morigin/shahd[m[33m, [m[1;32mfeature-a[m[33m)[m HEAD@{32}: merge origin/shahd: Fast-forward
+[33m7bf6d36[m[33m ([m[1;31morigin/feature-a[m[33m)[m HEAD@{33}: checkout: moving from master to feature-a
+[33m527b0c6[m HEAD@{34}: commit: save my changes on master
+[33m07ab0e0[m HEAD@{35}: commit: sec commit
+[33m7bf6d36[m[33m ([m[1;31morigin/feature-a[m[33m)[m HEAD@{36}: commit (initial): init commit

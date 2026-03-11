@@ -1,8 +1,16 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
+import React, { memo } from 'react';
+import { Star, Users, BookOpen, Check } from 'lucide-react';
+
+// Icon mapping for stats
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Star': Star,
+  'Users': Users,
+  'BookOpen': BookOpen,
+  'Check': Check,
+};
 
 type StatCard = {
-  icon: any;
+  icon: string;
   value: string;
   label: string;
 };
@@ -12,7 +20,7 @@ type Props = {
   stats: StatCard[];
 };
 
-const AboutSection: React.FC<Props> = ({ images, stats }) => {
+const AboutSection: React.FC<Props> = memo(({ images, stats }) => {
   return (
     <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-center">
@@ -35,13 +43,14 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-            {stats.map((stat, idx) => (
+            {stats.map((stat, idx) => {
+              const IconComponent = stat.icon ? iconMap[stat.icon] : null;
+              return (
               <div key={idx} className="flex items-start gap-2 ">
                 <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-[#0f5e8b] rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                  <FontAwesomeIcon 
-                    icon={stat.icon} 
-                    className="text-base sm:text-lg md:text-xl"
-                  />
+                  {IconComponent && (
+                    <IconComponent className="text-base sm:text-lg md:text-xl" />
+                  )}
                 </div>
                 
                 <div className="min-w-0 flex-1">
@@ -49,18 +58,22 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
                   <div className="text-xs sm:text-sm text-gray-500 leading-tight">{stat.label}</div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
 
         {/* Left: Images collage - order-2 on mobile, order-1 on desktop */}
         <div className="relative rounded-2xl sm:rounded-3xl md:rounded-[32px] lg:rounded-[36px] bg-gradient-to-br from-[#fff6e9] via-white to-[#e0f0ff] p-4 sm:p-5 md:p-6 lg:p-8 flex flex-col sm:flex-row gap-4 sm:gap-5 md:gap-6 order-2 lg:order-1">
-          {/* primary image */}
+          {/* primary image - CLS optimized with explicit dimensions */}
           <div className="flex-1 min-h-[160px] sm:min-h-[180px] md:min-h-[200px] lg:min-h-[280px] xl:min-h-[320px]">
             {images[0] ? (
               <img
                 src={images[0]}
                 alt="about-primary"
+                width={400}
+                height={300}
+                loading="lazy"
                 className="w-full h-full min-h-[160px] sm:min-h-[180px] md:min-h-[200px] lg:min-h-[280px] xl:h-[300px] object-cover rounded-xl sm:rounded-2xl md:rounded-3xl lg:rounded-[32px]"
               />
             ) : (
@@ -68,7 +81,7 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
             )}
           </div>
 
-          {/* stacked images */}
+          {/* stacked images - CLS optimized */}
           <div className="flex-1 flex flex-col ">
             <div className="flex-1 lg:flex items-center justify-center hidden">
               {images[1] ? (
@@ -76,6 +89,9 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
                   <img
                     src={images[1]}
                     alt="about-secondary"
+                    width={100}
+                    height={100}
+                    loading="lazy"
                     className="w-full h-full object-cover rounded-full"
                   />
                 </div>
@@ -89,6 +105,9 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
                 <img
                   src={images[2]}
                   alt="about-tertiary"
+                  width={200}
+                  height={150}
+                  loading="lazy"
                   className="w-full h-full min-h-[120px] sm:min-h-[130px] md:min-h-[200px] lg:min-h-[150px] xl:h-[18rem] object-cover rounded-lg sm:rounded-xl md:rounded-2xl lg:rounded-[24px]"
                 />
               ) : (
@@ -100,7 +119,7 @@ const AboutSection: React.FC<Props> = ({ images, stats }) => {
       </div>
     </section>
   );
-};
+});
 
 export default AboutSection;
 

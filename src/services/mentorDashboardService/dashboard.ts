@@ -17,6 +17,12 @@ export interface MentorDashboardParams {
   months?: number;
 }
 
+/** Common pagination params used by several dashboard endpoints */
+export interface PaginationParams {
+  page?: number;
+  size?: number;
+}
+
 /**
  * Shape of the combined dashboard response returned by the new endpoint.
  * The service simply proxies whatever the backend returns; callers can
@@ -38,16 +44,67 @@ export const getMentorDashboard = (
 ) => handleRequest(api.get<MentorDashboardResponse>(`${BASE}`, { params }));
 
 /** GET /api/v1/dashboard/{id}/top-learners */
-export const getTopLearners = (mentorshipId: string) =>
-  handleRequest(api.get(`${BASE}/${mentorshipId}/top-learners`));
+export const getTopLearners = (
+  mentorshipId: string,
+  params?: PaginationParams
+) => handleRequest(api.get(`${BASE}/${mentorshipId}/top-learners`, { params }));
 
 /** GET /api/v1/dashboard/{id}/stats */
+export interface MentorshipStats {
+  title: string;
+  status: string; // e.g. 'DRAFT' | 'PUBLISHED'
+  totalQuizzes: number;
+  totalLessons: number;
+  totalAssignments: number;
+  totalSessions: number;
+  [key: string]: unknown;
+}
+
 export const getMentorshipStats = (mentorshipId: string) =>
-  handleRequest(api.get(`${BASE}/${mentorshipId}/stats`));
+  handleRequest(api.get<MentorshipStats>(`${BASE}/${mentorshipId}/stats`));
 
 /** GET /api/v1/dashboard/{id}/reviews */
-export const getMentorshipReviews = (mentorshipId: string) =>
-  handleRequest(api.get(`${BASE}/${mentorshipId}/reviews`));
+export const getMentorshipReviews = (
+  mentorshipId: string,
+  params?: PaginationParams
+) => handleRequest(api.get(`${BASE}/${mentorshipId}/reviews`, { params }));
+
+export interface FullMentorshipDashboardParams {
+  reviewsPage?: number;
+  reviewsSize?: number;
+  topPage?: number;
+  topSize?: number;
+}
+
+export interface MentorshipPaginatedItems<T = unknown> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface FullMentorshipDashboard {
+  stats: MentorshipStats;
+  reviews: MentorshipPaginatedItems;
+  topLearners: MentorshipPaginatedItems;
+  studentsRanks: MentorshipPaginatedItems;
+}
+
+export interface FullMentorshipDashboardResponse {
+  apiResponse: {
+    dashboard: FullMentorshipDashboard;
+  };
+}
+
+/** GET /api/v1/dashboard/mentorship/{id} 
+ *  Combined endpoint for stats, top learners, reviews, and student ranks
+ */
+export const getFullMentorshipDashboard = (
+  mentorshipId: string | number,
+  params?: FullMentorshipDashboardParams
+) => handleRequest(api.get<FullMentorshipDashboardResponse>(`${BASE}/mentorship/${mentorshipId}`, { params }));
+
 
 /**
  * Legacy helpers that previously hit individual dashboard endpoints.
@@ -73,8 +130,9 @@ function extractPiece<T = unknown>(
   return (dash[key] as T) ?? undefined;
 }
 
-export const getMentorStudents = () =>
-  getMentorDashboard().then((r) => extractPiece(r, 'students'));
+export const getMentorStudents = (params?: PaginationParams) =>
+  // backend exposes a dedicated students route under the dashboard base
+  handleRequest(api.get(`${BASE}/students`, { params }));
 
 export const getUpcomingSessions = () =>
   getMentorDashboard().then((r) => extractPiece(r, 'sessions'));
