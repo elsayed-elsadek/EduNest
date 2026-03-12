@@ -24,6 +24,7 @@ const MentorshipsList: FC = () => {
   const deleteMutation = useDeleteMentorship();
 
   // Transform data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const mentorships: Mentorship[] = data?.content ?? [];
   const totalElements = data?.totalElements ?? 0;
   const totalPages = data?.totalPages ?? 0;
