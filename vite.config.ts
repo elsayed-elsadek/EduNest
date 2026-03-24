@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 export default defineConfig({
+  // plugins: [react()],
+  define: {
+    global: 'globalThis',  // ← أضيفي السطر ده
+  },
   plugins: [
     react(),
     // إضافة أداة ضغط الصور تلقائياً عند عمل Build
@@ -22,7 +26,7 @@ export default defineConfig({
   ],
   server: {
     host: '0.0.0.0',
-    port: 5173,
+    port: 5753,
     proxy: {
       '/api': {
         target: 'localhost:8080',

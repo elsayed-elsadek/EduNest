@@ -80,6 +80,45 @@ export interface TaskSubmissionPageResponse {
   totalPages: number;
 }
 
+// ─── STATISTICS API TYPES ─────────────────────────────────────────
+
+export interface TaskStatistics {
+  status: 'DRAFT' | 'PUBLISHED';
+  taskTitle: string;
+  totalStudents: number;
+  totalSubmissions: number;
+  pendingReview: number;
+  createdAt: string;
+  deadLine: string | null;
+  totalPoints: number;
+  taskSubmissionResponsePageResponse: {
+    content: TaskSubmissionItem[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+  };
+}
+
+export interface TaskSubmissionItem {
+  submissionId: number;
+  taskId: number;
+  studentId: number;
+  studentFullName: string;
+  fileUrl: string | null;
+  uploadedFilePath: string | null;
+  submittedAt: string;
+  isLate: boolean;
+  status: 'SUBMITTED' | 'GRADED' | 'NOT_SUBMITTED';
+  rawScore: number | null;
+  finalScore: number | null;
+  feedback: string | null;
+}
+
+export interface TaskStatisticsResponse {
+  taskStatistics: TaskStatistics;
+}
+
 export interface GradePayload {
   score: number;
   feedback?: string;
@@ -268,6 +307,26 @@ export const getTaskSubmissions = async (
     return res as TaskSubmissionPageResponse;
   }
   return raw as TaskSubmissionPageResponse;
+};
+
+// ─── TASK STATISTICS ─────────────────────────────────────────────
+
+export const getTaskStatistics = async (
+  taskId: number,
+  page: number = 0,
+  size: number = 6
+): Promise<TaskStatistics> => {
+
+  const raw = await handleRequest(
+    api.get(`api/v1/task/${taskId}/statistics?page=${page}&size=${size}`)
+  );
+
+  const data = raw as Record<string, unknown>;
+  if (data?.apiResponse && typeof data.apiResponse === 'object') {
+    const res = (data.apiResponse as Record<string, unknown>)['taskStatistics'];
+    if (res) return res as TaskStatistics;
+  }
+  return raw as TaskStatistics;
 };
 
 // ─── GRADE ───────────────────────────────────────────────────────

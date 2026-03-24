@@ -1,75 +1,83 @@
 
 import api from './api';
-
 const handleRequest = async <T>(request: Promise<{ data: T }>): Promise<T> => {
   try {
-    const response = await request;
-    return response.data;
+    return (await request).data;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
     throw err.response?.data ?? err.message;
   }
 };
 
-// Types 
-
 export interface StudentProfileInfo {
-  name: string;
-  email: string;
-  address: string | null;
-  facebookLink: string | null;
-  linkedInLink: string | null;
-  githubLink: string | null;
-  activeMentorships: number;
+  name:                 string;
+  email:                string;
+  address:              string | null;
+  facebookLink:         string | null;
+  linkedInLink:         string | null;
+  githubLink:           string | null;
+  activeMentorships:    number;
   completedMentorships: number;
-  totalPoints: number;
-  avatar?: string;
-  coverImage?: string;
+  totalPoints:          number;
+  avatar?:              string;
+  coverImage?:          string;
 }
 
 export interface EnrolledMentorship {
-  mentorshipId: number | string;
-  title: string;
-  status: string;          
-  totalPoints: number;
-  totalTasks: number;
-  submittedTasks: number;
-  totalQuizzes: number;
+  mentorshipId:     number | string;
+  title:            string;
+  status:           string;
+  totalPoints:      number;
+  totalTasks:       number;
+  submittedTasks:   number;
+  totalQuizzes:     number;
   submittedQuizzes: number;
 }
 
 export interface StudentProject {
-  id: string | number;
-  title: string;
-  mentorship: string;
-  status: string;
+  id:             string | number;
+  title:          string;
+  mentorship:     string;
+  status:         string;
   submissionDate: string;
-  filesCount?: number;
-  feedback?: string;
-  submissionLink?: string;   
-  rawScore?: number;
-  finalScore?: number;
+  filesCount?:    number;
+  feedback?:      string;
+  submissionLink?: string;
+  rawScore?:      number;
+  finalScore?:    number;
+}
+
+// ── Awarded badge from full-profile response ──────────────────────────────────
+export interface AwardedBadgeRaw {
+  id:              number;
+  badgeId:         number;
+  badgeTitle:      string;
+  studentId:       number;
+  studentFullName: string;
+  awardedById:     number;
+  awardedAt:       string;
+  note?:           string;
+  badgePoints:     number;
 }
 
 export interface StudentFullProfile {
   info: StudentProfileInfo;
   mentorships: {
-    content: EnrolledMentorship[];
-    page: number;
-    size: number;
+    content:       EnrolledMentorship[];
+    page:          number;
+    size:          number;
     totalElements: number;
-    totalPages: number;
+    totalPages:    number;
   };
   projects: {
-    content: StudentProject[];
-    page: number;
-    size: number;
+    content:       StudentProject[];
+    page:          number;
+    size:          number;
     totalElements: number;
-    totalPages: number;
+    totalPages:    number;
   };
+  awardedBadges: AwardedBadgeRaw[];   // ← NEW: from badges[] in response
 }
-
-//  API Call
 
 /** GET /profile/students/{studentId}/full-profile */
 export const getStudentFullProfile = (
@@ -77,8 +85,8 @@ export const getStudentFullProfile = (
   options?: {
     mentorshipsPage?: number;
     mentorshipsSize?: number;
-    projectsPage?: number;
-    projectsSize?: number;
+    projectsPage?:   number;
+    projectsSize?:   number;
     projectsStatus?: string;
   }
 ) =>
@@ -94,67 +102,77 @@ export const getStudentFullProfile = (
     })
   );
 
-//  Extractor 
-
 export const extractStudentFullProfile = (response: unknown): StudentFullProfile | null => {
   if (!response || typeof response !== 'object') return null;
 
-  const res = response as Record<string, unknown>;
-
-  // : { apiResponse: { studentFullProfile: { ... } } }
+  const res        = response as Record<string, unknown>;
   const apiResponse = res.apiResponse as Record<string, unknown> | undefined;
   if (!apiResponse) return null;
 
   const fullProfile = apiResponse.studentFullProfile as Record<string, unknown> | undefined;
   if (!fullProfile) return null;
 
-  //  Profile Info 
+  // ── Profile Info ─────────────────────────────────────────────────────────
   const raw = (fullProfile.profileStudentInformationForMentorResponse ?? {}) as Record<string, unknown>;
 
   const info: StudentProfileInfo = {
     name:                 String(raw.name  ?? ''),
     email:                String(raw.email ?? ''),
-    address:              raw.address      ? String(raw.address)    : null,
+    address:              raw.address      ? String(raw.address)      : null,
     facebookLink:         raw.facebookLink ? String(raw.facebookLink) : null,
     linkedInLink:         raw.linkedInLink ? String(raw.linkedInLink) : null,
     githubLink:           raw.githubLink   ? String(raw.githubLink)   : null,
     activeMentorships:    Number(raw.activeMentorships    ?? 0),
     completedMentorships: Number(raw.completedMentorships ?? 0),
     totalPoints:          Number(raw.totalPoints          ?? 0),
-    avatar:               raw.avatar       ? String(raw.avatar)       : undefined,
-    coverImage:           raw.coverImage   ? String(raw.coverImage)   : undefined,
+    avatar:               raw.avatar     ? String(raw.avatar)     : undefined,
+    coverImage:           raw.coverImage ? String(raw.coverImage) : undefined,
   };
 
-  // Enrolled Mentorships 
+  // ── Enrolled Mentorships ──────────────────────────────────────────────────
   const mentorshipsRaw = (fullProfile.enrolledMentorshipProgressDtoPageResponse ?? {}) as Record<string, unknown>;
   const mentorshipsContent: EnrolledMentorship[] = Array.isArray(mentorshipsRaw.content)
-    ? (mentorshipsRaw.content as Record<string, unknown>[]).map((m) => ({
-        mentorshipId:    m.mentorshipId as number,
-        title:           String(m.title ?? ''),
-        status:          String(m.status ?? ''),
-        totalPoints:     Number(m.totalPoints     ?? 0),
-        totalTasks:      Number(m.totalTasks      ?? 0),
-        submittedTasks:  Number(m.submittedTasks  ?? 0),
-        totalQuizzes:    Number(m.totalQuizzes    ?? 0),
+    ? (mentorshipsRaw.content as Record<string, unknown>[]).map(m => ({
+        mentorshipId:     m.mentorshipId as number,
+        title:            String(m.title            ?? ''),
+        status:           String(m.status           ?? ''),
+        totalPoints:      Number(m.totalPoints      ?? 0),
+        totalTasks:       Number(m.totalTasks       ?? 0),
+        submittedTasks:   Number(m.submittedTasks   ?? 0),
+        totalQuizzes:     Number(m.totalQuizzes     ?? 0),
         submittedQuizzes: Number(m.submittedQuizzes ?? 0),
       }))
     : [];
 
-  //  Projects 
+  // ── Projects ──────────────────────────────────────────────────────────────
   const projectsRaw = (fullProfile.projectProfileDTOPageResponse ?? {}) as Record<string, unknown>;
   const projectsContent: StudentProject[] = Array.isArray(projectsRaw.content)
-    ? (projectsRaw.content as Record<string, unknown>[]).map((p) => ({
+    ? (projectsRaw.content as Record<string, unknown>[]).map(p => ({
         id:             String(p.projectSubmissionId ?? p.id ?? ''),
-        title:          String(p.projectTitle        ?? p.title ?? 'Untitled Project'),
-        mentorship:     String(p.mentorshipTitle     ?? p.mentorship ?? 'N/A'),
-        //  API (SUBMITTED / GRADED / REJECTED)
+        title:          String(p.projectTitle ?? p.title ?? 'Untitled Project'),
+        mentorship:     String(p.mentorshipTitle ?? p.mentorship ?? 'N/A'),
         status:         String(p.status ?? 'SUBMITTED'),
         submissionDate: String(p.submittedAt ?? p.submissionDate ?? p.createdAt ?? ''),
-        filesCount:     p.filesCount != null ? Number(p.filesCount) : undefined,
-        feedback:       p.feedback       ? String(p.feedback)       : undefined,
-        submissionLink: p.submissionLink ? String(p.submissionLink) : undefined,
-        rawScore:       p.rawScore   != null ? Number(p.rawScore)   : undefined,
-        finalScore:     p.finalScore != null ? Number(p.finalScore) : undefined,
+        filesCount:     p.filesCount  != null ? Number(p.filesCount)  : undefined,
+        feedback:       p.feedback       ? String(p.feedback)         : undefined,
+        submissionLink: p.submissionLink ? String(p.submissionLink)   : undefined,
+        rawScore:       p.rawScore    != null ? Number(p.rawScore)    : undefined,
+        finalScore:     p.finalScore  != null ? Number(p.finalScore)  : undefined,
+      }))
+    : [];
+
+  // ── Awarded Badges ────────────────────────────────────────────────────────
+  const awardedBadges: AwardedBadgeRaw[] = Array.isArray(fullProfile.badges)
+    ? (fullProfile.badges as Record<string, unknown>[]).map(b => ({
+        id:              Number(b.id              ?? 0),
+        badgeId:         Number(b.badgeId         ?? 0),
+        badgeTitle:      String(b.badgeTitle       ?? ''),
+        studentId:       Number(b.studentId        ?? 0),
+        studentFullName: String(b.studentFullName  ?? ''),
+        awardedById:     Number(b.awardedById      ?? 0),
+        awardedAt:       String(b.awardedAt        ?? ''),
+        note:            b.note ? String(b.note)   : undefined,
+        badgePoints:     Number(b.badgePoints      ?? 0),
       }))
     : [];
 
@@ -174,5 +192,6 @@ export const extractStudentFullProfile = (response: unknown): StudentFullProfile
       totalElements: Number(projectsRaw.totalElements ?? projectsContent.length),
       totalPages:    Number(projectsRaw.totalPages    ?? 1),
     },
+    awardedBadges,
   };
 };

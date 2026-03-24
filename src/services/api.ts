@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
 
-// const API_BASE_URL = 'https://arline-unbalked-hiram.ngrok-free.dev/'; //hazem
-const API_BASE_URL = 'http://localhost:8080/'; //Docker
+const API_BASE_URL = 'http://localhost:8080/'; 
 
 // Production mode check - only log in development
 const isDev = import.meta.env.DEV;
@@ -26,6 +25,8 @@ const PUBLIC_AUTH_PATHS = [
   'api/v1/register/verify-user',
   'login-api',
   'forget-password',
+  'api/v1/register/restore',
+  'api/v1/register/confirm-restore',
 ];
 
 function isPublicAuthRequest(url: string | undefined): boolean {

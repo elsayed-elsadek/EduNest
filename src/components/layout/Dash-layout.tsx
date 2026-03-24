@@ -3,7 +3,14 @@ import { useNavigate } from "react-router-dom";
 import MentorSidebar from "../common/common-dash/MentorSidebar";
 import { MentorNavbar } from "../common/common-dash";
 import { useAuthStore } from "../../store/authStore";
+import { getMentorProfile, extractMentorProfile } from "../../services/Mentorprofileservice";
+import api from "../../services/api";
 import { getFirstNameFromToken } from "../../utils/jwt";
+
+const BASE_URL = (() => {
+  const url = (api.defaults.baseURL ?? "").replace(/\/api\/v1\/?$/, "").replace(/\/$/, "");
+  return url;
+})();
 
 interface DashLayoutProps {
   children: React.ReactNode;
@@ -29,6 +36,37 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
       navigate('/login', { replace: true });
     }
   }, [token, navigate]);
+
+  useEffect(() => {
+    const fetchProfileIfNeeded = async () => {
+      // Get current state to check if we really need to fetch
+      const state = useAuthStore.getState();
+      if (!state.isHydrated || !token || state.userAvatar) return;
+
+      try {
+        const res = await getMentorProfile();
+        const data = extractMentorProfile(res);
+        if (data) {
+          const avatar = data.profileImageUrl
+            ? (data.profileImageUrl.startsWith('http')
+                ? data.profileImageUrl
+                : `${BASE_URL}${data.profileImageUrl}`)
+            : undefined;
+
+          const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+          
+          useAuthStore.setState({
+            userName: fullName || useAuthStore.getState().userName,
+            userAvatar: avatar ?? useAuthStore.getState().userAvatar,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile in DashLayout:', err);
+      }
+    };
+
+    fetchProfileIfNeeded();
+  }, [token]);
 
   if (!token) return null;
 

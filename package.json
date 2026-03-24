@@ -1,8 +1,20 @@
 {
   "name": "mentors-app",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "homepage": "https://github.com/elsayed-elsadek/mentorHup#readme",
+  "bugs": {
+    "url": "https://github.com/elsayed-elsadek/mentorHup/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elsayed-elsadek/mentorHup.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
     "start": "npm run dev",
@@ -17,6 +29,7 @@
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@headlessui/react": "^2.2.9",
     "@jitsi/react-sdk": "^1.4.4",
+    "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.90.5",
     "aos": "^2.3.4",
     "axios": "^1.13.1",
@@ -24,8 +37,10 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",
+    "react-is": "^19.2.4",
     "react-router-dom": "^7.9.4",
-    "recharts": "^2.12.7",
+    "recharts": "^3.8.0",
+    "sockjs-client": "^1.6.1",
     "sweetalert2": "^11.26.17",
     "sweetalert2-react-content": "^5.1.1",
     "zustand": "^5.0.8"
@@ -37,6 +52,7 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@types/react-router-dom": "^5.3.3",
+    "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.15",
     "baseline-browser-mapping": "^2.9.19",
@@ -51,10 +67,7 @@
     "tailwindcss": "^3.3.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.45.0",
-    "vite": "npm:rolldown-vite@7.1.14",
+    "vite": "^8.0.0",
     "vite-plugin-image-optimizer": "^2.0.3"
-  },
-  "overrides": {
-    "vite": "npm:rolldown-vite@7.1.14"
   }
 }

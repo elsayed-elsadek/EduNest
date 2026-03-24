@@ -1,14 +1,24 @@
-# Performance Optimization Tasks
+# إصلاح مشكلة mentorshipId undefined في ScheduledSessions
 
-## ✅ Completed
+## 📋 قائمة المهام (Todo List)
 
-- [x] Task 1: Create Reusable OptimizedImage Component
-- [x] Task 2: Create FontAwesome centralized icons file
-- [x] Task 3: Create image optimization utilities
-- [x] Task 4: Critical Path Optimization (index.html preload)
-- [x] Task 5: Vite Configuration Optimization
+### ✅ **تم الانتهاء**
 
-## 📝 Notes
+- [x] إنشاء TODO.md وتخطيط الخطوات
 
-- FontAwesome imports in components can be optimized by importing from `@/icons/fontAwesome`
-- Run `npm run build` to test the optimizations
+### ✅ **تم الانتهاء**
+
+- [x] إنشاء TODO.md وتخطيط الخطوات
+- [x] تعديل mappers.ts - إضافة mentorshipId mapping
+- [x] تعديل ScheduledSessions.tsx - إضافة safe navigation
+
+### ✅ **كاملة ومحلولة**
+
+- [x] التحقق من extractors.ts والـ API response
+
+### ⏳ **خطوات المتابعة**
+
+- [ ] تشغيل `npm run dev` واختبار
+- [ ] Console.log debugging
+- [ ] Test الـ Link navigation
+- [ ] إغلاق الـ Issue

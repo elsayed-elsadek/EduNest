@@ -11,6 +11,8 @@ const ENDPOINTS = {
   FORGET_PWD: 'forget-password',
   FORGET_PWD_VERIFY: 'forget-password/verify-otp',
   FORGET_PWD_RESET: 'forget-password/reset',
+  RESTORE_OTP: 'api/v1/register/restore',
+  CONFIRM_RESTORE: 'api/v1/register/confirm-restore',
 };
 
 // 2. استخدام Generic Types لضمان دقة البيانات العائدة
@@ -57,3 +59,10 @@ export const forgetPasswordVerifyOtp = (email: string, otp: string) =>
 export const forgetResetPassword = (email: string, newPassword: string) => 
   handleRequest(api.post(ENDPOINTS.FORGET_PWD_RESET, { email, newPassword }));
 
+// --- Account Restore ---
+
+export const sendRestoreOtp = (email: string) =>
+  handleRequest(api.post(ENDPOINTS.RESTORE_OTP, { email }));
+
+export const confirmRestore = (email: string, otp: string) =>
+  handleRequest(api.post(ENDPOINTS.CONFIRM_RESTORE, { email, otp }));

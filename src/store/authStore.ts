@@ -67,22 +67,26 @@ export const useAuthStore = create<AuthState>()(
         set({ isHydrated: value }),
       setRememberMe: (email, remember) =>
         set({ lastEmail: email, rememberMe: remember }),
-      logout: () =>
-        set(() => {
-          if (typeof window !== 'undefined') {
-            window.localStorage.removeItem(TOKEN_KEY);
-          }
-          return {
-            token: '',
-            isAuthenticated: false,
-            userName: '',
-            userEmail: '',
-            userRole: '',
-            userAvatar: '',
-            lastEmail: '',
-            rememberMe: false,
-          };
-        }),
+      logout: () => {
+        if (typeof window !== 'undefined') {
+          localStorage.clear();
+          sessionStorage.clear();
+          // Clear zustand persist explicitly
+          localStorage.removeItem(AUTH_STORAGE);
+        }
+        set({
+          token: '',
+          isAuthenticated: false,
+          userName: '',
+          userEmail: '',
+          userRole: '',
+          userAvatar: '',
+          lastEmail: '',
+          rememberMe: false,
+        });
+        // Hard redirect to clear all React state/cache
+        window.location.href = '/login';
+      },
     }),
     {
       name: AUTH_STORAGE,
