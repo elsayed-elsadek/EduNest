@@ -88,6 +88,22 @@ export const useLogin = () => {
         || (errorData?.errorMessages && Object.values(errorData.errorMessages)[0]);
       const errorText = (typeof rawMsg === 'string' ? rawMsg : String(rawMsg || '')).toLowerCase();
 
+      // حساب محذوف (soft delete) → توجيه لصفحة استرجاع الحساب
+      const isDeletedAccount =
+        errorText.includes('deleted') ||
+        errorText.includes('account is deleted') ||
+        errorText.includes('account deleted');
+
+      if (isDeletedAccount) {
+        localStorage.setItem("restoreEmail", formData.email);
+        toast("Your account is deleted. Redirecting to account restore...", {
+          icon: "⚠️",
+          duration: 3000,
+        });
+        navigate("/restore-account");
+        return;
+      }
+
       // حساب موجود لكن غير مفعّل → توجيه لصفحة OTP لإكمال التفعيل
       const isUnverifiedAccount =
         errorText.includes('not verified') ||

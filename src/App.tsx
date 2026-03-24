@@ -18,34 +18,38 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const Login = lazy(() => import('./pages/Login/Login'));
 const Register = lazy(() => import('./pages/register/Register'));
 const Success = lazy(() => import('./pages/success-register/success'));
-const Knowabout = lazy(() => import('./pages/mentorinfo/Knowabout'));
+const Knowabout = lazy(() => import('./pages/mentor-pages/mentorinfo/Knowabout'));
 const ForgetPass = lazy(() => import('./pages/forgetPass/ForgetPass'));
 const CheckEmail = lazy(() => import('./pages/forgetPass/CheckEmail'));
 const ResetPassword = lazy(() => import('./pages/forgetPass/ResetPassword'));
 const ResetSuccess = lazy(() => import('./pages/forgetPass/ResetSuccess'));
+const RestoreAccount = lazy(() => import('./pages/accountRestore/RestoreAccount'));
+const ConfirmRestore = lazy(() => import('./pages/accountRestore/ConfirmRestore'));
 
 // Named export - Verify
 const Verify = lazy(() => import('./pages/verifiy/Verify').then(m => ({ default: m.Verify })));
 
 // Protected routes - lazy loaded
-const MentorDash = lazy(() => import('./pages/mentordash/MentorDash'));
-const MyMentorships = lazy(() => import('./pages/my-mentorsship-dash/MyMentorsship'));
-const StudentsList = lazy(() => import('./pages/studentspage-mentordash/StudentsList'));
-const Messages = lazy(() => import('./pages/mentorMessages/Messages'));
-const NotificationsList = lazy(() => import('./pages/mentorNotifications/NotificationsList'));
-const ProfilePage = lazy(() => import('./pages/mentorProfile/ProfilePage'));
-const Setting = lazy(() => import('./pages/mentorSettings/Settings'));
-const MentorshipDetail = lazy(() => import('./pages/mentorship-detail/MentorshipDetail'));
-const EditMentorship = lazy(() => import('./pages/edit-mentorship/EditMentorship'));
-const StudentProfile = lazy(() => import('./pages/mentor-view-studentprofile/StudentProfile'));
-const CreateMentorship = lazy(() => import('./pages/create-mentorship/CreateMentorship'));
-const MentorshipContent = lazy(() => import('./pages/mentorship-content/MentorshipContent'));
-const MentorshipSessions = lazy(() => import('./pages/mentorship-sessions/MentorshipSessions'));
-const MentorshipQuizzes = lazy(() => import('./pages/mentorship-quizzes/MentorshipQuizzes'));
-const QuizDetail = lazy(() => import('./pages/mentorship-quizzes/QuizDetail'));
-const QuizQuestions = lazy(() => import('./pages/mentorship-quizzes/QuizQuestions'));
-const MentorshipTasks = lazy(() => import('./pages/mentorship-tasks/MentorshipTasks'));
-const TaskDetail = lazy(() => import('./pages/mentorship-tasks/TaskDetail'));
+const MentorDash = lazy(() => import('./pages/mentor-pages/mentordash/MentorDash'));
+const MyMentorships = lazy(() => import('./pages/mentor-pages/my-mentorsship-dash/MyMentorsship'));
+const StudentsList = lazy(() => import('./pages/mentor-pages/studentspage-mentordash/StudentsList'));
+const Messages = lazy(() => import('./pages/mentor-pages/mentorMessages/Messages'));
+const NotificationsList = lazy(() => import('./pages/mentor-pages/mentorNotifications/NotificationsList'));
+const ProfilePage = lazy(() => import('./pages/mentor-pages/mentorProfile/ProfilePage'));
+const Setting = lazy(() => import('./pages/mentor-pages/mentorSettings/Settings'));
+const MentorshipDetail = lazy(() => import('./pages/mentor-pages/mentorship-detail/MentorshipDetail'));
+const EditMentorship = lazy(() => import('./pages/mentor-pages/edit-mentorship/EditMentorship'));
+const StudentProfile = lazy(() => import('./pages/mentor-pages/mentor-view-studentprofile/StudentProfile'));
+const CreateMentorship = lazy(() => import('./pages/mentor-pages/create-mentorship/CreateMentorship'));
+const MentorshipContent = lazy(() => import('./pages/mentor-pages/mentorship-content/MentorshipContent'));
+const MentorshipSessions = lazy(() => import('./pages/mentor-pages/mentorship-sessions/MentorshipSessions'));
+const MentorshipQuizzes = lazy(() => import('./pages/mentor-pages/mentorship-quizzes/MentorshipQuizzes'));
+const QuizDetail = lazy(() => import('./pages/mentor-pages/mentorship-quizzes/QuizDetail'));
+const QuizQuestions = lazy(() => import('./pages/mentor-pages/mentorship-quizzes/QuizQuestions'));
+const MentorshipTasks = lazy(() => import('./pages/mentor-pages/mentorship-tasks/MentorshipTasks'));
+const TaskDetail = lazy(() => import('./pages/mentor-pages/mentorship-tasks/TaskDetail'));
+const MentorshipProjects = lazy(() => import('./pages/mentor-pages/mentorship-projects/MentorshipProjects'));
+const ProjectDetail = lazy(() => import('./pages/mentor-pages/mentorship-projects/ProjectDetail'));
 
 // Loading fallback component - minimal to avoid layout shift
 const PageLoader = () => (
@@ -96,6 +100,8 @@ function App() {
           <Route path="/check-email" element={<CheckEmail />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/reset-success" element={<ResetSuccess />} />
+          <Route path="/restore-account" element={<RestoreAccount />} />
+          <Route path="/confirm-restore" element={<ConfirmRestore />} />
           
           {/* Protected Mentor Routes */}
           <Route element={<ProtectedRoute />}>
@@ -110,6 +116,8 @@ function App() {
             <Route path="/mentor/mentorships/:id/quizzes/:quizId/questions" element={<QuizQuestions />} />
             <Route path="/mentor/mentorships/:id/tasks" element={<MentorshipTasks />} />
             <Route path="/mentor/mentorships/:id/tasks/:taskId" element={<TaskDetail />} />
+            <Route path="/mentor/mentorships/:id/projects" element={<MentorshipProjects />} />
+            <Route path="/mentor/mentorships/:id/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/mentor/mentorships/:id/edit" element={<EditMentorship />} />
             <Route path="/mentor/students" element={<StudentsList />} />
             <Route path="/mentor/messages" element={<Messages />} />

@@ -54,6 +54,7 @@ export function mapApiMentorshipToUi(item: unknown): Mentorship {
     id: String(m.id ?? ''),
     title: String(m.title ?? 'Untitled'),
     icon: '📋',
+    coverImageUrl: (typeof m.coverImageUrl === 'string' ? m.coverImageUrl : null),
     level: String(m.difficultyLevel ?? m.level ?? 'ALL_LEVEL'),
     rating: Number(m.rating ?? 0),
     totalEnrolled: Number(m.totalEnrolled ?? m.enrolledCount ?? m.students ?? 0),

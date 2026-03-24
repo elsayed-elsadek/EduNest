@@ -18,6 +18,9 @@ export interface MentorshipApiResponse {
   createdAt?: string;
   createdDate?: string;
   created_at?: string;
+  Image_URL?: string;
+  imageUrl?: string;
+  coverImage?: string;
   [key: string]: unknown;
 }
 

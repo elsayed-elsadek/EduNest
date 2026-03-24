@@ -43,6 +43,29 @@ export const updateQuiz = async (id: number, payload: UpdateQuizPayload): Promis
     return raw;
 };
 
+export interface QuizDetails {
+    id: number;
+    title: string;
+    durationMinutes: number;
+    description: string;
+    status: 'DRAFT' | 'PUBLISHED' | 'CLOSED';
+    submissions: number;
+    averageScore: number;
+}
+
+export const getQuizDetails = async (id: number): Promise<QuizDetails> => {
+    const raw = await handleRequest(api.get<unknown>(`api/v1/quiz/${id}`));
+    const data = raw as Record<string, unknown>;
+    if (data?.apiResponse && typeof data.apiResponse === 'object') {
+        const res = (data.apiResponse as Record<string, unknown>)['Quiz Details'];
+        if (res) return res as QuizDetails;
+
+        // Fallback for some APIs that might return it differently
+        return data.apiResponse as unknown as QuizDetails;
+    }
+    throw new Error('Invalid response structure');
+};
+
 // --- New Endpoints ---
 
 export interface QuizOverviewDtoPageResponse {

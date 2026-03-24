@@ -172,3 +172,41 @@ export async function updateMentorship(
 export async function deleteMentorship(mentorshipId: string | number): Promise<void> {
   await api.delete(`api/v1/mentorship/${mentorshipId}`);
 }
+
+/** Change mentorship cover image */
+export async function changeMentorshipCoverImage(
+  mentorshipId: string | number,
+  imageFile: File
+): Promise<{ Image_URL: string }> {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const response = await api.post<unknown>(`api/v1/mentorship/${mentorshipId}/change-cover-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    const raw = response.data as Record<string, unknown> | null;
+    if (raw && typeof raw === 'object') {
+      const apiRes = raw.apiResponse as Record<string, unknown> | undefined;
+      // Depending on the actual response format, try getting Image_URL
+      if (apiRes && apiRes.Image_URL) {
+        return { Image_URL: apiRes.Image_URL as string };
+      }
+      if (raw.Image_URL) {
+        return { Image_URL: raw.Image_URL as string };
+      }
+    }
+
+    throw new Error('Failed to change cover image. Invalid response format.');
+  } catch (error) {
+    const fieldErrors = getValidationFieldErrors(error);
+    if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+      const firstMessage = Object.values(fieldErrors)[0] ?? 'Validation failed';
+      throw new ApiValidationError(firstMessage, fieldErrors);
+    }
+    throw error;
+  }
+}

@@ -57,6 +57,7 @@ export interface MentorshipStats {
   totalLessons: number;
   totalAssignments: number;
   totalSessions: number;
+  totalProjects: number;
   [key: string]: unknown;
 }
 

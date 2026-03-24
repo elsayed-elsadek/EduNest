@@ -5,6 +5,7 @@ export interface Mentorship {
   title: string;
   description?: string;
   icon: string;
+  coverImageUrl?: string | null;
   level: string;
   rating: number;
   totalEnrolled: number;

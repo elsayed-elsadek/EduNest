@@ -25,6 +25,8 @@ const PUBLIC_AUTH_PATHS = [
   'api/v1/register/verify-user',
   'login-api',
   'forget-password',
+  'api/v1/register/restore',
+  'api/v1/register/confirm-restore',
 ];
 
 function isPublicAuthRequest(url: string | undefined): boolean {

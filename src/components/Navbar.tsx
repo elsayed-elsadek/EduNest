@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/edunestlogo.png";
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, User, LogOut } from 'lucide-react';
 import { useTheme } from '../context/useTheme';
+import { useAuthStore } from '../store/authStore';
 
 const navItems = [
   { label: "Home", target: "home" },
@@ -29,6 +30,9 @@ const Navbar: React.FC = () => {
   const [activeNavItem, setActiveNavItem] = useState("home");
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const authStore = useAuthStore();
+  const isAuthenticated = authStore.isAuthenticated;
+  const userName = authStore.userName;
   const handleNavClick = (target: string) => {
     setActiveNavItem(target);
     scrollToSection(target);
@@ -73,19 +77,41 @@ const Navbar: React.FC = () => {
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
-            <Link to="/login">
-              <button className="text-sm text-gray-600 dark:text-gray-200 hover:text-primary transition font-semibold">
-                Sign in
-              </button>
-            </Link>
-            <button
-              onClick={() => {
-                navigate("/register");
-              }}
-              className="px-4 py-2 bg-primary text-white rounded-full text-sm hover:opacity-90 transition"
-            >
-              Register Now
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => navigate('/mentor/dashboard')}
+                  className="flex items-center gap-2 text-sm bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">{userName || 'User'}</span>
+                </button>
+                <button
+                  onClick={() => authStore.logout()}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 rounded-full text-sm transition"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <button className="text-sm text-gray-600 dark:text-gray-200 hover:text-primary transition font-semibold">
+                    Sign in
+                  </button>
+                </Link>
+                <button
+                  onClick={() => {
+                    navigate("/register");
+                  }}
+                  className="px-4 py-2 bg-primary text-white rounded-full text-sm hover:opacity-90 transition"
+                >
+                  Register Now
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile/medium trigger */}
@@ -148,11 +174,33 @@ const Navbar: React.FC = () => {
                   aria-label="Toggle theme">
                   {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                 </button>
-                <Link to="/login">
-                  <button className="text-sm text-gray-600 dark:text-gray-200 text-left hover:text-primary p-2 font-semibold rounded-lg">
-                    Sign in
-                  </button>
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      className="text-sm text-gray-600 dark:text-gray-200 text-left hover:text-primary p-2 font-semibold rounded-lg flex items-center gap-2"
+                      onClick={() => {
+                        navigate('/mentor/dashboard');
+                        setIsOpen(false);
+                      }}
+                    >
+                      <User className="w-4 h-4" />
+                      {userName || 'Dashboard'}
+                    </button>
+                    <button
+                      onClick={() => authStore.logout()}
+                      className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 p-2 rounded-lg flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <Link to="/login">
+                    <button className="text-sm text-gray-600 dark:text-gray-200 text-left hover:text-primary p-2 font-semibold rounded-lg">
+                      Sign in
+                    </button>
+                  </Link>
+                )}
               </div>
               <button
                 onClick={() => {

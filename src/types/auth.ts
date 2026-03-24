@@ -27,6 +27,7 @@ export interface FormErrors {
   educationalLevel?: string;
   agreeTerms?: string;
   rememberMe?: string;
+  otp?: string;
   general?: string;
 }
 
@@ -53,4 +54,14 @@ export interface ApiError {
   errorMessages?: {
     error?: string;
   };
+}
+
+// --- Account Restore ---
+export interface RestoreRequest {
+  email: string;
+}
+
+export interface ConfirmRestoreRequest {
+  email: string;
+  otp: string;
 }
