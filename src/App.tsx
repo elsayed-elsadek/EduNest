@@ -53,6 +53,11 @@ const ProjectDetail = lazy(() => import('./pages/mentor-pages/mentorship-project
 
 // Student Dashboard
 const StudentDashboard = lazy(() => import('./pages/student-pages/StudentDashboard/StudentDashboard'));
+const MyLearning = lazy(() => import('./pages/student-pages/MyLearning/MyLearning'));
+const StudentMessages = lazy(() => import('./pages/student-pages/Messages/Messages'));
+const StudentProfilePage = lazy(() => import('./pages/student-pages/Profile/StudentProfile'));
+const StudentSettings = lazy(() => import('./pages/student-pages/Settings/StudentSettings'));
+const StudentNotifications = lazy(() => import('./pages/student-pages/Notifications/StudentNotifications'));
 
 // Loading fallback component - minimal to avoid layout shift
 const PageLoader = () => (
@@ -153,6 +158,11 @@ function App() {
           {/* Protected Student Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
             <Route path="/student/dashboard" element={<StudentDashboard />} />
+            <Route path="/student/learning" element={<MyLearning />} />
+            <Route path="/student/messages" element={<StudentMessages />} />
+            <Route path="/student/profile" element={<StudentProfilePage />} />
+            <Route path="/student/settings" element={<StudentSettings />} />
+            <Route path="/student/notifications" element={<StudentNotifications />} />
           </Route>
 
           {/* Protected Admin Routes */}

@@ -1,4 +1,4 @@
-// components/student/Timeline/TimelineItem.tsx
+
 
 import  type { FC } from 'react';
 import type { TimelineEvent } from '../../../../types/student-role-types/course.types';

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import type { LoginFormData, FormErrors } from "../types/auth";
 import { loginUser, sendOtp } from "../services/authService";
+import { getStudentProfile } from "../services/student-roleService/Studentprofileservice";
+import api from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
@@ -99,6 +101,21 @@ export const useLogin = () => {
           userEmail: userEmail,
           userRole: userRole,
         });
+
+        // Fetch profile image for students
+        if (userRole === 'ROLE_STUDENT') {
+          try {
+            const profileResponse = await getStudentProfile();
+            const profileImageUrl = profileResponse.apiResponse.profile.profileImageUrl;
+            if (profileImageUrl) {
+              const baseUrl = api.defaults.baseURL?.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '') || '';
+              const fullAvatarUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${baseUrl}${profileImageUrl}`;
+              useAuthStore.getState().updateProfile({ userAvatar: fullAvatarUrl });
+            }
+          } catch (error) {
+            console.warn('Failed to fetch student profile image:', error);
+          }
+        }
 
         // Save Remember Me preference
         if (formData.rememberMe) {

@@ -2,6 +2,7 @@
 import  type { FC } from 'react';
 import { Star, ShoppingCart } from 'lucide-react';
 import type { Course } from '../../../../types/student-role-types/course.types';
+const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
 
 interface RecommendedCourseCardProps {
   course: Course;
@@ -21,9 +22,12 @@ const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={course.thumbnail}
+          src={course.thumbnail || DEFAULT_COURSE_THUMBNAIL}
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.currentTarget.src = DEFAULT_COURSE_THUMBNAIL;
+          }}
         />
         
         {/* Discount Badge */}
