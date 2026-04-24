@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
 
-const API_BASE_URL = (import.meta.env.VITE_BASE_URL ? `${import.meta.env.VITE_BASE_URL}/` : 'http://localhost:8080/');
+export const API_BASE_URL = (import.meta.env.VITE_BASE_URL ? `${import.meta.env.VITE_BASE_URL}/` : 'http://localhost:8080/');
 
 // Production mode check - only log in development
 const isDev = import.meta.env.DEV;

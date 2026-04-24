@@ -76,4 +76,32 @@ export interface MentorshipContentErrorResponse {
   };
 }
 
+// --- Lecture Types ---
+export interface Lecture {
+  id: number;
+  title: string;
+  lectureUrl: string;
+}
+
+export interface LectureApiResponse {
+  apiResponse: {
+    lecture: Lecture;
+    message: string;
+  };
+}
+
+// --- Join Mentorship Types ---
+export interface JoinMentorshipSuccessResponse {
+  apiResponse: {
+    message: string;
+  };
+}
+
+export interface JoinMentorshipErrorResponse {
+  errorMessages: {
+    error: string;
+  };
+}
+
+
 

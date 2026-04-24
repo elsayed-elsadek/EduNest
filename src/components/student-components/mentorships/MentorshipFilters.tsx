@@ -28,13 +28,15 @@ const MentorshipFilters: FC<MentorshipFiltersProps> = ({
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set(['All Mentors']));
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(2000);
-  const debounceTimer = useRef<NodeJS.Timeout>();
+  const debounceTimer = useRef<number | null>(null);
 
   // Handle keyword change with debounce
   const handleKeywordChange = (value: string) => {
     setKeyword(value);
     
-    clearTimeout(debounceTimer.current);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
     debounceTimer.current = setTimeout(() => {
       triggerFilterUpdate({ keyword: value });
     }, 500);
@@ -113,7 +115,10 @@ const MentorshipFilters: FC<MentorshipFiltersProps> = ({
             placeholder="Filter mentor or skill..."
             value={keyword}
             onChange={(e) => handleKeywordChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent text-sm"
+            style={{ outline: 'none' }}
+            onFocus={(e) => (e.target.style.boxShadow = '0 0 0 2px var(--primary-500)')}
+            onBlur={(e) => (e.target.style.boxShadow = 'none')}
           />
         </div>
       </div>
@@ -156,7 +161,7 @@ const MentorshipFilters: FC<MentorshipFiltersProps> = ({
               onChange={(e) => handleMinPriceChange(Number(e.target.value))}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(minPrice / 2000) * 100}%, #E5E7EB ${(minPrice / 2000) * 100}%, #E5E7EB 100%)`,
+                background: `linear-gradient(to right, var(--primary-500) 0%, var(--primary-500) ${(minPrice / 2000) * 100}%, #E5E7EB ${(minPrice / 2000) * 100}%, #E5E7EB 100%)`,
               }}
             />
           </div>
@@ -175,7 +180,7 @@ const MentorshipFilters: FC<MentorshipFiltersProps> = ({
               onChange={(e) => handleMaxPriceChange(Number(e.target.value))}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(maxPrice / 2000) * 100}%, #E5E7EB ${(maxPrice / 2000) * 100}%, #E5E7EB 100%)`,
+                background: `linear-gradient(to right, var(--primary-500) 0%, var(--primary-500) ${(maxPrice / 2000) * 100}%, #E5E7EB ${(maxPrice / 2000) * 100}%, #E5E7EB 100%)`,
               }}
             />
           </div>

@@ -64,6 +64,13 @@ const MentorshipContentSection = lazy(() => import('./pages/student-pages/mentor
 const MentorshipReviews = lazy(() => import('./pages/student-pages/mentorshipDetails/ReviewsSection'));
 const MentorshipLeaderboard = lazy(() => import('./pages/student-pages/mentorshipDetails/leaderboard/LeaderBoard'));
 const MentorProfilePage = lazy(() => import('./pages/student-pages/mentorProfile/MentorProfilePage'));
+const MyLearning = lazy(() => import('./pages/student-pages/MyLearning/MyLearning'));
+const StudentMentorshipContent = lazy(() => import('./pages/student-pages/studentLearning/StudentMentorshipContent'));
+const EnrollMentorship = lazy(() => import('./pages/student-pages/enrollMentorship/EnrollMentorship'));
+const StudentMessages = lazy(() => import('./pages/student-pages/Messages/Messages'));
+const StudentProfilePage = lazy(() => import('./pages/student-pages/Profile/StudentProfile'));
+const StudentSettings = lazy(() => import('./pages/student-pages/Settings/StudentSettings'));
+const StudentNotifications = lazy(() => import('./pages/student-pages/Notifications/StudentNotifications'));
 
 // Loading fallback component - minimal to avoid layout shift
 const PageLoader = () => (
@@ -173,6 +180,13 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/explore-mentorships" element={<ExploreMentorships />} />
+            <Route path="/student/learning" element={<MyLearning />} />
+            <Route path="/student/learning/:mentorshipId" element={<StudentMentorshipContent />} />
+            <Route path="/mentorships/:mentorshipId/enroll" element={<EnrollMentorship />} />
+            <Route path="/student/messages" element={<StudentMessages />} />
+            <Route path="/student/profile" element={<StudentProfilePage />} />
+            <Route path="/student/settings" element={<StudentSettings />} />
+            <Route path="/student/notifications" element={<StudentNotifications />} />
           </Route>
 
           {/* Protected Admin Routes */}

@@ -2,6 +2,7 @@
 import  type { FC } from 'react';
 import { Play } from 'lucide-react';
 import type { Course } from '../../../../types/student-role-types/course.types';
+const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
 
 interface CourseCardProps {
   course: Course;
@@ -14,11 +15,11 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={course.thumbnail}
+          src={course.thumbnail || DEFAULT_COURSE_THUMBNAIL}
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
-            e.currentTarget.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80';
+            e.currentTarget.src = DEFAULT_COURSE_THUMBNAIL;
           }}
         />
         
@@ -58,7 +59,7 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
           
           <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-300"
+              className="h-full bg-[var(--primary-500)] rounded-full transition-all duration-300"
               style={{ width: `${course.progress}%` }}
             />
           </div>
@@ -67,7 +68,7 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
         {/* Resume Button */}
         <button
           onClick={() => onResume(course.id)}
-          className="w-full mt-4 py-2.5 text-sm font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-4 py-2.5 text-sm font-semibold text-[var(--primary-500)] border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
         >
           Resume Mentorship
           <span>→</span>

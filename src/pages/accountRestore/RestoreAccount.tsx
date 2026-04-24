@@ -23,6 +23,7 @@ const RestoreAccount: React.FC = () => {
 
   const handleSendOtp = async () => {
     await sendOtpHandler();
+    // toast.success("OTP sent to your email. Check your inbox!");
     // After OTP is sent, navigate to the confirm restore page
     const emailToPass = formData.email || localStorage.getItem("restoreEmail") || "";
     navigate("/confirm-restore", { state: { email: emailToPass } });

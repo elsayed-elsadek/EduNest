@@ -1,6 +1,6 @@
 import { type FC, useState, useCallback, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, SlidersHorizontal, X } from 'lucide-react';
 import MentorshipGrid from "../../components/student-components/mentorships/MentorshipGrid";
 import Pagination from "../../components/student-components/mentorships/Pagination";
 import MentorshipFilters from "../../components/student-components/mentorships/MentorshipFilters";
@@ -24,6 +24,7 @@ const ExploreMentorships: FC = () => {
   });
 
   const navigate = useNavigate();
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Fetch mentorships data
   const { data, isLoading, isError, error } = useMentorships(filters);
@@ -80,32 +81,87 @@ useEffect(() => {
 }, [filters]);
   return (
     <div className="min-h-screen bg-white">
-       <Navbar />
+      <Navbar />
+
+      {/* ── Mobile Filter Drawer ── */}
+      {/* Overlay backdrop */}
+      {isMobileFilterOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          onClick={() => setIsMobileFilterOpen(false)}
+        />
+      )}
+
+      {/* Slide-in drawer from left */}
+      <div
+        className={`fixed top-13 left-0 h-[95vh] w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+          isMobileFilterOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+          <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4 text-[var(--primary-500)]" />
+            Filters
+          </h2>
+          <button
+            onClick={() => setIsMobileFilterOpen(false)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Drawer body – reuse the same MentorshipFilters */}
+        <div className="overflow-y-auto h-[calc(100%-64px)] px-5 py-2">
+          <MentorshipFilters
+            onFiltersChange={handleFiltersChange}
+          />
+        </div>
+      </div>
+
       {/* Header Section */}
       <div className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3">
             Discover Academic Mentorship
           </h1>
           <p className="text-gray-600 text-base max-w-3xl">
             Connect with world-class scholars and industry leaders. Professional guidance tailored
             for high-impact academic and career growth.
           </p>
+
+       
         </div>
       </div>
 
+
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+
+        
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar - Filters */}
-          <div className="lg:col-span-1">
+
+   {/* Mobile Filter Button – visible only on small screens */}
+          <button
+            onClick={() => setIsMobileFilterOpen(true)}
+            className="lg:hidden mt-4 flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 shadow-sm w-[100px]"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-[var(--primary-500)]" />
+            Filters
+          </button>
+
+          {/* Left Sidebar – visible only on large screens */}
+          <div className="hidden lg:block lg:col-span-1">
             <MentorshipFilters onFiltersChange={handleFiltersChange} />
           </div>
 
           {/* Right Main Area - Grid */}
           <div className="lg:col-span-3">
             {/* Error State */}
-{isError && (
+            {isError && (
               <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -143,7 +199,7 @@ useEffect(() => {
               />
             )}
 
-            {/* Loading State with No Results */}
+            {/* No Results */}
             {!isLoading && mentorships.length === 0 && !isError && (
               <div className="mt-12 p-12 text-center">
                 <p className="text-gray-500 text-lg">

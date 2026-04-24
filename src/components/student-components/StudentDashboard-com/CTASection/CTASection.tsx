@@ -1,6 +1,6 @@
-
 import type { FC } from 'react';
 import { ArrowRight, MessageCircle } from 'lucide-react';
+import { theme } from '../../../../theme/colors';
 import { Link } from 'react-router-dom';
 
 const CTASection: FC = () => {
@@ -8,7 +8,7 @@ const CTASection: FC = () => {
 
 
   return (
-    <div className="bg-gradient-to-br from-[#0a1628] to-[#1a2d4a] rounded-3xl p-8 md:p-12 relative overflow-hidden">
+    <div className="rounded-3xl p-8 md:p-12 relative overflow-hidden" style={{ background: theme.gradients.studentHero }}>
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{

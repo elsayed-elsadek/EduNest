@@ -209,7 +209,7 @@ const MentorshipQuizzes: FC = () => {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Avg Score</p>
-                            <h3 className="text-2xl font-bold text-gray-900">{stats?.averageScore || 0} %</h3>
+                            <h3 className="text-2xl font-bold text-gray-900"> {Number(stats?.averageScore || 0).toFixed(2)} %</h3>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
                             <BarChart2 size={24} />

@@ -1,10 +1,12 @@
 import { type FC, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Clock, MessageCircle, BadgeCheck, Flame } from 'lucide-react';
 import type { MentorshipDetails } from '../../../../types/student-role-types/studentMentorshipTypes';
 
 interface HeroSectionProps {
   mentorship?: MentorshipDetails;
   isLoading?: boolean;
+  mentorshipId?: number;
 }
 
 const formatCurrency = (value: number) =>
@@ -14,29 +16,36 @@ const formatCurrency = (value: number) =>
     minimumFractionDigits: 0,
   }).format(value);
 
-const HeroSection: FC<HeroSectionProps> = ({ mentorship }) => {
+const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId }) => {
+  const navigate = useNavigate();
   const [imageError] = useState(false);
 
-  const discountPercent = mentorship?.price && mentorship?.finalPrice 
-    ? Math.round(((mentorship.price - mentorship.finalPrice) / mentorship.price) * 100) 
+  const discountPercent = mentorship?.price && mentorship?.finalPrice
+    ? Math.round(((mentorship.price - mentorship.finalPrice) / mentorship.price) * 100)
     : 0;
 
+  const handleEnroll = () => {
+    if (mentorshipId) {
+      navigate(`/mentorships/${mentorshipId}/enroll`);
+    }
+  };
+
   return (
-    <section 
+    <section
       id="overview"
       className="relative min-h-[500px] lg:min-h-[600px] flex items-center overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-900 shadow-2xl"
       style={{
         backgroundImage: mentorship?.coverImageUrl && !imageError ? `url(${mentorship.coverImageUrl})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'scroll' // Changed to scroll for better mobile performance
+        backgroundAttachment: 'scroll'
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-b lg:bg-gradient-to-r from-slate-950 via-slate-950/90 lg:via-slate-950/80 to-transparent z-0" />
-      
+
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-8 relative z-10 w-full py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_0.75fr] gap-8 lg:gap-12 items-center">
-          
+
           {/* LEFT COLUMN */}
           <div className="space-y-6 lg:space-y-8 text-white">
             <div className="flex flex-wrap gap-2 lg:gap-3">
@@ -73,19 +82,17 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship }) => {
               </div>
             </div>
 
-              {/* Tags */}
-          <div>
-            <div className="flex flex-wrap gap-2 lg:gap-3 mt-4">
-              {mentorship?.tags.map((tag) => (
-                <span key={tag} className="px-3 lg:px-4 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] lg:text-[12px] font-semibold tracking-[0.15em] lg:tracking-[0.2em] uppercase">
-                  {tag}
-                </span>
-              ))}
+            {/* Tags */}
+            <div>
+              <div className="flex flex-wrap gap-2 lg:gap-3 mt-4">
+                {mentorship?.tags.map((tag) => (
+                  <span key={tag} className="px-3 lg:px-4 py-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] lg:text-[12px] font-semibold tracking-[0.15em] lg:tracking-[0.2em] uppercase">
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-          </div>
-
-        
 
           {/* RIGHT COLUMN: ACTION CARD */}
           <div className="bg-white rounded-[1.5rem] lg:rounded-[2.5rem] p-6 lg:p-8 shadow-2xl text-slate-900 lg:max-w-md w-full transform hover:scale-[1.01] transition-transform duration-500">
@@ -104,7 +111,7 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship }) => {
                     </span>
                   )}
                   <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--primary-500)] mt-1">
-                    {formatCurrency(mentorship?.finalPrice  || 0)}
+                    {formatCurrency(mentorship?.finalPrice || 0)}
                   </p>
                 </div>
               </div>
@@ -121,10 +128,17 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship }) => {
               </div>
 
               <div className="grid grid-cols-1 gap-3 lg:gap-4">
-                <button className="w-full px-6 lg:px-8 py-4 lg:py-5 bg-[var(--primary-500)] text-white rounded-xl lg:rounded-2xl font-black text-lg lg:text-xl hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                <button
+                  type="button"
+                  onClick={handleEnroll}
+                  className="w-full px-6 lg:px-8 py-4 lg:py-5 bg-[var(--primary-500)] text-white rounded-xl lg:rounded-2xl font-black text-lg lg:text-xl hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-blue-500/20"
+                >
                   Enroll Now
                 </button>
-                <button className="w-full px-6 lg:px-8 py-4 lg:py-5 bg-slate-100 text-slate-700 rounded-xl lg:rounded-2xl font-bold text-base lg:text-lg hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  className="w-full px-6 lg:px-8 py-4 lg:py-5 bg-slate-100 text-slate-700 rounded-xl lg:rounded-2xl font-bold text-base lg:text-lg hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                >
                   <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5" />
                   Contact Mentor
                 </button>
@@ -143,3 +157,4 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship }) => {
 };
 
 export default HeroSection;
+

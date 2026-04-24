@@ -11,7 +11,7 @@ interface MentorInfoProps {
 const MentorInfo: FC<MentorInfoProps> = ({ mentorship, isLoading = false }) => {
   return (
     <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-      <div className="flex flex-col gap-6 lg:flex-row items-center">
+      <div className="flex flex-col gap-6 lg:flex-row items-center ">
         <div className="h-32 w-32 overflow-hidden rounded-3xl bg-slate-100">
           {isLoading ? (
             <div className="h-full w-full animate-pulse bg-gray-200 rounded-full" />

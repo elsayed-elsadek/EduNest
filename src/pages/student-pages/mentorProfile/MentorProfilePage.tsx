@@ -32,7 +32,7 @@ const MentorProfilePage = () => {
 
 
 {/* maybe i will add this class later ,,max-w-7xl,, */}
-      <main className=" mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <ProfileHeader mentorProfile={mentorProfile} fullName={fullName} isLoading={isLoading} />
 
         {/* Main Content Grid */}

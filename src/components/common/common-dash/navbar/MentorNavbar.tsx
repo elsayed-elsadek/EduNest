@@ -1,7 +1,7 @@
 
 import type { FC } from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, ChevronDown, Menu, X, User, Settings, LogOut } from 'lucide-react';
+import { Search, Bell, ChevronDown, Menu, X, User, Settings, LogOut, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../../../store/authStore';
@@ -17,7 +17,9 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
@@ -29,6 +31,18 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
   const [avatarSrc, setAvatarSrc] = useState<string | null>(userAvatar || null);
 
   const firstName = userName?.trim().split(/\s+/)[0] || 'Mentor';
+
+  // Search suggestions
+  const suggestions = [
+    { label: 'Profile', path: '/mentor/profile', icon: User },
+    { label: 'Settings', path: '/mentor/settings', icon: Settings },
+    { label: 'Notifications', path: '/mentor/notifications', icon: Bell },
+    { label: 'Dashboard', path: '/mentor/dashboard', icon: Home },
+  ];
+
+  const filteredSuggestions = suggestions.filter(suggestion =>
+    suggestion.label.toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.trim() !== ''
+  );
 
   // Preload and commit avatar when available
   useEffect(() => {
@@ -46,8 +60,6 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
     toast.success('You have been logged out. See you soon!', {
       duration: 2000,
       position: 'top-center',
-    
-      
     });
     navigate('/', { replace: true });
   };
@@ -57,15 +69,28 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setIsProfileMenuOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-
   const handleMenuAction = (path: string, callback?: () => void) => {
     setIsProfileMenuOpen(false);
     if (callback) callback();
+    navigate(path);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setIsSearchDropdownOpen(e.target.value.trim() !== '');
+  };
+
+  const handleSuggestionClick = (path: string) => {
+    setSearchQuery('');
+    setIsSearchDropdownOpen(false);
     navigate(path);
   };
 
@@ -76,19 +101,40 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
       {/* 1. Mobile Search Overlay */}
       {isMobileSearchOpen && (
         <div className="absolute inset-0 bg-white dark:bg-[var(--dark-bg)] z-50 flex items-center px-4 md:hidden">
-          <div className="relative flex-1">
+          <div className="relative flex-1" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               autoFocus
               type="text"
               placeholder="Search here..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full h-[45px] pl-10 pr-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:outline-none"
             />
+            {/* Mobile Search Dropdown */}
+            {isSearchDropdownOpen && filteredSuggestions.length > 0 && (
+              <div className="absolute top-full mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-50 max-h-48 overflow-y-auto">
+                {filteredSuggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      handleSuggestionClick(suggestion.path);
+                      setIsMobileSearchOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                  >
+                    {suggestion.icon && <suggestion.icon size={16} className="text-gray-400" />}
+                    {suggestion.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <button
-            onClick={() => setIsMobileSearchOpen(false)}
+            onClick={() => {
+              setIsMobileSearchOpen(false);
+              setIsSearchDropdownOpen(false);
+            }}
             className="ml-3 p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
           >
             <X size={20} />
@@ -123,7 +169,7 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
         <div className="flex items-center gap-1.5 sm:gap-4 md:gap-6 flex-shrink-0">
 
           {/* search*/}
-          <div className="relative">
+          <div className="relative" ref={searchRef}>
             <div className="hidden md:block relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <Search className="w-4 h-4 text-gray-400" strokeWidth={2} />
@@ -132,9 +178,24 @@ const MentorNavbar: FC<MentorNavbarProps & { onMenuClick?: () => void }> = ({
                 type="text"
                 placeholder="search here"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-40 lg:w-72 h-[35px] pl-9 pr-4 py-1 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-[11px] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
               />
+              {/* Search Dropdown */}
+              {isSearchDropdownOpen && filteredSuggestions.length > 0 && (
+                <div className="absolute top-full mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-50 max-h-48 overflow-y-auto">
+                  {filteredSuggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(suggestion.path)}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                    >
+                      {suggestion.icon && <suggestion.icon size={16} className="text-gray-400" />}
+                      {suggestion.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <button

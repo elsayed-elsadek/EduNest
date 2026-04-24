@@ -92,7 +92,8 @@ const MentorshipDetailsPage = () => {
         ) : (
           <>
             <div className="space-y-4">
-              <HeroSection mentorship={mentorship} isLoading={isLoading} />
+              
+              <HeroSection mentorship={mentorship} isLoading={isLoading} mentorshipId={normalizedId} />
               <MentorshipTabsNav />
               <Outlet context={{ mentorship, isLoading, mentorshipId: normalizedId }} />
             </div>

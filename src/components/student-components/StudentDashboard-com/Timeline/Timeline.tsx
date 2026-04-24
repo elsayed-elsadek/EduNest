@@ -1,6 +1,7 @@
 
 import type { FC } from 'react';
 import { Calendar } from 'lucide-react';
+import { theme } from '../../../../theme/colors';
 import TimelineItem from './TimelineItem';
 import type { TimelineEvent } from '../../../../types/student-role-types/course.types';
 
@@ -32,7 +33,19 @@ const Timeline: FC<TimelineProps> = ({ events }) => {
       </div>
 
       {/* View Details Link */}
-      <button className="w-full mt-4 py-2.5 text-sm font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+      <button className="w-full mt-4 py-2.5 text-sm font-medium border rounded-lg hover:opacity-80 transition-colors"
+        style={{ 
+          color: theme.primary[600],
+          borderColor: theme.primary[200],
+          backgroundColor: 'transparent'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.primary[50];
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
         See full schedule
       </button>
     </div>

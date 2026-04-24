@@ -2,6 +2,7 @@
 import  type { FC } from 'react';
 import { Star, ShoppingCart } from 'lucide-react';
 import type { Course } from '../../../../types/student-role-types/course.types';
+const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
 
 interface RecommendedCourseCardProps {
   course: Course;
@@ -21,9 +22,12 @@ const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={course.thumbnail}
+          src={course.thumbnail || DEFAULT_COURSE_THUMBNAIL}
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            e.currentTarget.src = DEFAULT_COURSE_THUMBNAIL;
+          }}
         />
         
         {/* Discount Badge */}
@@ -37,7 +41,7 @@ const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({
       {/* Content */}
       <div className="p-5">
         {/* Category */}
-        <div className="text-xs font-semibold text-blue-600 mb-2 uppercase tracking-wide">
+        <div className="text-xs font-semibold text-[var(--primary-500)] mb-2 uppercase tracking-wide">
           {course.category}
         </div>
 
@@ -87,7 +91,7 @@ const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({
           {/* Add to Cart Button */}
           <button
             onClick={() => onAddToCart(course.id)}
-            className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="p-2.5 bg-[var(--primary-500)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors"
           >
             <ShoppingCart className="w-5 h-5" />
           </button>

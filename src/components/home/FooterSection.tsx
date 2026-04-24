@@ -54,7 +54,7 @@ const FooterSection: React.FC = memo(() => {
 
           <div className="md:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 cursor-pointer ">
-              <div className="w-10 h-10 bg-primary dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 bg-primary dark:bg-[var(--primary-500)] rounded-full flex items-center justify-center text-white font-bold">
                 E
               </div>
               <span className="font-semibold text-lg">EduNest</span>
@@ -83,25 +83,25 @@ const FooterSection: React.FC = memo(() => {
             <div className="flex gap-3 mt-6">
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Instagram className="w-4 h-4 text-white" />
               </a>
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Linkedin className="w-4 h-4 text-white" />
               </a>
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Facebook className="w-4 h-4 text-white" />
               </a>
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Twitter className="w-4 h-4 text-white" />
               </a>

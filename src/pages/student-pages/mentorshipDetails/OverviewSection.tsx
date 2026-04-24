@@ -74,7 +74,8 @@ const OverviewSection: FC = () => {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+{/* i will add it when bacj-end add api */}
+          {/* <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
             <p className="text-sm uppercase tracking-[0.24em] text-gray-500">Need a mentor?</p>
             <div className="mt-6 space-y-3 text-slate-700">
               <p className="text-sm leading-7">
@@ -88,7 +89,7 @@ const OverviewSection: FC = () => {
                 Request mentoring call
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </aside>
 

@@ -26,8 +26,9 @@ const ProjectDetail: React.FC = () => {
       setLoading(true);
       const res = await getProjectStatistics(projectId, { page, size: 10 });
       setStats(res.projectStatistics);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load project details');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to load project details';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -66,8 +67,9 @@ const ProjectDetail: React.FC = () => {
       toast.success('Grade submitted successfully');
       closeGradeModal();
       fetchStats(); // Refresh data
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to submit grade');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to submit grade';
+      toast.error(message);
     } finally {
       setIsSubmittingGrade(false);
     }
@@ -103,7 +105,7 @@ const ProjectDetail: React.FC = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-baseline gap-4">
           <div>
-            <div className="flex items-center items-center gap-2 cursor-pointer text-gray-600 hover:text-gray-900" onClick={handleBackToProjects}>
+            <div className="flex items-center gap-2 cursor-pointer text-gray-600 hover:text-gray-900" onClick={handleBackToProjects}>
               <ArrowLeft size={20} />
               <h1 className="text-2xl font-bold text-gray-900">{stats?.projectTitle || 'Project Details'}</h1>
             </div>
@@ -249,9 +251,9 @@ const ProjectDetail: React.FC = () => {
       {isGradeModalOpen && activeSubmission && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900">Grade Submission</h3>
-              <p className="text-sm text-gray-500 mt-1">Student: <span className="font-medium text-gray-700">{activeSubmission.studentFullName}</span></p>
+            <div className="p-6 border-b border-gray-100 bg-[var(--primary-500)]">
+              <h3 className="text-xl font-bold text-white">Grade Submission</h3>
+              <p className="text-sm text-white mt-1">Student: <span className="font-medium text-white">{activeSubmission.studentFullName}</span></p>
             </div>
             
             <div className="p-6 flex-1 overflow-y-auto space-y-4">
