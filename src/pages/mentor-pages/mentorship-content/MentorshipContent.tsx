@@ -252,7 +252,7 @@ const MentorshipContent: FC = () => {
       setShowDeleteConfirm(false);
       setDeleteTarget(null);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete');
+      toast.error( err instanceof Error ? err.message : 'Failed to delete.');
     }
   };
 

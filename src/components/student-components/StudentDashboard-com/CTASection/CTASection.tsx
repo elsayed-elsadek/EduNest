@@ -1,9 +1,12 @@
-
 import type { FC } from 'react';
 import { ArrowRight, MessageCircle } from 'lucide-react';
 import { theme } from '../../../../theme/colors';
+import { Link } from 'react-router-dom';
 
 const CTASection: FC = () => {
+
+
+
   return (
     <div className="rounded-3xl p-8 md:p-12 relative overflow-hidden" style={{ background: theme.gradients.studentHero }}>
       {/* Background Pattern */}
@@ -25,10 +28,13 @@ const CTASection: FC = () => {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <button className="flex items-center gap-2 px-8 py-4 bg-yellow-400 text-gray-900 rounded-xl font-bold hover:bg-yellow-300 transition-colors shadow-lg">
+          <Link
+          to="/explore-mentorships"
+            className="flex items-center gap-2 px-8 py-4 bg-yellow-400 text-gray-900 rounded-xl font-bold hover:bg-yellow-300 transition-colors shadow-lg"
+          >
             Explore All Programs
             <ArrowRight className="w-5 h-5" />
-          </button>
+          </Link>
           
           <button className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20">
             <MessageCircle className="w-5 h-5" />

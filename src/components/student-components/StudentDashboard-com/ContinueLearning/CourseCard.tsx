@@ -59,7 +59,7 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
           
           <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-300"
+              className="h-full bg-[var(--primary-500)] rounded-full transition-all duration-300"
               style={{ width: `${course.progress}%` }}
             />
           </div>
@@ -68,7 +68,7 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
         {/* Resume Button */}
         <button
           onClick={() => onResume(course.id)}
-          className="w-full mt-4 py-2.5 text-sm font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-4 py-2.5 text-sm font-semibold text-[var(--primary-500)] border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
         >
           Resume Mentorship
           <span>→</span>

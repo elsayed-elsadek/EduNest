@@ -56,7 +56,7 @@ const RecommendedCourses: FC<RecommendedCoursesProps> = ({ courses, onAddToCart 
             <ChevronRight className="w-4 h-4" />
           </button>
           <Link
-            to="/student/mentorships"
+            to="/explore-mentorships"
             className="text-xs font-semibold ml-1"
             style={{ color: theme.primary[600] }}
           >
@@ -73,9 +73,11 @@ const RecommendedCourses: FC<RecommendedCoursesProps> = ({ courses, onAddToCart 
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {courses.map(course => (
-          <div key={course.id} className="flex-shrink-0 w-72">
+          <Link 
+          to={`/mentorships/${course.id}`}
+           key={course.id} className="flex-shrink-0 w-72">
             <RecommendedCourseCard course={course} onAddToCart={onAddToCart} />
-          </div>
+          </Link>
         ))}
       </div>
     </div>

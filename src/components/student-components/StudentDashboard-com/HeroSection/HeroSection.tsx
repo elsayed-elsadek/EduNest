@@ -127,7 +127,7 @@ const HeroSection: FC<HeroSectionProps> = ({
             {/* ── Resume Learning → ينقل لصفحة الـ Learning */}
             <button
               onClick={onResume}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30"
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500)] text-white rounded-xl font-semibold hover:bg-[var(--primary-dark)] transition-colors shadow-lg shadow-blue-600/30"
             >
               <PlayCircle className="w-5 h-5" />
               Resume Learning

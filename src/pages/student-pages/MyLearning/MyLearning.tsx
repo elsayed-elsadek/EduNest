@@ -1,5 +1,6 @@
 
 import { type FC, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar            from '../../../components/student-components/common/Navbar/Navbar';
 import Footer            from '../../../components/student-components/common/Footer/Footer';
 import LearningTabs      from '../../../components/student-components/my-learning-com/LearningTabs/LearningTabs';
@@ -68,6 +69,8 @@ const MyLearning: FC = () => {
     return achievements.projectsTotalPages;
   }, [achievements.projects.length, achievements.projectsTotalPages]);
 
+  const navigate = useNavigate();
+
   const handleTabChange = (tab: TabKey) => {
     setActiveTab(tab);
     setEnrollPage(0); setBadgePage(0); setProjectPage(0); setCertPage(0);
@@ -111,7 +114,7 @@ const MyLearning: FC = () => {
             ) : learning.mentorships.length > 0 ? (
               <ActiveMentorships
                 mentorships={learning.mentorships}
-                onContinue={id => console.log('Continue:', id)}
+                onContinue={(id) => navigate(`/student/learning/${id}`)}
                 onPrevSlide={() => setEnrollPage(p => Math.max(0, p - 1))}
                 onNextSlide={() => setEnrollPage(p => Math.min(enrollTotalPage - 1, p + 1))}
                 canGoPrev={enrollPage > 0}

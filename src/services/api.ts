@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
 
-const API_BASE_URL = 'http://localhost:8080/'; 
+export const API_BASE_URL = (import.meta.env.VITE_BASE_URL ? `${import.meta.env.VITE_BASE_URL}/` : 'http://localhost:8080/');
 
 // Production mode check - only log in development
 const isDev = import.meta.env.DEV;
@@ -37,9 +37,17 @@ function isPublicAuthRequest(url: string | undefined): boolean {
 
 // Add authorization token only for requests that need it
 api.interceptors.request.use((config) => {
+  // 🔍 DEBUG LOG: All API requests (filter for mentorship overview)
+  if (config.url?.includes('/mentorships/') && config.url.includes('/overview')) {
+    const authHeader = typeof config.headers?.Authorization === 'string' 
+      ? config.headers.Authorization.substring(0,20) + '...' 
+      : 'NO_TOKEN';
+    console.log('[DEBUG API] Request START:', config.url, config.params, 'headers:', authHeader);
+  }
+  
   if (isPublicAuthRequest(config.url)) {
     if (isDev) {
-      console.log('📤 Public request (no token needed):', config.url);
+      console.log(' Public request (no token needed):', config.url);
     }
     return config;
   }
@@ -57,16 +65,17 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     if (isDev) {
-      console.log('✅ API Response:', response.status, response.config.url);
+      console.log(' API Response:', response.status, response.config.url);
     }
     return response;
   },
   (error) => {
     // Minimal error logging - only in development
     if (isDev) {
-      const status = error.response?.status;
-      const url = error.config?.url;
-      console.error(`❌ API Error ${status} on ${url}`);
+      const status = error.response?.status ?? 'NO_RESPONSE';
+      const url = error.config?.url ?? 'unknown';
+      const code = error.code ?? 'UNKNOWN';
+      console.error(`❌ API Error ${status} (${code}) on ${url}:`, error.message);
     }
     return Promise.reject(error);
   }

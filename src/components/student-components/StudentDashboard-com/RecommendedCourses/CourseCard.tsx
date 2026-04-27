@@ -41,7 +41,7 @@ const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({
       {/* Content */}
       <div className="p-5">
         {/* Category */}
-        <div className="text-xs font-semibold text-blue-600 mb-2 uppercase tracking-wide">
+        <div className="text-xs font-semibold text-[var(--primary-500)] mb-2 uppercase tracking-wide">
           {course.category}
         </div>
 
@@ -91,7 +91,7 @@ const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({
           {/* Add to Cart Button */}
           <button
             onClick={() => onAddToCart(course.id)}
-            className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="p-2.5 bg-[var(--primary-500)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors"
           >
             <ShoppingCart className="w-5 h-5" />
           </button>

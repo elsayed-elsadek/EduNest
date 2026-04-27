@@ -34,6 +34,7 @@ export interface TaskDashboardDTO {
 }
 
 export interface TaskResponseContent {
+  uploadedAttachmentPath: string | undefined;
   id: number;
   title: string;
   status: 'DRAFT' | 'PUBLISHED';
@@ -45,6 +46,7 @@ export interface TaskResponseContent {
   attachmentUrl?: string;
   submissions?: number;
   averageScore?: number;
+  studentSubmission?: TaskSubmissionItem | null;
 }
 
 export interface TaskResponsePageResponse {
@@ -342,3 +344,7 @@ export const gradeTaskSubmission = async (
 
   return raw;
 };
+
+
+
+

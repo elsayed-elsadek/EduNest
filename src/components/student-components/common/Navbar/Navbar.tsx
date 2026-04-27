@@ -55,7 +55,7 @@ const Navbar: FC<NavbarProps> = ({ userName: nameProp, userAvatar: avatarProp })
 
   const navItems = [
     { label: 'Home',        path: '/student/dashboard'   },
-    { label: 'Mentorships', path: '/student/mentorships' },
+    { label: 'Mentorships', path: '/explore-mentorships' },
     { label: 'Learning',    path: '/student/learning'    },
     { label: 'Messages',    path: '/student/messages'    },
     { label: 'Profile',     path: '/student/profile'     },

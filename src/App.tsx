@@ -53,7 +53,20 @@ const ProjectDetail = lazy(() => import('./pages/mentor-pages/mentorship-project
 
 // Student Dashboard
 const StudentDashboard = lazy(() => import('./pages/student-pages/StudentDashboard/StudentDashboard'));
+// const ExploreMentorships = lazy(() => import('./pages/student-pages/ExploreMentorships'));
+
+
+// Explore Mentorships Page - lazy loaded for code splitting
+const ExploreMentorships = lazy(() => import('./pages/student-pages/ExploreMentorships'));
+const MentorshipDetailsPage = lazy(() => import('./pages/student-pages/mentorshipDetails/StudentMentorshipDetails'));
+const MentorshipOverview = lazy(() => import('./pages/student-pages/mentorshipDetails/OverviewSection'));
+const MentorshipContentSection = lazy(() => import('./pages/student-pages/mentorshipDetails/ContentSection'));
+const MentorshipReviews = lazy(() => import('./pages/student-pages/mentorshipDetails/ReviewsSection'));
+const MentorshipLeaderboard = lazy(() => import('./pages/student-pages/mentorshipDetails/leaderboard/LeaderBoard'));
+const MentorProfilePage = lazy(() => import('./pages/student-pages/mentorProfile/MentorProfilePage'));
 const MyLearning = lazy(() => import('./pages/student-pages/MyLearning/MyLearning'));
+const StudentMentorshipContent = lazy(() => import('./pages/student-pages/studentLearning/StudentMentorshipContent'));
+const EnrollMentorship = lazy(() => import('./pages/student-pages/enrollMentorship/EnrollMentorship'));
 const StudentMessages = lazy(() => import('./pages/student-pages/Messages/Messages'));
 const StudentProfilePage = lazy(() => import('./pages/student-pages/Profile/StudentProfile'));
 const StudentSettings = lazy(() => import('./pages/student-pages/Settings/StudentSettings'));
@@ -118,6 +131,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/become-mentor" element={<BecomeMentor />} />
           <Route path="/start-Started" element={<GetStarted />} />
+          <Route path="/mentorships" element={<ExploreMentorships />} />
+          <Route path="/mentorships/:mentorshipId" element={<MentorshipDetailsPage />}>
+            <Route index element={<MentorshipOverview />} />
+            <Route path="content" element={<MentorshipContentSection />} />
+            <Route path="reviews" element={<MentorshipReviews />} />
+            <Route path="leaderboard" element={<MentorshipLeaderboard />} />
+          </Route>
+          <Route path="/mentor-profile/:mentorEmail" element={<MentorProfilePage />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -158,7 +179,10 @@ function App() {
           {/* Protected Student Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
             <Route path="/student/dashboard" element={<StudentDashboard />} />
+            <Route path="/explore-mentorships" element={<ExploreMentorships />} />
             <Route path="/student/learning" element={<MyLearning />} />
+            <Route path="/student/learning/:mentorshipId" element={<StudentMentorshipContent />} />
+            <Route path="/mentorships/:mentorshipId/enroll" element={<EnrollMentorship />} />
             <Route path="/student/messages" element={<StudentMessages />} />
             <Route path="/student/profile" element={<StudentProfilePage />} />
             <Route path="/student/settings" element={<StudentSettings />} />
