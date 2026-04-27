@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Camera, X, Check } from 'lucide-react';
 import { updateRoomImage } from '../../../services/Roomchatservice';
 
 interface Props {
@@ -68,7 +69,7 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -88,7 +89,7 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
                 }}
                 className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -104,9 +105,10 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
             />
             <button
               onClick={() => inputRef.current?.click()}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-dashed border-[#0c2d48] bg-[#0c2d48]/5 text-sm font-medium text-[#0c2d48] hover:bg-[#0c2d48]/10 transition"
+              className="w-full px-4 py-2.5 rounded-xl border-2 border-dashed border-[#0c2d48] bg-[#0c2d48]/5 text-sm font-medium text-[#0c2d48] hover:bg-[#0c2d48]/10 transition flex items-center justify-center gap-2"
             >
-              📸 Choose Image
+              <Camera className="w-4 h-4" />
+              Choose Image
             </button>
             <p className="text-xs text-gray-400 mt-1.5 text-center">
               JPG, PNG. Max 5MB
@@ -136,8 +138,8 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
             {loading ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              '✓'
-            )}{' '}
+              <Check className="w-4 h-4" />
+            )}
             Save Image
           </button>
         </div>

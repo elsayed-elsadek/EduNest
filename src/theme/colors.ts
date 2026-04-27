@@ -13,7 +13,7 @@ export const theme = {
     200: '#b3cde1',
     300: '#8db4d2',
     400: '#679bc3',
-    500: '#0C2D48',  // Primary (Dark Navy Blue)
+    500: '#0f5e8b',  // Primary (Updated to user's specified color)
     600: '#0a253c',  // Primary Dark (hover/active)
     700: '#081d30',
     800: '#061524',

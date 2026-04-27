@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
+import { Search, X } from 'lucide-react';
 import ChatItem from './ChatItem';
 import type { Chat, ChatTab } from '../../../../types/mentor-meaasges.types';
 
@@ -66,7 +67,7 @@ const ChatList: FC<ChatListProps> = ({
               }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
-              ✕
+              <X className="w-4 h-4" />
             </button>
           ) : (
             <svg
@@ -151,7 +152,7 @@ const ChatList: FC<ChatListProps> = ({
           ))
         ) : (
           <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-3">
-            <div className="text-3xl mb-1">🔍</div>
+            <Search className="w-8 h-8 text-gray-400 mb-1" />
             <p className="text-sm text-gray-500">
               {searchQuery ? `No results for "${searchQuery}"` : 'No conversations yet'}
             </p>

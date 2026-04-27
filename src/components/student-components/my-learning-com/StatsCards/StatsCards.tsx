@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { Star } from 'lucide-react';
 import StatCard from './StatCard';
 import type { StatsCardsProps } from './StatsCards.types';
 
@@ -24,7 +25,7 @@ const StatsCards: FC<StatsCardsProps> = ({ data }) => {
       {/* Total Points */}
       <StatCard label="Total Points">
         <span>{totalPoints.toLocaleString()}</span>
-        <span className="text-2xl">⭐</span>
+        <Star className="w-6 h-6 text-yellow-500" />
       </StatCard>
     </div>
   );

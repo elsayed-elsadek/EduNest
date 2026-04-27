@@ -1,6 +1,6 @@
 
 import  type { FC } from 'react';
-import { Play } from 'lucide-react';
+import { Play, User, ArrowRight } from 'lucide-react';
 import type { Course } from '../../../../types/student-role-types/course.types';
 const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
 
@@ -46,7 +46,7 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
         </h3>
         
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-          <span>👤</span>
+          <User className="w-4 h-4 text-gray-500" />
           <span>{course.instructor}</span>
         </div>
 
@@ -71,7 +71,7 @@ const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
           className="w-full mt-4 py-2.5 text-sm font-semibold text-[var(--primary-500)] border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
         >
           Resume Mentorship
-          <span>→</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 
 import type { FC } from 'react';
 import { useRef, useEffect, useState } from 'react';
+import { MessageCircle } from 'lucide-react';
 import ChatHeader from './ChatHeader';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
@@ -83,8 +84,9 @@ const ChatWindow: FC<ChatWindowProps> = ({
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent', maxHeight: 'calc(100vh - 200px)' }}
       >
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-gray-400">No messages yet. Say hello! 👋</p>
+          <div className="flex items-center justify-center h-full gap-2 text-center">
+            <MessageCircle className="w-5 h-5 text-gray-400" />
+            <p className="text-sm text-gray-400">No messages yet. Say hello!</p>
           </div>
         ) : (
           messages.map(message => {

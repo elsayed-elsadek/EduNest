@@ -1,4 +1,5 @@
 import { useEffect, useState, type FC } from 'react';
+import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { getRoomMembers, type RoomMemberDto } from '../../../services/Roomchatservice';
 
 interface Props {
@@ -53,23 +54,24 @@ const MembersPanel: FC<Props> = ({
         </div>
         <button onClick={onClose}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition">
-          ✕
+          <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* List */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {loading && (
           <div className="flex items-center justify-center h-32">
             <span className="w-6 h-6 border-2 border-[#2D9CDB] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
+
         {error && (
           <div className="flex flex-col items-center justify-center h-32 gap-2 text-gray-400">
-            <span className="text-2xl">⚠️</span>
+            <AlertTriangle className="w-10 h-10" />
             <p className="text-sm">Failed to load members</p>
           </div>
         )}
+
         {!loading && !error && members.length === 0 && (
           <p className="text-sm text-gray-400 text-center mt-10">No members found</p>
         )}
@@ -143,7 +145,8 @@ const MembersPanel: FC<Props> = ({
                 onClick={() => setConfirmDel(true)}
                 className="w-full py-2 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition flex items-center justify-center gap-2"
               >
-                🗑️ Delete Group
+                <Trash2 className="w-4 h-4" />
+                Delete Group
               </button>
             ) : (
               <div className="space-y-1.5">

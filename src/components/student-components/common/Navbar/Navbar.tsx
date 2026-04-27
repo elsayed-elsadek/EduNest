@@ -1,12 +1,13 @@
 
 import type { FC } from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Menu, X, ChevronDown, LogOut } from 'lucide-react';
+import { Search, Bell, Menu, X, ChevronDown, LogOut, User, Settings } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../../store/authStore';
 import { theme } from '../../../../theme/colors';
 import edunestLogo from '../../../../assets/edunestlogo.png';
 import { useStudentProfile } from '../../../../hooks/student-roleHooks/Usestudentprofile';
+import { useNotifications } from '../../../../hooks/Usenotifications';
 
 interface NavbarProps {
   userName?:   string;
@@ -26,6 +27,9 @@ const Navbar: FC<NavbarProps> = ({ userName: nameProp, userAvatar: avatarProp })
 
   // ── Fetch student profile for avatar ────────────────────────────────────
   const { profile: profileData } = useStudentProfile();
+
+  // ── Notifications ──────────────────────────────────────────────────────
+  const { unreadCount } = useNotifications();
 
   const userName   = nameProp   || storeUserName   || 'Student';
   const userAvatar = avatarProp || profileData?.avatar || storeUserAvatar || '';
@@ -59,7 +63,7 @@ const Navbar: FC<NavbarProps> = ({ userName: nameProp, userAvatar: avatarProp })
     { label: 'Learning',    path: '/student/learning'    },
     { label: 'Messages',    path: '/student/messages'    },
     { label: 'Profile',     path: '/student/profile'     },
-    { label: 'Setting',     path: '/student/settings'    },
+    { label: 'Settings',    path: '/student/settings'    },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -117,7 +121,9 @@ const Navbar: FC<NavbarProps> = ({ userName: nameProp, userAvatar: avatarProp })
               title="Notifications"
             >
               <Bell className="w-5 h-5 text-gray-700" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </button>
 
             {/* User Dropdown */}
@@ -152,17 +158,19 @@ const Navbar: FC<NavbarProps> = ({ userName: nameProp, userAvatar: avatarProp })
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-50">
                   <Link
                     to="/student/profile"
-                    className="block px-4 py-2.5 text-xs text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                     onClick={() => setIsUserDropdownOpen(false)}
                   >
-                    👤 View Profile
+                    <User className="w-3.5 h-3.5" />
+                    View Profile
                   </Link>
                   <Link
                     to="/student/settings"
-                    className="block px-4 py-2.5 text-xs text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                     onClick={() => setIsUserDropdownOpen(false)}
                   >
-                    ⚙️ Settings
+                    <Settings className="w-3.5 h-3.5" />
+                    Settings
                   </Link>
                   <div className="border-t border-gray-100 my-1" />
                   <button

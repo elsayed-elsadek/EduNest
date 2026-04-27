@@ -1,5 +1,6 @@
 
 import { type FC, useState, useRef, useEffect } from 'react';
+import { Ban, Edit3, Trash2 } from 'lucide-react';
 import type { Message } from '../../../../types/mentor-meaasges.types';
 
 interface MessageBubbleProps {
@@ -83,8 +84,9 @@ const MessageBubble: FC<MessageBubbleProps> = ({
               {isOwn ? 'You' : displayName}
             </span>
           )}
-          <div className="px-4 py-2.5 rounded-2xl text-sm italic text-gray-400 border border-gray-200 bg-gray-50">
-            🚫 You deleted this message
+          <div className="px-4 py-2.5 rounded-2xl text-sm italic text-gray-400 border border-gray-200 bg-gray-50 flex items-center gap-2">
+            <Ban className="w-4 h-4" />
+            You deleted this message
           </div>
           <span className="text-[10px] text-gray-400 mt-0.5 mx-1">{formatTime(message.timestamp)}</span>
         </div>
@@ -133,7 +135,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 
                     hover:bg-gray-50 transition-colors font-medium"
                 >
-                  <span className="text-base">✏️</span> Edit
+                  <Edit3 className="w-4 h-4" /> Edit
                 </button>
               )}
               {onEdit && onDelete && (
@@ -145,7 +147,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 
                     hover:bg-red-50 transition-colors font-medium"
                 >
-                  <span className="text-base">🗑️</span> Delete
+                  <Trash2 className="w-4 h-4" /> Delete
                 </button>
               )}
             </div>

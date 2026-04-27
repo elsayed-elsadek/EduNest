@@ -1,6 +1,6 @@
 
 import type { FC } from 'react';
-import { PlayCircle, Calendar } from 'lucide-react';
+import { PlayCircle, Calendar, Users, FileText, Briefcase, CheckCircle, Target, Trophy, Rocket, Sparkles } from 'lucide-react';
 import { useAuthStore }   from '../../../../store/authStore';
 import { useHomeImages }  from '../../../../hooks/useHomeImages';
 import { theme }          from '../../../../theme/colors';
@@ -28,7 +28,12 @@ const buildSmartSentence = (
   stats:  DashboardStats
 ): React.ReactNode => {
   if (events.length === 0 && stats.totalUpcoming === 0) {
-    return <>You're all caught up this week. Keep up the great work! 🎉</>;
+    return (
+      <>
+        You're all caught up this week. Keep up the great work!{' '}
+        <Trophy className="inline w-5 h-5 text-yellow-300" />
+      </>
+    );
   }
 
   const counts: Record<string, number> = {};
@@ -45,7 +50,12 @@ const buildSmartSentence = (
     parts.push(`${counts['QUIZ']} quiz${counts['QUIZ'] !== 1 ? 'zes' : ''}`);
 
   if (parts.length === 0)
-    return <>Ready to continue your journey today. Let's go! 🚀</>;
+    return (
+      <>
+        Ready to continue your journey today. Let's go!{' '}
+        <Rocket className="inline w-5 h-5 text-blue-300" />
+      </>
+    );
 
   return (
     <>
@@ -80,11 +90,12 @@ const HeroSection: FC<HeroSectionProps> = ({
   timelineEvents.forEach(e => { counts[e.type] = (counts[e.type] ?? 0) + 1; });
 
   const pills = [
-    counts['MENTORSHIP'] && { label: 'Sessions',  count: counts['MENTORSHIP'], bg: 'bg-blue-100',   emoji: '🎓' },
-    counts['ASSIGNMENT'] && { label: 'Tasks',      count: counts['ASSIGNMENT'], bg: 'bg-yellow-100', emoji: '📝' },
-    counts['PROJECT']    && { label: 'Projects',   count: counts['PROJECT'],    bg: 'bg-purple-100', emoji: '🗂️' },
-    counts['QUIZ']       && { label: 'Quizzes',    count: counts['QUIZ'],       bg: 'bg-green-100',  emoji: '✅' },
-  ].filter(Boolean) as { label: string; count: number; bg: string; emoji: string }[];
+    counts['MENTORSHIP'] && { label: 'Sessions',  count: counts['MENTORSHIP'], bg: 'bg-blue-100',   icon: Users },
+    counts['ASSIGNMENT'] && { label: 'Tasks',      count: counts['ASSIGNMENT'], bg: 'bg-yellow-100', icon: FileText },
+    counts['PROJECT']    && { label: 'Projects',   count: counts['PROJECT'],    bg: 'bg-purple-100', icon: Briefcase },
+    counts['QUIZ']       && { label: 'Quizzes',    count: counts['QUIZ'],       bg: 'bg-green-100',  icon: CheckCircle },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ].filter(Boolean) as { label: string; count: number; bg: string; icon: any }[];
 
   return (
     <div
@@ -104,8 +115,9 @@ const HeroSection: FC<HeroSectionProps> = ({
 
         {/* ── Left ── */}
         <div>
-          <div className="inline-block px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium text-white mb-4 uppercase tracking-wider">
-            ✨ Active Student Portal
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium text-white mb-4 uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
+            Active Student Portal
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
@@ -124,7 +136,7 @@ const HeroSection: FC<HeroSectionProps> = ({
           </p>
 
           <div className="flex flex-wrap gap-3">
-            {/* ── Resume Learning → ينقل لصفحة الـ Learning */}
+            {/* ── Resume Learning، ينقل لصفحة الـ Learning */}
             <button
               onClick={onResume}
               className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500)] text-white rounded-xl font-semibold hover:bg-[var(--primary-dark)] transition-colors shadow-lg shadow-blue-600/30"
@@ -133,7 +145,7 @@ const HeroSection: FC<HeroSectionProps> = ({
               Resume Learning
             </button>
 
-            {/* ── View Schedule → يسكرول لـ Timeline */}
+            {/* ── View Schedule، يسكرول لـ Timeline */}
             <button
               onClick={onSchedule}
               className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20"
@@ -167,8 +179,8 @@ const HeroSection: FC<HeroSectionProps> = ({
           {/* Progress floating card — bottom left */}
           <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-4 shadow-xl ring-1 ring-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center text-xl">
-                🎯
+              <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center">
+                <Target className="w-6 h-6 text-green-600" />
               </div>
               <div>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
@@ -188,16 +200,17 @@ const HeroSection: FC<HeroSectionProps> = ({
           {/* Upcoming floating card — top right (pills breakdown) */}
           {!loading && pills.length > 0 && (
             <div className="absolute -top-3 -right-3 bg-white rounded-2xl px-3 py-2.5 shadow-xl ring-1 ring-gray-100 min-w-[130px]">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                📅 Upcoming
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Upcoming
               </p>
               <div className="flex flex-col gap-1">
                 {pills.map(p => (
                   <div key={p.label} className="flex items-center gap-1.5">
                     <span
-                      className={`w-5 h-5 ${p.bg} rounded-md flex items-center justify-center text-[11px]`}
+                      className={`w-5 h-5 ${p.bg} rounded-md flex items-center justify-center`}
                     >
-                      {p.emoji}
+                      <p.icon className="w-3 h-3 text-gray-700" />
                     </span>
                     <span className="text-xs font-semibold text-gray-800">
                       {p.count} {p.label}

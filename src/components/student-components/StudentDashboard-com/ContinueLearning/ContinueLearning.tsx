@@ -1,7 +1,7 @@
 
 import type { FC } from 'react';
 import { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { theme } from '../../../../theme/colors';
 import CourseCard from './CourseCard';
@@ -60,10 +60,11 @@ const ContinueLearning: FC<ContinueLearningProps> = ({ courses, onResumeCourse }
           </button>
           <Link
             to="/student/learning"
-            className="text-xs font-semibold ml-1"
+            className="text-xs font-semibold ml-1 flex items-center gap-1"
             style={{ color: theme.primary[600] }}
           >
-            View all →
+            View all
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

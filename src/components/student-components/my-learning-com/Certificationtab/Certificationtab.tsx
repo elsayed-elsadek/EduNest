@@ -1,6 +1,6 @@
 
 import { type FC, useState } from 'react';
-import { Download, Share2, Award, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Download, Share2, Award, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 import type { Certificate } from '../../../../types/student-role-types/Certificate.types';
 
 // ── helpers 
@@ -72,7 +72,9 @@ const CertificateDocument: FC<{ cert: Certificate }> = ({ cert }) => (
     })}
     {([-170, 170] as number[]).map(x =>
       (['top','bottom'] as const).map(v => (
-        <div key={`${x}-${v}`} style={{ position:'absolute',[v]:50,left:'50%',transform:`translateX(calc(-50% + ${x}px))`,fontSize:90,opacity:0.05,userSelect:'none',pointerEvents:'none' }}>📖</div>
+        <div key={`${x}-${v}`} style={{ position:'absolute',[v]:50,left:'50%',transform:`translateX(calc(-50% + ${x}px))`,fontSize:90,opacity:0.05,userSelect:'none',pointerEvents:'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BookOpen style={{ width: '90px', height: '90px' }} />
+        </div>
       ))
     )}
     <div style={{ textAlign:'center', marginBottom:18 }}>
@@ -297,7 +299,7 @@ const CertificationTab: FC<CertificationTabProps> = ({
       {/* Empty */}
       {!loading && certificates.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-200 p-20 text-center">
-          <p className="text-5xl mb-4">🎓</p>
+          <Award className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-700 mb-1">No certificates yet</h3>
           <p className="text-sm text-gray-400">Complete a mentorship to earn your first credential.</p>
         </div>

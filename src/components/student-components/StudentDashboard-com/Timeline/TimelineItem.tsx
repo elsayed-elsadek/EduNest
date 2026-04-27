@@ -1,6 +1,7 @@
 
 
 import  type { FC } from 'react';
+import { Calendar, Users, FileText, Briefcase, ArrowRight } from 'lucide-react';
 import type { TimelineEvent } from '../../../../types/student-role-types/course.types';
 
 
@@ -15,11 +16,24 @@ const TimelineItem: FC<TimelineItemProps> = ({ event }) => {
     PROJECT: 'bg-purple-100',
   };
 
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'MENTORSHIP':
+        return <Users className="w-5 h-5 text-blue-600" />;
+      case 'ASSIGNMENT':
+        return <FileText className="w-5 h-5 text-orange-600" />;
+      case 'PROJECT':
+        return <Briefcase className="w-5 h-5 text-purple-600" />;
+      default:
+        return <Calendar className="w-5 h-5 text-gray-600" />;
+    }
+  };
+
   return (
     <div className="flex gap-3 p-4 hover:bg-gray-50 rounded-lg transition-colors group">
       {/* Icon */}
       <div className={`w-10 h-10 rounded-full ${iconBgColors[event.type]} flex items-center justify-center flex-shrink-0`}>
-        <span className="text-xl">{event.icon || '📅'}</span>
+        {getIcon(event.type)}
       </div>
 
       {/* Content */}
@@ -42,8 +56,9 @@ const TimelineItem: FC<TimelineItemProps> = ({ event }) => {
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">{event.time}</span>
           {event.status === 'UPCOMING' && (
-            <button className="text-xs font-medium text-blue-600 hover:text-blue-700">
-              Join Meeting →
+            <button className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              Join Meeting
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

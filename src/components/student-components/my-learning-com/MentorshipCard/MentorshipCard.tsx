@@ -2,6 +2,9 @@
 import type { FC } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { MentorshipCardProps } from './MentorshipCard.types';
+import { theme } from '../../../../theme/colors';
+
+const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
 
 const LEVEL_COLORS: Record<string, string> = {
   BEGINNER:     'bg-gray-800 text-white',
@@ -27,8 +30,7 @@ const MentorshipCard: FC<MentorshipCardProps> = ({ mentorship, onContinue }) => 
           alt={title}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.currentTarget.src =
-              'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80';
+            e.currentTarget.src = DEFAULT_COURSE_THUMBNAIL;
           }}
         />
         {/* Badges */}
@@ -54,12 +56,12 @@ const MentorshipCard: FC<MentorshipCardProps> = ({ mentorship, onContinue }) => 
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-medium text-gray-600">Progress</span>
-            <span className="text-xs font-bold text-blue-600">{progress}%</span>
+            <span className="text-xs font-bold" style={{ color: theme.primary[500] }}>{progress}%</span>
           </div>
           <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progress}%`, background: theme.primary[500] }}
             />
           </div>
         </div>

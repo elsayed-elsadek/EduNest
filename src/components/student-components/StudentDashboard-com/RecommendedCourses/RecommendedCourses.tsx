@@ -1,7 +1,7 @@
 
 import type { FC } from 'react';
 import { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { theme } from '../../../../theme/colors';
 import RecommendedCourseCard from './CourseCard';
@@ -57,10 +57,11 @@ const RecommendedCourses: FC<RecommendedCoursesProps> = ({ courses, onAddToCart 
           </button>
           <Link
             to="/explore-mentorships"
-            className="text-xs font-semibold ml-1"
+            className="text-xs font-semibold ml-1 flex items-center gap-1"
             style={{ color: theme.primary[600] }}
           >
-            Explore more →
+            Explore more
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

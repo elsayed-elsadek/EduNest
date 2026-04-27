@@ -83,7 +83,7 @@ const CreateRoomModal = ({ onClose, onCreated }: Props) => {
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -163,7 +163,7 @@ const CreateRoomModal = ({ onClose, onCreated }: Props) => {
             {loading ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              '✓'
+              <Check className="w-4 h-4" />
             )}{' '}
             Create Group
           </button>
