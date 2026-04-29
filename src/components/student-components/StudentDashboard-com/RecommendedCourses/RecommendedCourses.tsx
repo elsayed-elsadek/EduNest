@@ -1,88 +1,87 @@
 
 import type { FC } from 'react';
-import { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { theme } from '../../../../theme/colors';
-import RecommendedCourseCard from './CourseCard';
+import { useState } from 'react';
+import { Star, ShoppingCart } from 'lucide-react';
 import type { Course } from '../../../../types/student-role-types/course.types';
+import NoCover from '../../common/Nocover/Nocover';
 
-interface RecommendedCoursesProps {
-  courses: Course[];
+interface RecommendedCourseCardProps {
+  course:      Course;
   onAddToCart: (courseId: string) => void;
 }
 
-const RecommendedCourses: FC<RecommendedCoursesProps> = ({ courses, onAddToCart }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canLeft,  setCanLeft ] = useState(false);
-  const [canRight, setCanRight] = useState(courses.length > 2);
+const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({ course, onAddToCart }) => {
+  const [imgError, setImgError] = useState(false);
+  const showPlaceholder = !course.thumbnail || imgError;
 
-  const CARD_W = 300;
-
-  const scroll = (dir: 'left' | 'right') => {
-    scrollRef.current?.scrollBy({ left: dir === 'left' ? -CARD_W : CARD_W, behavior: 'smooth' });
-  };
-
-  const handleScroll = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 8);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 8);
-  };
+  const discountPct = course.originalPrice
+    ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
+    : 0;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900">Recommended for You</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Curated programs to expand your potential.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => scroll('left')}
-            disabled={!canLeft}
-            className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500
-                       hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            disabled={!canRight}
-            className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500
-                       hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <Link
-            to="/explore-mentorships"
-            className="text-xs font-semibold ml-1 flex items-center gap-1"
-            style={{ color: theme.primary[600] }}
-          >
-            Explore more
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300">
+      {/* Thumbnail */}
+      <div className="relative aspect-video overflow-hidden">
+        {showPlaceholder ? (
+          <NoCover title={course.title} />
+        ) : (
+          <img
+            src={course.thumbnail}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImgError(true)}
+          />
+        )}
+
+        {discountPct > 0 && (
+          <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+            {discountPct}% OFF
+          </div>
+        )}
       </div>
 
-      {/* Carousel track */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex gap-4 overflow-x-auto scroll-smooth pb-1"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {courses.map(course => (
-          <Link 
-          to={`/mentorships/${course.id}`}
-           key={course.id} className="flex-shrink-0 w-72">
-            <RecommendedCourseCard course={course} onAddToCart={onAddToCart} />
-          </Link>
-        ))}
+      {/* Content */}
+      <div className="p-5">
+        <div className="text-xs font-semibold text-[var(--primary-500,#1d4ed8)] mb-2 uppercase tracking-wide">
+          {course.category}
+        </div>
+
+        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">{course.title}</h3>
+
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+          Learn {course.title.toLowerCase()} with hands-on projects and real-world applications.
+        </p>
+
+        {/* Rating */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`w-4 h-4 ${i < Math.floor(course.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+              />
+            ))}
+          </div>
+          <span className="text-sm font-semibold text-gray-900">{course.rating.toFixed(1)}</span>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-gray-900">${course.price.toFixed(2)}</span>
+            {course.originalPrice && (
+              <span className="text-sm text-gray-500 line-through">${course.originalPrice.toFixed(2)}</span>
+            )}
+          </div>
+          <button
+            onClick={() => onAddToCart(course.id)}
+            className="p-2.5 bg-[var(--primary-500,#1d4ed8)] text-white rounded-lg hover:opacity-90 transition-opacity"
+          >
+            <ShoppingCart className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default RecommendedCourses;
+export default RecommendedCourseCard;

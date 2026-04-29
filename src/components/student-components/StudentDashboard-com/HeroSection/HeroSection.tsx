@@ -1,12 +1,14 @@
 
 import type { FC } from 'react';
-import { PlayCircle, Calendar, Users, FileText, Briefcase, CheckCircle, Target, Trophy, Rocket, Sparkles } from 'lucide-react';
-import { useAuthStore }   from '../../../../store/authStore';
-import { useHomeImages }  from '../../../../hooks/useHomeImages';
-import { theme }          from '../../../../theme/colors';
+import {
+  PlayCircle, Calendar,
+  Target, Rocket, Trophy, Sparkles,
+} from 'lucide-react';
+import { useAuthStore }  from '../../../../store/authStore';
+import { useHomeImages } from '../../../../hooks/useHomeImages';
+import { theme }         from '../../../../theme/colors';
 import type { DashboardStats } from '../../../../types/student-role-types/student-home-page.types';
 import type { TimelineEvent }  from '../../../../types/student-role-types/course.types';
-
 interface HeroSectionProps {
   stats:            DashboardStats;
   timelineEvents:   TimelineEvent[];
@@ -18,16 +20,15 @@ interface HeroSectionProps {
 
 const getGreeting = (): string => {
   const h = new Date().getHours();
+  if (h >= 0 && h < 5) return 'Good night';
   if (h < 12) return 'Good morning';
   if (h < 17) return 'Good afternoon';
   return 'Good evening';
 };
 
-const buildSmartSentence = (
-  events: TimelineEvent[],
-  stats:  DashboardStats
-): React.ReactNode => {
-  if (events.length === 0 && stats.totalUpcoming === 0) {
+// Build the smart sentence from actual API types (SESSION / TASK / PROJECT / QUIZ)
+const buildSmartSentence = (events: TimelineEvent[]): React.ReactNode => {
+  if (events.length === 0) {
     return (
       <>
         You're all caught up this week. Keep up the great work!{' '}
@@ -40,22 +41,22 @@ const buildSmartSentence = (
   events.forEach(e => { counts[e.type] = (counts[e.type] ?? 0) + 1; });
 
   const parts: string[] = [];
-  if ((counts['MENTORSHIP'] ?? 0) > 0)
-    parts.push(`${counts['MENTORSHIP']} mentorship session${counts['MENTORSHIP'] !== 1 ? 's' : ''}`);
-  if ((counts['ASSIGNMENT'] ?? 0) > 0)
-    parts.push(`${counts['ASSIGNMENT']} assignment${counts['ASSIGNMENT'] !== 1 ? 's' : ''}`);
-  if ((counts['PROJECT'] ?? 0) > 0)
-    parts.push(`${counts['PROJECT']} project deadline${counts['PROJECT'] !== 1 ? 's' : ''}`);
-  if ((counts['QUIZ'] ?? 0) > 0)
-    parts.push(`${counts['QUIZ']} quiz${counts['QUIZ'] !== 1 ? 'zes' : ''}`);
+  if (counts['SESSION'])  parts.push(`${counts['SESSION']} session${counts['SESSION'] !== 1 ? 's' : ''}`);
+  if (counts['TASK'])     parts.push(`${counts['TASK']} task${counts['TASK'] !== 1 ? 's' : ''}`);
+  if (counts['PROJECT'])  parts.push(`${counts['PROJECT']} project deadline${counts['PROJECT'] !== 1 ? 's' : ''}`);
+  if (counts['QUIZ'])     parts.push(`${counts['QUIZ']} quiz${counts['QUIZ'] !== 1 ? 'zes' : ''}`);
+  // legacy keys
+  if (counts['MENTORSHIP']) parts.push(`${counts['MENTORSHIP']} mentorship session${counts['MENTORSHIP'] !== 1 ? 's' : ''}`);
+  if (counts['ASSIGNMENT']) parts.push(`${counts['ASSIGNMENT']} assignment${counts['ASSIGNMENT'] !== 1 ? 's' : ''}`);
 
-  if (parts.length === 0)
+  if (parts.length === 0) {
     return (
       <>
         Ready to continue your journey today. Let's go!{' '}
         <Rocket className="inline w-5 h-5 text-blue-300" />
       </>
     );
+  }
 
   return (
     <>
@@ -72,7 +73,6 @@ const buildSmartSentence = (
 };
 
 const HeroSection: FC<HeroSectionProps> = ({
-  stats,
   timelineEvents,
   averageProgress,
   loading = false,
@@ -85,22 +85,10 @@ const HeroSection: FC<HeroSectionProps> = ({
   const greeting  = getGreeting();
   const progress  = averageProgress ?? 0;
 
-  // ── حساب الـ pills من timelineEvents
-  const counts: Record<string, number> = {};
-  timelineEvents.forEach(e => { counts[e.type] = (counts[e.type] ?? 0) + 1; });
-
-  const pills = [
-    counts['MENTORSHIP'] && { label: 'Sessions',  count: counts['MENTORSHIP'], bg: 'bg-blue-100',   icon: Users },
-    counts['ASSIGNMENT'] && { label: 'Tasks',      count: counts['ASSIGNMENT'], bg: 'bg-yellow-100', icon: FileText },
-    counts['PROJECT']    && { label: 'Projects',   count: counts['PROJECT'],    bg: 'bg-purple-100', icon: Briefcase },
-    counts['QUIZ']       && { label: 'Quizzes',    count: counts['QUIZ'],       bg: 'bg-green-100',  icon: CheckCircle },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ].filter(Boolean) as { label: string; count: number; bg: string; icon: any }[];
-
   return (
     <div
       className="rounded-3xl p-8 md:p-12 relative overflow-hidden"
-      style={{ background: theme.gradients.studentHero }}
+      style={{ background: theme.gradients?.studentHero ?? 'linear-gradient(135deg, #0c2d48 0%, #1a4d7a 100%)' }}
     >
       {/* Dot pattern */}
       <div
@@ -131,21 +119,19 @@ const HeroSection: FC<HeroSectionProps> = ({
                 <span className="h-4 w-1/2 bg-white/10 rounded animate-pulse block" />
               </span>
             ) : (
-              buildSmartSentence(timelineEvents, stats)
+              buildSmartSentence(timelineEvents)
             )}
           </p>
 
           <div className="flex flex-wrap gap-3">
-            {/* ── Resume Learning، ينقل لصفحة الـ Learning */}
             <button
               onClick={onResume}
-              className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500)] text-white rounded-xl font-semibold hover:bg-[var(--primary-dark)] transition-colors shadow-lg shadow-blue-600/30"
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--primary-500,#2563eb)] text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-blue-600/30"
             >
               <PlayCircle className="w-5 h-5" />
               Resume Learning
             </button>
 
-            {/* ── View Schedule، يسكرول لـ Timeline */}
             <button
               onClick={onSchedule}
               className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20"
@@ -176,16 +162,14 @@ const HeroSection: FC<HeroSectionProps> = ({
             )}
           </div>
 
-          {/* Progress floating card — bottom left */}
+          {/* Progress card — bottom left */}
           <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-4 shadow-xl ring-1 ring-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center">
                 <Target className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                  Progress
-                </p>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Progress</p>
                 {loading ? (
                   <div className="h-5 w-10 bg-gray-200 rounded animate-pulse mt-0.5" />
                 ) : (
@@ -196,30 +180,6 @@ const HeroSection: FC<HeroSectionProps> = ({
               </div>
             </div>
           </div>
-
-          {/* Upcoming floating card — top right (pills breakdown) */}
-          {!loading && pills.length > 0 && (
-            <div className="absolute -top-3 -right-3 bg-white rounded-2xl px-3 py-2.5 shadow-xl ring-1 ring-gray-100 min-w-[130px]">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                Upcoming
-              </p>
-              <div className="flex flex-col gap-1">
-                {pills.map(p => (
-                  <div key={p.label} className="flex items-center gap-1.5">
-                    <span
-                      className={`w-5 h-5 ${p.bg} rounded-md flex items-center justify-center`}
-                    >
-                      <p.icon className="w-3 h-3 text-gray-700" />
-                    </span>
-                    <span className="text-xs font-semibold text-gray-800">
-                      {p.count} {p.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

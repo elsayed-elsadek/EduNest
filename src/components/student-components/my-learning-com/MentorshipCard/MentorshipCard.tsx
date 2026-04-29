@@ -1,15 +1,16 @@
 
 import type { FC } from 'react';
+import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { MentorshipCardProps } from './MentorshipCard.types';
 import { theme } from '../../../../theme/colors';
-
-const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
+import NoCover from '../../common/Nocover/Nocover';
 
 const LEVEL_COLORS: Record<string, string> = {
   BEGINNER:     'bg-gray-800 text-white',
   INTERMEDIATE: 'bg-gray-800 text-white',
   ADVANCED:     'bg-gray-800 text-white',
+  ALL_LEVEL:    'bg-gray-800 text-white',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -20,36 +21,43 @@ const STATUS_COLORS: Record<string, string> = {
 
 const MentorshipCard: FC<MentorshipCardProps> = ({ mentorship, onContinue }) => {
   const { id, title, subtitle, thumbnail, level, category, progress, stats, currentWeek, statusLabel, statusType } = mentorship;
+  const [imgError, setImgError] = useState(false);
+
+  const showPlaceholder = !thumbnail || imgError;
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col">
-      {/* Thumbnail */}
+      {/* Thumbnail / Placeholder */}
       <div className="relative aspect-[16/9] overflow-hidden">
-        <img
-          src={thumbnail}
-          alt={title}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.src = DEFAULT_COURSE_THUMBNAIL;
-          }}
-        />
+        {showPlaceholder ? (
+          <NoCover title={title} />
+        ) : (
+          <img
+            src={thumbnail}
+            alt={title}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        )}
+
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          <span className={`px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-full ${LEVEL_COLORS[level]}`}>
+        <div className="absolute top-3 left-3 flex gap-1.5">
+          <span className={`px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-full ${LEVEL_COLORS[level] ?? 'bg-gray-800 text-white'}`}>
             {level}
           </span>
-          <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-full bg-gray-800 text-white">
-            {category}
-          </span>
+          {category && (
+            <span className="px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-full bg-gray-800 text-white">
+              {category}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Content */}
       <div className="p-5 flex flex-col gap-3 flex-1">
-        {/* Title */}
         <div>
           <h3 className="text-base font-bold text-gray-900 leading-snug">{title}</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+          {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
         </div>
 
         {/* Progress Bar */}
@@ -77,12 +85,8 @@ const MentorshipCard: FC<MentorshipCardProps> = ({ mentorship, onContinue }) => 
             ] as const
           ).map(({ label, val }) => (
             <div key={label} className="flex flex-col items-center">
-              <span className="text-[9px] font-semibold tracking-wider text-gray-400 uppercase">
-                {label}
-              </span>
-              <span className="text-xs font-bold text-gray-700 mt-0.5">
-                {val.done}/{val.total}
-              </span>
+              <span className="text-[9px] font-semibold tracking-wider text-gray-400 uppercase">{label}</span>
+              <span className="text-xs font-bold text-gray-700 mt-0.5">{val.done}/{val.total}</span>
             </div>
           ))}
         </div>
@@ -90,22 +94,18 @@ const MentorshipCard: FC<MentorshipCardProps> = ({ mentorship, onContinue }) => 
         {/* Footer Row */}
         <div className="flex items-end justify-between border-t border-gray-100 pt-2 mt-auto">
           <div>
-            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
-              CURRENT
-            </p>
-            <p className="text-sm font-bold text-gray-800">
-              Week {String(currentWeek).padStart(2, '0')}
-            </p>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">CURRENT</p>
+            <p className="text-sm font-bold text-gray-800">Week {String(currentWeek).padStart(2, '0')}</p>
           </div>
           <div className="text-right">
-            <p className={`text-[9px] font-semibold uppercase tracking-wider ${STATUS_COLORS[statusType]}`}>
+            <p className={`text-[9px] font-semibold uppercase tracking-wider ${STATUS_COLORS[statusType] ?? 'text-gray-400'}`}>
               {statusType.replace('_', ' ')}
             </p>
             <p className="text-xs font-medium text-gray-700">{statusLabel}</p>
           </div>
         </div>
 
-        {/* CTA Button */}
+        {/* CTA */}
         <button
           onClick={() => onContinue(id)}
           className="w-full mt-1 py-3 bg-[#0c2d48] hover:bg-[#0a2438] text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-colors duration-200"

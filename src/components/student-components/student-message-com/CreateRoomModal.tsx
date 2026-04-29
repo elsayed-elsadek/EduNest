@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { X, Check } from 'lucide-react';
 import { createRoom } from '../../../services/Roomchatservice';
 import api from '../../../services/api';
 

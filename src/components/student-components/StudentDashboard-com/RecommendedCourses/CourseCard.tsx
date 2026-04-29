@@ -1,104 +1,85 @@
 
-import  type { FC } from 'react';
-import { Star, ShoppingCart } from 'lucide-react';
+import type { FC } from 'react';
+import { useState } from 'react';
+import { Play, User, ArrowRight } from 'lucide-react';
 import type { Course } from '../../../../types/student-role-types/course.types';
-const DEFAULT_COURSE_THUMBNAIL = 'https://images.unsplash.com/photo-1514996937319-344454492b37?w=800&q=80';
+import NoCover from '../../common/Nocover/Nocover';
 
-interface RecommendedCourseCardProps {
-  course: Course;
-  onAddToCart: (courseId: string) => void;
+interface CourseCardProps {
+  course:   Course;
+  onResume: (courseId: string) => void;
 }
 
-const RecommendedCourseCard: FC<RecommendedCourseCardProps> = ({ 
-  course, 
-  onAddToCart 
-}) => {
-  const discountPercentage = course.originalPrice
-    ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
-    : 0;
+const CourseCard: FC<CourseCardProps> = ({ course, onResume }) => {
+  const [imgError, setImgError] = useState(false);
+  const showPlaceholder = !course.thumbnail || imgError;
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300">
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden">
-        <img
-          src={course.thumbnail || DEFAULT_COURSE_THUMBNAIL}
-          alt={course.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.currentTarget.src = DEFAULT_COURSE_THUMBNAIL;
-          }}
-        />
-        
-        {/* Discount Badge */}
-        {discountPercentage > 0 && (
-          <div className="absolute top-3 left-3 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
-            {discountPercentage}% OFF
+        {showPlaceholder ? (
+          <NoCover title={course.title} />
+        ) : (
+          <img
+            src={course.thumbnail}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImgError(true)}
+          />
+        )}
+
+        {/* Status badge */}
+        <div className="absolute top-3 left-3 px-3 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full">
+          IN PROGRESS
+        </div>
+
+        {/* Play overlay */}
+        {!showPlaceholder && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => onResume(course.id)}
+              className="w-16 h-16 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+            >
+              <Play className="w-8 h-8 text-blue-600 ml-1" fill="currentColor" />
+            </button>
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-5">
-        {/* Category */}
-        <div className="text-xs font-semibold text-[var(--primary-500)] mb-2 uppercase tracking-wide">
-          {course.category}
+        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">{course.title}</h3>
+
+        <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+          <User className="w-4 h-4 text-gray-500" />
+          <span>{course.instructor}</span>
         </div>
 
-        {/* Title */}
-        <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
-          {course.title}
-        </h3>
-
-        {/* Description - Mock */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-          Learn {course.title.toLowerCase()} with hands-on projects and real-world applications.
-        </p>
-
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 ${
-                  i < Math.floor(course.rating)
-                    ? 'text-yellow-400 fill-yellow-400'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
+        {/* Progress */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Course Progress</span>
+            <span className="font-bold text-gray-900">{course.progress}%</span>
           </div>
-          <span className="text-sm font-semibold text-gray-900">
-            {course.rating.toFixed(1)}
-          </span>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          {/* Price */}
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900">
-              ${course.price.toFixed(2)}
-            </span>
-            {course.originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                ${course.originalPrice.toFixed(2)}
-              </span>
-            )}
+          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[var(--primary-500,#1d4ed8)] rounded-full transition-all duration-300"
+              style={{ width: `${course.progress}%` }}
+            />
           </div>
-
-          {/* Add to Cart Button */}
-          <button
-            onClick={() => onAddToCart(course.id)}
-            className="p-2.5 bg-[var(--primary-500)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors"
-          >
-            <ShoppingCart className="w-5 h-5" />
-          </button>
         </div>
+
+        <button
+          onClick={() => onResume(course.id)}
+          className="w-full mt-4 py-2.5 text-sm font-semibold text-[var(--primary-500,#1d4ed8)] border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+        >
+          Resume Mentorship
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
 };
 
-export default RecommendedCourseCard;
+export default CourseCard;

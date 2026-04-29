@@ -1,6 +1,3 @@
-// types/student-role-types/homepage.types.ts
-
-// ── Raw API shapes ───────────────────────────────────────────────────────────
 
 export interface ContinueLearningDto {
   mentorshipId:       number;
@@ -27,13 +24,19 @@ export interface RecommendedMentorshipDto {
 }
 
 export interface UpcomingItemDto {
-  id:          number | string;
-  type:        'MENTORSHIP' | 'ASSIGNMENT' | 'PROJECT' | 'QUIZ';
-  title:       string;
-  description?: string;
-  dueDate?:    string;    // ISO
-  startTime?:  string;    // ISO
-  status:      'UPCOMING' | 'IN_PROGRESS' | 'COMPLETED';
+  id:              number | string;
+  type:            'SESSION' | 'TASK' | 'PROJECT' | 'QUIZ' | 'MENTORSHIP' | 'ASSIGNMENT';
+  title:           string;
+  description?:    string;
+  dueDate?:        string;       // ISO
+  startTime?:      string;       // ISO
+  status:          'UPCOMING' | 'IN_PROGRESS' | 'COMPLETED';
+  // extra fields from API
+  mentorshipId?:   number;
+  mentorshipTitle?: string;
+  weekId?:         number;
+  weekTitle?:      string;
+  points?:         number | null;
 }
 
 export interface HomepageDataDto {
@@ -50,8 +53,8 @@ export interface HomepageApiResponse {
 }
 
 export interface DashboardStats {
-  mentorshipSessions: number;   // MENTORSHIP type items
-  projectDeadlines:   number;   // PROJECT type items
-  assignments:        number;   // ASSIGNMENT type items
+  mentorshipSessions: number;   // SESSION type count
+  projectDeadlines:   number;   // PROJECT type count
+  assignments:        number;   // TASK type count
   totalUpcoming:      number;
 }
