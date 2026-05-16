@@ -2,14 +2,16 @@ import { useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Navbar from './components/Navbar';
+import AdminLayout from './components/admin-components/shared/AdminLayout';
 import './index.css';
 import { useAuthStore } from './store/authStore';
 import { ProtectedRoute } from './routes';
 import { queryClient } from './lib/queryClient';
+import AdminDashboard from './pages/admin-pages/AdminDashboard/AdminDashboard';
+import AdminPayment from './pages/admin-pages/AdminPayment/AdminPayment';
 
 // Lazy load all page components for code splitting
 // This significantly reduces initial bundle size and improves FCP/LCP
-
 // Pages with default exports
 const Home = lazy(() => import('./pages/Home'));
 const BecomeMentor = lazy(() => import('./pages/BecomeMentor'));
@@ -37,6 +39,8 @@ const Messages = lazy(() => import('./pages/mentor-pages/mentorMessages/Messages
 const NotificationsList = lazy(() => import('./pages/mentor-pages/mentorNotifications/NotificationsList'));
 const ProfilePage = lazy(() => import('./pages/mentor-pages/mentorProfile/ProfilePage'));
 const Setting = lazy(() => import('./pages/mentor-pages/mentorSettings/Settings'));
+const IssuesPage = lazy(() => import('./pages/admin-pages/IssuesPage/IssuesPage'));
+const AdminSettings = lazy(() => import('./pages/admin-pages/AdminSettings/AdminSettings'));
 const MentorshipDetail = lazy(() => import('./pages/mentor-pages/mentorship-detail/MentorshipDetail'));
 const EditMentorship = lazy(() => import('./pages/mentor-pages/edit-mentorship/EditMentorship'));
 const StudentProfile = lazy(() => import('./pages/mentor-pages/mentor-view-studentprofile/StudentProfile'));
@@ -153,7 +157,7 @@ function App() {
           <Route path="/confirm-restore" element={<ConfirmRestore />} />
           
           {/* Protected Mentor Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR', 'ROLE_ADMIN']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR']} />}>
             <Route path="/mentor/dashboard" element={<MentorDash />} />
             <Route path="/mentor/mentorships" element={<MyMentorships />} />
             <Route path="/mentor/mentorships/create" element={<CreateMentorship />} />
@@ -191,7 +195,12 @@ function App() {
 
           {/* Protected Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
-            <Route path="/admin/dashboard" element={<div>Admin Dashboard - Coming Soon</div>} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="payment" element={<AdminPayment />} />
+              <Route path="issues" element={<IssuesPage />} />
+              <Route path="configurations" element={<AdminSettings />} />
+            </Route>
           </Route>
         </Routes>
       </Suspense>

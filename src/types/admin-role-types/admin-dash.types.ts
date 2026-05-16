@@ -1,0 +1,124 @@
+
+export type TrendDirection = 'up' | 'down' | 'neutral';
+
+
+export interface AdminDashboardApiResponse {
+  apiResponse: {
+    message: string;
+    dashboard: {
+      cards: {
+        totalStudents:        number;
+        totalMentors:         number;
+        activeMentorships:    number;
+        completedMentorships: number;
+        totalRevenue:         number;
+      };
+      sessionsChart: {
+        month:         string;
+        year:          number;
+        totalSessions: number;
+      }[];
+      notifications: {
+        content: {
+          id:        number;
+          title:     string;
+          content:   string;
+          type:      string;
+          createdAt: string;
+        }[];
+        page:          number;
+        size:          number;
+        totalElements: number;
+        totalPages:    number;
+      };
+      topMentors: {
+        content: {
+          fullName:        string;
+          email:           string;
+          profileImageUrl: string | null;
+          totalStudents:   number;
+          totalRevenue:    number;
+        }[];
+        page:          number;
+        size:          number;
+        totalElements: number;
+        totalPages:    number;
+      };
+    };
+  };
+}
+
+//  UI Types 
+
+export interface StatCardData {
+  id:        string;
+  label:     string;
+  value:     string;
+  iconType:  'students' | 'mentors' | 'mentorships' | 'revenue';
+}
+
+export interface ChartPoint {
+  month:    string;
+  sessions: number;
+}
+
+export interface TopMentor {
+  rank:            number;
+  name:            string;
+  email:           string;
+  students:        number;
+  revenue:         string;
+  profileImageUrl: string | null;
+}
+
+export type ActivityType = 'mentorship' | 'verified' | 'alert' | 'payment' | 'session' | 'task' | 'announcement';
+
+export interface ActivityEvent {
+  id:          number;
+  type:        ActivityType;
+  title:       string;
+  description: string;
+  linkText?:   string;
+  timeLabel:   string;
+  isAlert:     boolean;
+}
+
+//  Component Props 
+
+export interface DashboardHeaderProps {
+  onExport:   () => void;
+  onRefresh:  () => void;
+  isLoading?: boolean;
+}
+
+export interface StatsGridProps {
+  stats: StatCardData[];
+}
+
+export interface StatCardProps {
+  data: StatCardData;
+}
+
+export interface EngagementChartProps {
+  data:          ChartPoint[];
+  selectedRange: string;
+  onRangeChange: (r: string) => void;
+}
+
+export interface TopMentorsProps {
+  mentors:    TopMentor[];
+  onViewAll?: () => void;
+}
+
+export interface MentorRowProps {
+  mentor: TopMentor;
+}
+
+export interface LiveActivityStreamProps {
+  events:     ActivityEvent[];
+  onViewAll?: () => void;
+}
+
+export interface ActivityItemProps {
+  event: ActivityEvent;
+}

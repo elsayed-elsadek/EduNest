@@ -80,9 +80,7 @@ const ChatHeader: FC<ChatHeaderProps> = ({
             {/* ← show mentorshipName, fallback to ID */}
             {chat.mentorshipName ?? (chat.mentorshipId ? `Mentorship #${chat.mentorshipId}` : 'Group Chat')}
           </p>
-        ) : (
-          <p className="text-xs text-[#4CAF50] font-medium">Online</p>
-        )}
+        ) : null}
       </div>
 
       {/* Action buttons */}

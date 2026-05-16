@@ -55,9 +55,7 @@ const ChatHeader: FC<ChatHeaderProps> = ({
           <p className="text-xs text-gray-400 truncate">
             {chat.mentorshipName ?? (chat.mentorshipId ? `Mentorship #${chat.mentorshipId}` : 'Group Chat')}
           </p>
-        ) : (
-          <p className="text-xs text-[#4CAF50] font-medium">Online</p>
-        )}
+        ) : null}
       </div>
 
       <div className="flex items-center gap-1">
