@@ -1,5 +1,6 @@
 
 import type { FC } from 'react';
+import { BookOpen } from 'lucide-react';
 import type { Mentorship } from '../../../types/viewStudent.types';
 
 const PRIMARY = '#0f5e8b';
@@ -25,12 +26,15 @@ const MentorshipAvatar: FC<{ m: Mentorship; size?: string }> = ({ m, size = 'w-1
       </div>
     );
   }
+
+  const FallbackIcon = m.iconComponent ?? BookOpen;
+
   return (
     <div
       className={`${size} rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0`}
       style={{ backgroundColor: m.iconColor }}
     >
-      {m.icon}
+      <FallbackIcon size={18} className="text-white" />
     </div>
   );
 };

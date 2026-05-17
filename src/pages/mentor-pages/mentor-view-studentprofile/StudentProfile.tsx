@@ -1,6 +1,7 @@
 
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
+import { BookOpen, BookMarked, BookText, BookDashed, Notebook, NotebookPen, CheckCircle2, Sparkles, Trophy } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import DashLayout from '../../../components/layout/Dash-layout';
@@ -14,10 +15,9 @@ import AwardBadgesModal from '../../../components/mentor-components/viewstuudent
 import type { Student, Mentorship, Project, SocialMedia, AwardedBadge } from '../../../types/viewStudent.types';
 import { getStudentFullProfile, extractStudentFullProfile } from '../../../services/Studentprofileservice';
 
-// ── App primary color (matches rest of app) ───────────────────────────────────
 const PRIMARY = '#0f5e8b';
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+// Skeleton 
 const ProfileSkeleton: FC = () => (
   <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-pulse">
     <div className="xl:col-span-1 bg-white rounded-2xl border border-gray-100 h-[650px]" />
@@ -33,11 +33,11 @@ const ProfileSkeleton: FC = () => (
   </div>
 );
 
-// ── Fallback emoji + color pools ──────────────────────────────────────────────
-const ICON_POOL  = ['📚','📘','📙','📕','📗','📓'];
+//  Fallback icon component + color pools 
+const ICON_POOL  = [BookOpen, BookMarked, BookText, BookDashed, Notebook, NotebookPen];
 const COLOR_POOL = ['#F59E0B','#3B82F6','#8B5CF6','#10B981','#EF4444','#EC4899'];
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+//  Page 
 const StudentProfile: FC = () => {
   const { id: studentId } = useParams<{ id: string }>();
   const navigate   = useNavigate();
@@ -58,6 +58,7 @@ const StudentProfile: FC = () => {
   const [mentorshipsTotalPages, setMentorshipsTotalPages ] = useState(1);
   const [projectsPage,          setProjectsPage         ] = useState(0);
   const [projectsTotalPages,    setProjectsTotalPages   ] = useState(1);
+  const [projectsTotalElements, setProjectsTotalElements] = useState(0);
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
   const fetchProfile = (mPage: number, pPage: number, spinner = true) => {
@@ -65,7 +66,7 @@ const StudentProfile: FC = () => {
     if (spinner) setLoading(true);
     setError(null);
 
-    getStudentFullProfile(studentId, { mentorshipsPage: mPage, projectsPage: pPage })
+    getStudentFullProfile(studentId, { mentorshipsPage: mPage, projectsPage: pPage, projectsSize: 1 })
       .then((res) => {
         const profile = extractStudentFullProfile(res);
         if (!profile) { setError('Could not parse student profile.'); return; }
@@ -94,7 +95,8 @@ const StudentProfile: FC = () => {
             id:               String(m.mentorshipId),
             name:             m.title,
             imageUrl:         m.imageUrl,                          // ← real cover from API
-            icon:             ICON_POOL[idx  % ICON_POOL.length],  // fallback
+            icon:             '',
+            iconComponent:    ICON_POOL[idx  % ICON_POOL.length],
             iconColor:        COLOR_POOL[idx % COLOR_POOL.length], // fallback
             startDate:        '',
             totalPoints:      m.totalPoints,
@@ -128,6 +130,7 @@ const StudentProfile: FC = () => {
           }))
         );
         setProjectsTotalPages(pData.totalPages || 1);
+        setProjectsTotalElements(pData.totalElements || 0);
 
         setAwardedBadges(aBadges.map((b): AwardedBadge => ({
           id:              b.id,
@@ -192,7 +195,7 @@ const StudentProfile: FC = () => {
                   className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 text-white"
                   style={{ backgroundColor: PRIMARY }}
                 >
-                  <span>🏆</span>
+                  <Trophy size={16} />
                   Award Badges
                   {awardedBadges.length > 0 && (
                     <span className="ml-1 bg-white text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: PRIMARY }}>
@@ -206,9 +209,9 @@ const StudentProfile: FC = () => {
             {/* ── Content ── */}
             <div className="xl:col-span-2 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <StatsCard icon={<span>📚</span>} label="Active Mentorships"    value={student.activeMentorships}               iconBgColor="bg-blue-50" />
-                <StatsCard icon={<span>✅</span>} label="Completed Mentorships" value={student.completedMentorships}            iconBgColor="bg-green-50" />
-                <StatsCard icon={<span>✨</span>} label="Total Points"          value={student.totalPoints.toLocaleString()}    iconBgColor="bg-orange-50" />
+                <StatsCard icon={<BookOpen size={22} className="text-blue-600" />} label="Active Mentorships"    value={student.activeMentorships}               iconBgColor="bg-blue-50" />
+                <StatsCard icon={<CheckCircle2 size={22} className="text-emerald-600" />} label="Completed Mentorships" value={student.completedMentorships}            iconBgColor="bg-green-50" />
+                <StatsCard icon={<Sparkles size={22} className="text-orange-500" />} label="Total Points"          value={student.totalPoints.toLocaleString()}    iconBgColor="bg-orange-50" />
               </div>
 
               <EnrolledMentorshipsTable
@@ -222,6 +225,7 @@ const StudentProfile: FC = () => {
                 projects={projects}
                 projectsPage={projectsPage}
                 projectsTotalPages={projectsTotalPages}
+                projectsTotalCount={projectsTotalElements}
                 onProjectsPageChange={handleProjectsPage}
                 awardedBadges={awardedBadges}
               />

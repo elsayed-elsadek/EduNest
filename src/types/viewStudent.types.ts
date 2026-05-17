@@ -1,4 +1,6 @@
 
+import type { ComponentType } from 'react';
+
 export interface Student {
   id:                   string;
   name:                 string;
@@ -15,7 +17,8 @@ export interface Mentorship {
   id:               string;
   name:             string;
   imageUrl?:        string;   // absolute URL from API mentorship cover image
-  icon:             string;   // fallback emoji if no image
+  icon:             string;   // fallback string label if no image
+  iconComponent?:   ComponentType<{ size?: number; className?: string }>;
   iconColor:        string;   // fallback bg color if no image
   startDate:        string;
   totalPoints:      number;
