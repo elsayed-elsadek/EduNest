@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: #f7f7f8;
+  color: #222;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+html, body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ============================================
+   CSS VARIABLES
+   ============================================ */
+:root {
+  --sidebar-bg: #0c2d48;
+  --active-bg: #f7f7f8;
+
+  --primary-from: #154d71;
+  --primary-via: #2a7fa8;
+  --primary-to: #33a1e0;
+  --primary-500: #0f5e8b;
+  --primary-dark: #0f3550;
+
+  --blue-from: #33A1E0;
+  --blue-to: #2176AE;
+}
+
+.dark {
+  --dark-bg: #0b1220;
+  --dark-card: #0f1724;
+  --dark-border: #1f2937;
+  --dark-muted: #9ca3af;
+  --dark-text: #e5e7eb;
+
+  --sidebar-bg: #071627;
+  --active-bg: #0b1220;
+  --accent: #d4af37;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+/* .dark .bg-white { background-color: var(--dark-card) !important; }
+.dark .bg-white\/95 { background-color: rgba(15,23,36,0.95) !important; }
+.dark .bg-gray-50 { background-color: var(--dark-bg) !important; }
+.dark .bg-gray-100 { background-color: var(--dark-card) !important; }
+.dark .bg-white\/70 { background-color: rgba(15,23,36,0.7) !important; }
+.dark .bg-\[\#F7F7F8\] { background-color: var(--dark-bg) !important; }
+.dark .bg-\[\#F7F8FA\] { background-color: var(--dark-bg) !important; }
+
+.dark .text-gray-900, .dark .text-gray-800 { color: var(--dark-text) !important; }
+.dark .text-gray-600 { color: var(--dark-muted) !important; }
+.dark .text-gray-500 { color: var(--dark-muted) !important; }
+.dark .text-gray-400 { color: #94a3b8 !important; }
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-50 { border-color: var(--dark-border) !important; }
+
+.dark .shadow-sm { box-shadow: none !important; }
+.dark .bg-gradient-to-br { background-image: none !important; } */
+
+/* ============================================
+   GLOBAL ELEMENTS
+   ============================================ */
+img, picture, video, canvas {
+  display: block;
+  max-width: 100%;
+}
+
+ul, ol { list-style: none; }
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* ============================================
+   COLORS & UTILITIES
+   ============================================ */
+.blueTextColor { color: rgba(28, 110, 164, 1); }
+.blueBGColor   { background-color: rgba(28, 110, 164, 1); }
+
+.hero-image {
+  @apply w-[360px] h-[400px] rounded-[30px] overflow-hidden;
+}
+
+img {
+  aspect-ratio: 1024 / 1034;
+}
+
+.text-primary { color: var(--primary-500); }
+.bg-primary   { background-color: var(--primary-500); }
+.btn-primary  { background-color: var(--primary-500); }
+
+.btn-blue-gradient {
+  background-image: linear-gradient(90deg, var(--blue-from), var(--blue-to));
+}
+
+/* ============================================
+   HOME PAGE
+   ============================================ */
+.mentor {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  background: #ffeeb5;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.mentor::before {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 20px;
+  border: 2px solid rgba(51, 161, 224, 0.8);
+  border-bottom: none;
+  border-right: none;
+  top: 31px;
+  left: -61%;
+  border-radius: 40px 0 0 0;
+  transform: rotate(-20deg);
+}
+
+.mentor::after {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 20px;
+  border: 2px solid rgba(51, 161, 224, 0.8);
+  border-bottom: none;
+  border-left: none;
+  top: 31px;
+  right: -61%;
+  border-radius: 0 40px 0 0;
+  transform: rotate(20deg);
+}
+
+/* ============================================
+   LOGO STRIP / MARQUEE
+   ============================================ */
+@keyframes marquee {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-100%); }
+}
+
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: flex;
+  animation: marquee 30s linear infinite;
+  width: max-content;
+}
+
+.marquee-container:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+/* ============================================
+   SIDEBAR INVERTED CURVES
+   ============================================ */
+.inverted-curve-top {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.inverted-curve-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--sidebar-bg);
+  border-bottom-right-radius: 20px;
+  box-shadow: 5px 5px 0 5px var(--active-bg);
+}
+
+.inverted-curve-bottom {
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.inverted-curve-bottom::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--sidebar-bg);
+  border-top-right-radius: 20px;
+  box-shadow: 5px -5px 0 5px var(--active-bg);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================
+   CHAT UNREAD BADGE ANIMATION
+   ============================================ */
+@keyframes chatBadgePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+    transform: scale(1.1);
+  }
+}

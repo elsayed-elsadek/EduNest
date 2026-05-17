@@ -123,14 +123,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
               const cleaned = content.replace(/^📎\s*/u, '').trim();
               const hasAttachmentName = cleaned.length > 0 && /\.[a-zA-Z0-9]{1,8}$/u.test(cleaned);
 
-              // if backend sends /uploads/... path inside content, use it as-is
-              // else assume it's just the filename
-              const url = hasAttachmentName
-                ? (cleaned.startsWith('/uploads/')
-                  ? `${BASE_URL}${cleaned}`
-                  : (cleaned.startsWith('http') ? cleaned : `${BASE_URL}/uploads/${cleaned}`)
-                )
-                : null;
+              const url = hasAttachmentName ? (cleaned.startsWith('http') ? cleaned : `${BASE_URL}/uploads/${cleaned}`) : null;
 
               // Image preview if looks like image by extension
               const isImg = !!url && /\.(png|jpe?g|gif|webp|bmp|svg)$/iu.test(cleaned);

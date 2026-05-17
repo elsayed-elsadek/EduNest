@@ -1,7 +1,6 @@
 
 
 export interface Mentorship {
-  totalEnroll: number;
   id: string;
   title: string;
   description?: string;

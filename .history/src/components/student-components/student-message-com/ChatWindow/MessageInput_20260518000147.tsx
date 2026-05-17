@@ -91,8 +91,10 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, disabled }) => {
   const handleSend = () => {
     if (disabled) return;
 
+    // Current UI: we only display preview; actual attachment upload must be wired to backend.
     if (previewFile) {
-      onSend(previewFile.name);
+      // backend expects the chat message content; at least keep compatibility for now.
+      onSend(`📎 ${previewFile.name}`);
       setPreviewFile(null);
       return;
     }

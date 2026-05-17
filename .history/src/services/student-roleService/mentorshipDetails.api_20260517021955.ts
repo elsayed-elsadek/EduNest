@@ -1,58 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import api from '../api';
 import { queryClient } from '../../lib/queryClient';
 import type { MentorshipDetails, MentorshipDetailsApiResponse, MentorshipSummary, MentorshipContentResponse, WeekContent, WeekContentResponse, Week, MentorshipOverviewApiResponse, MentorshipOverviewEnrolled } from '../../types/student-role-types/studentMentorshipTypes';
-
-// ── Chat Room Types ────────────────────────────────────────────────────────
-export interface MentorshipRoomWithStatus {
-  roomId: number;
-  roomName: string;
-  roomCoverImage: string | null;
-  joined: boolean;
-}
-
-export interface MentorshipRoomsResponse {
-  apiResponse: {
-    rooms: MentorshipRoomWithStatus[];
-    status: string;
-  };
-}
-
-// GET /api/v1/chat-room/mentorship/{mentorshipId}/rooms-with-status
-export const getMentorshipRoomsWithStatus = async (
-  mentorshipId: number | string
-): Promise<MentorshipRoomWithStatus[]> => {
-  const { data } = await api.get<MentorshipRoomsResponse>(
-    `/api/v1/chat-room/mentorship/${mentorshipId}/rooms-with-status`
-  );
-  return data.apiResponse.rooms;
-};
-
-// POST /api/v1/chat-room/{roomId}/join
-export const joinMentorshipRoom = async (roomId: number): Promise<void> => {
-  await api.post(`/api/v1/chat-room/${roomId}/join`);
-};
-
-// Hook: fetch rooms with status for a mentorship
-export const useMentorshipRooms = (mentorshipId: number | string, enabled = true) => {
-  return useQuery({
-    queryKey: ['mentorshipRooms', mentorshipId],
-    queryFn: () => getMentorshipRoomsWithStatus(mentorshipId),
-    enabled: enabled && !!mentorshipId,
-    staleTime: 30 * 1000,
-  });
-};
-
-// Hook: join a room (mutation)
-export const useJoinRoom = (mentorshipId: number | string) => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (roomId: number) => joinMentorshipRoom(roomId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['mentorshipRooms', mentorshipId] });
-    },
-  });
-};
 
 const baseUrl = import.meta.env.VITE_BASE_URL ?? '';
 

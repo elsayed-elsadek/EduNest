@@ -116,55 +116,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
                 : 'bg-gray-100 text-gray-900 rounded-bl-sm'
               }`}
           >
-            {(() => {
-              const content = message.content ?? '';
-              // Backend stores attachments in content as the filename, but uploads are served from /uploads
-              // Example content: "📎 Good team-bro (1).webp"
-              const cleaned = content.replace(/^📎\s*/u, '').trim();
-              const hasAttachmentName = cleaned.length > 0 && /\.[a-zA-Z0-9]{1,8}$/u.test(cleaned);
-
-              // if backend sends /uploads/... path inside content, use it as-is
-              // else assume it's just the filename
-              const url = hasAttachmentName
-                ? (cleaned.startsWith('/uploads/')
-                  ? `${BASE_URL}${cleaned}`
-                  : (cleaned.startsWith('http') ? cleaned : `${BASE_URL}/uploads/${cleaned}`)
-                )
-                : null;
-
-              // Image preview if looks like image by extension
-              const isImg = !!url && /\.(png|jpe?g|gif|webp|bmp|svg)$/iu.test(cleaned);
-              if (isImg && url) {
-                return (
-                  <div className="flex flex-col gap-2">
-                    <img
-                      src={url}
-                      alt={cleaned}
-                      className="max-w-[220px] max-h-[220px] rounded-xl object-cover"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <p className="break-words text-xs text-white/80">{cleaned}</p>
-                  </div>
-                );
-              }
-
-              if (hasAttachmentName && url) {
-                return (
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 underline decoration-dotted underline-offset-2"
-                    title={cleaned}
-                  >
-                    <span className="break-words">{cleaned}</span>
-                  </a>
-                );
-              }
-
-              return <p className="break-words">{content}</p>;
-            })()}
-
+            <p className="break-words">{message.content}</p>
             <span className={`text-xs mt-1 block ${isOwn ? 'text-white/70' : 'text-gray-500'}`}>
               {formatTime(message.timestamp)}
             </span>

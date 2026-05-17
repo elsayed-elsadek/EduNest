@@ -98,14 +98,20 @@ const CombinedClientAndFAQSections: React.FC = () => {
         
         {/* Left Side: Header and Question Mark Icon */}
         <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <h2 className="text-2xl sm:text-[29px] font-bold text-gray-900 mb-6 leading-tight mt-10">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight mt-10">
             Frequently asked questions
           </h2>
           {/* Question Mark Image Placeholder */}
-          <div className="w-72 h-56 mt-8 m-auto">
+          <div className="w-56 h-56 mt-8">
             <div className="w-full h-full flex items-center justify-center relative">
               <img src={askedImg } alt="askedImg" />
-        
+              <img src={askedImg } alt="askedImg"  className='w-12 absolute top-10 right-0 '/>
+              <img src={askedImg } alt="askedImg"  className='w-12 absolute top-15 right-5 '/>
+              <img src={askedImg } alt="askedImg"  className='w-12 absolute bottom-15 left-5 '/>
+              <img src={askedImg } alt="askedImg"  className='w-12 absolute bottom-10 left-0 '/>
+              <img src={askedImg } alt="askedImg"  className='w-12 absolute bottom-10 right-0 '/>
+
+
             </div>
           </div>
         </div>

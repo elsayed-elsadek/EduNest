@@ -107,11 +107,11 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
                   <span className="text-[10px] lg:text-sm font-bold tracking-widest text-slate-200">{mentorship?.duration} Months </span>
                 </div>
               )}
-             {!isEnrolled && ( 
+             {isEnrolled && ( 
                    <div className="flex items-center gap-2">
                 <Star className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-500 fill-amber-400" />
                 <span className="text-[10px] lg:text-sm font-bold tracking-widest text-slate-200">{mentorship?.rating?.toFixed(1) || '0.0'}</span>
-              </div> )}
+              </div>}
             </div>
 
             {/* Tags */}

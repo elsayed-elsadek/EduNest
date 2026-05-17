@@ -18,7 +18,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const root = window.document.documentElement;
 
-    // i stoped using `dark` class and switched to `light`
+    // i stoped using `dark` class and switched to `light` for dark mode to avoid
     if (theme === 'dark') root.classList.add('light');  
     else root.classList.remove('dark');
     try { localStorage.setItem('theme', theme); } catch { /* ignore */ }

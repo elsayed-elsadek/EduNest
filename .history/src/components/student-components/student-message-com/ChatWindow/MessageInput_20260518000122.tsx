@@ -88,13 +88,14 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, disabled }) => {
     ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`;
   }, [message]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (disabled) return;
 
+    // Attachment -> upload then send URL
     if (previewFile) {
-      onSend(previewFile.name);
-      setPreviewFile(null);
-      return;
+      try {
+        const file = e.target.files?.[0];
+      } catch {}
     }
 
     if (message.trim()) {

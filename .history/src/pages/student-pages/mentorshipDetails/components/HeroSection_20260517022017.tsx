@@ -1,9 +1,8 @@
 import { type FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Clock, MessageCircle, BadgeCheck, Flame, PlayCircle, Users } from 'lucide-react';
+import { Star, ShieldCheck, Clock, MessageCircle, BadgeCheck, Flame, PlayCircle } from 'lucide-react';
 import type { MentorshipDetails } from '../../../../types/student-role-types/studentMentorshipTypes';
 import { API_BASE_URL } from '../../../../services/api';
-import GroupsModal from './GroupsModal';
 
 interface HeroSectionProps {
   mentorship?: MentorshipDetails;
@@ -22,7 +21,6 @@ const formatCurrency = (value: number) =>
 const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolled }) => {
   const navigate = useNavigate();
   const [imageError] = useState(false);
-  const [showGroups, setShowGroups] = useState(false);
 
   const discountPercent = mentorship?.price && mentorship?.finalPrice
     ? Math.round(((mentorship.price - mentorship.finalPrice) / mentorship.price) * 100)
@@ -56,7 +54,6 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
   };
 
   return (
-    <>
     <section
       id="overview"
       className="relative min-h-[500px] lg:min-h-[600px] flex items-center overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-900 shadow-2xl"
@@ -107,11 +104,10 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
                   <span className="text-[10px] lg:text-sm font-bold tracking-widest text-slate-200">{mentorship?.duration} Months </span>
                 </div>
               )}
-             {!isEnrolled && ( 
-                   <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Star className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-500 fill-amber-400" />
-                <span className="text-[10px] lg:text-sm font-bold tracking-widest text-slate-200">{mentorship?.rating?.toFixed(1) || '0.0'}</span>
-              </div> )}
+                <span className="text-[10px] lg:text-sm font-bold tracking-widest text-slate-200">{mentorship?.rating?.toFixed(1) || '4.5'}</span>
+              </div>
             </div>
 
             {/* Tags */}
@@ -125,46 +121,26 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
               </div>
             </div>
 
-            {/* ENROLLED ACTION BUTTONS */}
+            {/* CONTINUE LEARNING BUTTON */}
             {isEnrolled && (
-              <div className="pt-4 lg:pt-6 flex flex-wrap gap-3">
+              <div className="pt-4 lg:pt-6">
                 <button
                   type="button"
                   onClick={handleContinueLearning}
                   className="
-                    inline-flex items-center gap-2.5
-                    px-6 py-3
-                    bg-[var(--primary-500)] text-white
-                    rounded-xl
-                    text-base font-semibold
-                    hover:bg-[var(--primary-dark)]
-                    transition-all duration-300
-                    active:scale-95
-                    shadow-md shadow-emerald-900/20
-                  "
+        inline-flex items-center gap-2.5
+        px-6 py-3
+        bg-[var(--primary-500)] text-white
+        rounded-xl
+        text-base font-semibold
+        hover:bg-[var(--primary-dark)]
+        transition-all duration-300
+        active:scale-95
+        shadow-md shadow-emerald-900/20
+      "
                 >
                   <PlayCircle className="w-5 h-5" />
                   Continue Learning
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowGroups(true)}
-                  className="
-                    inline-flex items-center gap-2.5
-                    px-6 py-3
-                    bg-white/10 hover:bg-white/20
-                    border border-white/20 hover:border-white/40
-                    text-white
-                    rounded-xl
-                    text-base font-semibold
-                    backdrop-blur-sm
-                    transition-all duration-300
-                    active:scale-95
-                  "
-                >
-                  <Users className="w-5 h-5" />
-                  View Groups
                 </button>
               </div>
             )}
@@ -233,15 +209,6 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
         </div>
       </div>
     </section>
-
-      {/* Groups Modal */}
-      {showGroups && mentorshipId && (
-        <GroupsModal
-          mentorshipId={mentorshipId}
-          onClose={() => setShowGroups(false)}
-        />
-      )}
-    </>
   );
 };
 
