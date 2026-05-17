@@ -55,7 +55,10 @@ const ChatHeader: FC<ChatHeaderProps> = ({
           <p className="text-xs text-gray-400 truncate">
             {chat.mentorshipName ?? (chat.mentorshipId ? `Mentorship #${chat.mentorshipId}` : 'Group Chat')}
           </p>
-        ) : null}
+        ) : (
+          // Online status placeholder — wire up to backend when available
+          <p className="text-xs text-[#4CAF50] font-medium"></p>
+        )}
       </div>
 
       <div className="flex items-center gap-1">

@@ -63,7 +63,7 @@ const Messages: FC = () => {
     }
 
     window.history.replaceState({}, '');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, direct.loading]);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ const Messages: FC = () => {
       setSelectedChatId(realConv.id);
       direct.openConversation(realConv);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [direct.chats]);
 
   const rawChatList: Chat[] = isRoomTab ? room.rooms : direct.chats;
@@ -83,12 +83,12 @@ const Messages: FC = () => {
   // ── Mentorship filter tags (groups only) ─────────────────────────────────
   const mentorshipTags = isRoomTab
     ? Array.from(
-        new Set(
-          room.rooms
-            .map(r => r.mentorshipName ?? (r.mentorshipId ? `#${r.mentorshipId}` : null))
-            .filter(Boolean) as string[]
-        )
+      new Set(
+        room.rooms
+          .map(r => r.mentorshipName ?? (r.mentorshipId ? `#${r.mentorshipId}` : null))
+          .filter(Boolean) as string[]
       )
+    )
     : [];
 
   const activeItem: Chat | null = (() => {
@@ -113,7 +113,7 @@ const Messages: FC = () => {
   })();
 
   const messages = isRoomTab ? room.messages : direct.messages;
-  const myEmail  = isRoomTab ? room.myEmail  : direct.myEmail;
+  const myEmail = isRoomTab ? room.myEmail : direct.myEmail;
 
   const handleSelectChat = (chatId: string) => {
     virtualTargetEmailRef.current = null;
@@ -167,7 +167,7 @@ const Messages: FC = () => {
     <div className="min-h-screen bg-[#F7F7F8] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden ">
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm h-full flex flex-col">
 
           {/* ── Frame Header ── */}
@@ -182,11 +182,11 @@ const Messages: FC = () => {
           </div>
 
           {/* ── Content Layout ── */}
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden ">
 
             {/* ── Chat List Sidebar ── */}
             <div
-              className={`flex-shrink-0 w-full lg:w-80 xl:w-96 flex flex-col border-r border-gray-200
+              className={`flex-shrink-0 w-full lg:w-80 xl:w-96 flex flex-col border-r border-gray-200 
                 ${selectedChatId ? 'hidden lg:flex' : 'flex'}`}
               style={{ height: '100%', minHeight: 0 }}
             >
@@ -202,7 +202,7 @@ const Messages: FC = () => {
 
             {/* ── Chat Window ── */}
             <div
-              className={`flex-1 min-w-0 flex flex-col relative
+              className={`flex-1 min-w-0 flex flex-col relative 
                 ${!selectedChatId ? 'hidden lg:flex' : 'flex'}`}
               style={{ height: '100%', minHeight: 0 }}
             >
