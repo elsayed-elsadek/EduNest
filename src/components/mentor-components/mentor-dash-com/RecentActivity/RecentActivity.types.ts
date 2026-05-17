@@ -1,7 +1,4 @@
 
-
-
-
 export interface StudentActivity {
   /** optional extra field used by some implementations */
   title?: unknown;
