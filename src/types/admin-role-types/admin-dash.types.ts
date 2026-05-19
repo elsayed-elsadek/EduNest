@@ -48,6 +48,38 @@ export interface AdminDashboardApiResponse {
   };
 }
 
+export interface UserSummaryData {
+  id: number;
+  enabled: boolean;
+  roleName: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  profileImageUrl: string | null;
+}
+
+export interface MonthlyUserStat {
+  month: string;
+  year: number;
+  totalUsers: number;
+}
+
+export interface AdminUsersDashboardSummaryResponse {
+  apiResponse: {
+    dashboardSummary: {
+      monthlyUsers: MonthlyUserStat[];
+      allUsersPaginated: {
+        content: UserSummaryData[];
+        page: number;
+        size: number;
+        totalElements: number;
+        totalPages: number;
+      };
+    };
+    message: string;
+  };
+}
+
 //  UI Types 
 
 export interface StatCardData {

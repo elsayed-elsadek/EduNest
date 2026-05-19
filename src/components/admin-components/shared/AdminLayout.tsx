@@ -13,7 +13,7 @@ const AdminLayout: FC = () => {
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <AdminHeader onMenuToggle={() => setSidebarOpen(prev => !prev)} />
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
       </div>
