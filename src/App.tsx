@@ -10,6 +10,7 @@ import { queryClient } from './lib/queryClient';
 import AdminDashboard from './pages/admin-pages/AdminDashboard/AdminDashboard';
 import AdminPayment from './pages/admin-pages/AdminPayment/AdminPayment';
 import MentorshipOverviewPage from './pages/student-pages/studentLearning/MentorshipOverviewPage';
+import AdminUsers from './pages/admin-pages/admin-users/AdminUsers';
 
 // Lazy load all page components for code splitting
 // This significantly reduces initial bundle size and improves FCP/LCP
@@ -203,6 +204,8 @@ function App() {
               <Route path="payment" element={<AdminPayment />} />
               <Route path="issues" element={<IssuesPage />} />
               <Route path="configurations" element={<AdminSettings />} />
+              <Route path="users" element={<AdminUsers/>} />  
+
             </Route>
             <Route path="/admin/dashboard" element={<div>Admin Dashboard - Coming Soon</div>} />
           </Route>
