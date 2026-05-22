@@ -1,6 +1,6 @@
 
 import type { FC } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Mentorship } from '../../../types/viewStudent.types';
 
 const PRIMARY = '#0f5e8b';
@@ -92,8 +92,8 @@ const Pagination: FC<{ current: number; total: number; onChange: (p: number) => 
       <button
         onClick={() => onChange(current - 1)}
         disabled={current === 0}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm font-medium"
-      >‹</button>
+        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+      ><ChevronLeft size={16} /></button>
 
       {Array.from({ length: total }).map((_, i) => (
         <button
@@ -111,8 +111,8 @@ const Pagination: FC<{ current: number; total: number; onChange: (p: number) => 
       <button
         onClick={() => onChange(current + 1)}
         disabled={current === total - 1}
-        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition text-sm font-medium"
-      >›</button>
+        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
+      ><ChevronRight size={16} /></button>
     </div>
   );
 };

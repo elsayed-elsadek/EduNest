@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
+import { X, Check } from 'lucide-react';
 import { createRoom } from '../../../services/Roomchatservice';
 import api from '../../../services/api';
 
@@ -77,7 +78,7 @@ const CreateRoomModal = ({ onClose, onCreated }: Props) => {
           <h2 className="text-lg font-bold text-gray-900">Create New Group</h2>
           <button onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition">
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -144,7 +145,7 @@ const CreateRoomModal = ({ onClose, onCreated }: Props) => {
             className="flex-1 py-2.5 rounded-xl bg-[#2D9CDB] text-white text-sm font-medium hover:bg-[#2589c3] transition disabled:opacity-40 flex items-center justify-center gap-2">
             {loading
               ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : '✓'} Create Group
+              : <Check className="w-4 h-4" />} Create Group
           </button>
         </div>
       </div>

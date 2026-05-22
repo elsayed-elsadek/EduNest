@@ -1,24 +1,45 @@
 
 import { useState, useEffect, useRef, type FC } from 'react';
+import {
+  AlertTriangle,
+  Check,
+
+  Crown,
+  Edit2,
+  Flame,
+
+  Palette,
+  Puzzle,
+  Plus,
+  Search,
+  Star,
+  Trash2,
+  Trophy,
+  Users,
+  X,
+  Zap,
+} from 'lucide-react';
 import { useBadges } from '../../../hooks/Usebadges';
 import type { BadgeCategory, CreateBadgeInput } from '../../../services/Badgesservice';
 
 const MAX_BADGES = 10;
 
-const CATEGORIES: { value: BadgeCategory; label: string; emoji: string; color: string }[] = [
-  { value: 'ACHIEVEMENT',         label: 'Achievement',         emoji: '🏆', color: '#F59E0B' },
-  { value: 'PERFORMANCE',         label: 'Performance',         emoji: '⚡', color: '#3B82F6' },
-  { value: 'CONSISTENCY',         label: 'Consistency',         emoji: '🔥', color: '#EF4444' },
-  { value: 'PROBLEM_SOLVING',     label: 'Problem Solving',     emoji: '🧩', color: '#8B5CF6' },
-  { value: 'CREATIVITY',          label: 'Creativity',          emoji: '🎨', color: '#EC4899' },
-  { value: 'LEADERSHIP',          label: 'Leadership',          emoji: '👑', color: '#F59E0B' },
-  { value: 'COMMUNITY',           label: 'Community',           emoji: '🤝', color: '#10B981' },
-  { value: 'SPECIAL_RECOGNITION', label: 'Special Recognition', emoji: '⭐', color: '#6366F1' },
+const CATEGORIES: { value: BadgeCategory; label: string; Icon: FC<{ size?: number; className?: string; color?: string }>; color: string }[] = [
+  { value: 'ACHIEVEMENT',         label: 'Achievement',         Icon: Trophy,      color: '#F59E0B' },
+  { value: 'PERFORMANCE',         label: 'Performance',         Icon: Zap,         color: '#3B82F6' },
+  { value: 'CONSISTENCY',         label: 'Consistency',         Icon: Flame,       color: '#EF4444' },
+  { value: 'PROBLEM_SOLVING',     label: 'Problem Solving',     Icon: Puzzle,      color: '#8B5CF6' },
+  { value: 'CREATIVITY',          label: 'Creativity',          Icon: Palette,     color: '#EC4899' },
+  { value: 'LEADERSHIP',          label: 'Leadership',          Icon: Crown,       color: '#F59E0B' },
+  { value: 'COMMUNITY',           label: 'Community',           Icon: Users,       color: '#10B981' },
+  { value: 'SPECIAL_RECOGNITION', label: 'Special Recognition', Icon: Star,        color: '#6366F1' },
 ];
 
 const getCat = (v: BadgeCategory) => CATEGORIES.find(c => c.value === v) ?? CATEGORIES[0];
 
-interface MentorshipInfo { id: string; name: string; emoji?: string; }
+
+
+interface MentorshipInfo { id: string; name: string; }
 interface Props {
   studentName:     string;
   studentId:       number;    // ← needed for award API
@@ -38,7 +59,9 @@ const ToastStack: FC<{ toasts: { id: number; message: string; type: 'success'|'e
         className={`flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white max-w-xs
           ${t.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}
         style={{ animation: 'slideIn .3s ease' }}>
-        <span className="flex-shrink-0">{t.type === 'success' ? '✓' : '✕'}</span>
+        <span className="flex-shrink-0">
+          {t.type === 'success' ? <Check size={16} /> : <X size={16} />}
+        </span>
         {t.message}
       </div>
     ))}
@@ -75,14 +98,16 @@ const BadgeFormModal: FC<{
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-lg font-bold text-gray-900">
-                {mode === 'edit' ? '✏️ Edit Badge' : '✨ Create New Badge'}
+                {mode === 'edit' ? 'Edit Badge' : 'Create New Badge'}
               </h3>
               <p className="text-sm text-gray-400 mt-0.5">
                 {mode === 'edit' ? 'Update badge details' : `Creating inside: ${mentorshipName}`}
               </p>
             </div>
             <button onClick={onCancel}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition">✕</button>
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition">
+              <X size={18} />
+            </button>
           </div>
         </div>
 
@@ -90,7 +115,7 @@ const BadgeFormModal: FC<{
           {/* Validation error */}
           {formError && (
             <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600 font-medium">
-              <span>⚠️</span> {formError}
+              <AlertTriangle size={16} className="flex-shrink-0" /> {formError}
             </div>
           )}
           {/* Category */}
@@ -99,9 +124,9 @@ const BadgeFormModal: FC<{
             <div className="relative">
               <select value={form.category}
                 onChange={e => setForm(p => ({ ...p, category: e.target.value as BadgeCategory }))}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 appearance-none cursor-pointer">
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0f5e8b] appearance-none cursor-pointer">
                 {CATEGORIES.map(c => (
-                  <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>
+                  <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▾</div>
@@ -115,14 +140,14 @@ const BadgeFormModal: FC<{
               <input type="text" value={form.title}
                 onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                 placeholder="e.g. Fast Learner"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]"
                 autoFocus />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Points Value</label>
               <input type="number" value={form.points} min={50} max={1000} step={50}
                 onChange={e => setForm(p => ({ ...p, points: Number(e.target.value) }))}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]" />
             </div>
           </div>
 
@@ -133,7 +158,7 @@ const BadgeFormModal: FC<{
               onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               placeholder="Describe what this badge represents..."
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]" />
           </div>
 
           {/* Icon preview */}
@@ -142,7 +167,7 @@ const BadgeFormModal: FC<{
             <div className="flex items-center gap-4 px-4 py-4 rounded-xl border border-gray-100 bg-gray-50">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
                 style={{ background: `${cat.color}18` }}>
-                {cat.emoji}
+                <cat.Icon size={24} color={cat.color} />
               </div>
               <div>
                 <p className="font-semibold text-gray-800 text-sm">{form.title || 'Badge Title'}</p>
@@ -160,10 +185,10 @@ const BadgeFormModal: FC<{
           </button>
           <button onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition disabled:opacity-40 flex items-center gap-2 shadow-sm">
+            className="px-5 py-2.5 rounded-xl bg-[#0f5e8b] text-white text-sm font-bold hover:bg-[#0c4a6d] transition disabled:opacity-40 shadow-sm">
             {saving
               ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : '✓'} {mode === 'edit' ? 'Save Changes' : 'Create Badge'}
+              : (mode === 'edit' ? 'Save Changes' : 'Create Badge')}
           </button>
         </div>
       </div>
@@ -182,7 +207,9 @@ const DeleteConfirmModal: FC<{
     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
       style={{ animation: 'fadeUp .2s ease' }}>
       <div className="px-6 py-6 text-center">
-        <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">🗑️</div>
+        <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+          <Trash2 size={28} className="text-red-500" />
+        </div>
         <h3 className="text-base font-bold text-gray-900 mb-1">Delete Badge?</h3>
         <p className="text-sm text-gray-500">
           Are you sure you want to delete <span className="font-semibold text-gray-700">"{badgeTitle}"</span>?
@@ -198,7 +225,7 @@ const DeleteConfirmModal: FC<{
           className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition disabled:opacity-50 flex items-center justify-center gap-2">
           {deleting
             ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            : '🗑️ Delete'}
+            : <><Trash2 size={16} /> Delete</>}
         </button>
       </div>
     </div>
@@ -289,30 +316,28 @@ const AwardBadgesModal: FC<Props> = ({
           <div className="px-6 pt-6 pb-4 flex-shrink-0">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">🏅 Award Badge to {studentName}</h2>
+                <h2 className="text-xl font-bold text-gray-900">Award Badge to {studentName}</h2>
                 <p className="text-sm text-gray-400 mt-0.5">Select a mentorship, then pick a badge to award</p>
               </div>
               <button onClick={onClose}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition flex-shrink-0">✕</button>
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition flex-shrink-0">
+                <X size={18} />
+              </button>
             </div>
 
             <div className="mt-5">
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Choose Mentorship</p>
               <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {mentorships.map((m, i) => {
-                  const emojis = ['⚙️','💻','⚡','📚','🎨'];
-                  return (
-                    <button key={m.id} onClick={() => { setActiveMid(m.id); setSelectedId(null); }}
-                      className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-                        activeMid === m.id
-                          ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
-                          : 'text-gray-600 border-gray-200 hover:border-amber-300 hover:text-amber-600 bg-white'
-                      }`}>
-                      <span>{m.emoji ?? emojis[i % emojis.length]}</span>
-                      {m.name}
-                    </button>
-                  );
-                })}
+                {mentorships.map(m => (
+                  <button key={m.id} onClick={() => { setActiveMid(m.id); setSelectedId(null); }}
+                    className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                      activeMid === m.id
+                        ? 'bg-[#0f5e8b] text-white border-[#0f5e8b] shadow-sm'
+                        : 'text-gray-600 border-gray-200 hover:border-[#0c4a6d] hover:text-[#0c4a6d] bg-white'
+                    }`}>
+                    {m.name}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -320,19 +345,19 @@ const AwardBadgesModal: FC<Props> = ({
           {/* Search + counter */}
           <div className="px-6 pb-3 flex-shrink-0">
             <div className="relative mb-3">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Search badges..."
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition" />
+                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f5e8b] focus:bg-white transition" />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-amber-600">
+              <span className="text-sm font-semibold text-[#0f5e8b]">
                 {hook.badges.length} / {MAX_BADGES} badges in this mentorship
               </span>
               <div className="flex gap-1">
                 {Array.from({ length: MAX_BADGES }).map((_, i) => (
                   <div key={i} className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    i < hook.badges.length ? 'bg-amber-400' : 'bg-gray-200'
+                    i < hook.badges.length ? 'bg-[#0f5e8b]' : 'bg-gray-200'
                   }`} />
                 ))}
               </div>
@@ -347,7 +372,7 @@ const AwardBadgesModal: FC<Props> = ({
 
             {hook.loading && (
               <div className="flex items-center justify-center h-40">
-                <span className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                <span className="w-6 h-6 border-2 border-[#0f5e8b] border-t-transparent rounded-full animate-spin" />
               </div>
             )}
 
@@ -363,45 +388,44 @@ const AwardBadgesModal: FC<Props> = ({
                       onClick={() => setSelectedId(isSelected ? null : badge.id)}
                       className={`relative flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all group overflow-hidden ${
                         isSelected
-                          ? 'border-amber-400 bg-amber-50 shadow-sm'
+                          ? 'border-[#0f5e8b] bg-[#eff6ff] shadow-sm'
                           : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
                       }`}>
 
                       <div className="absolute top-0 left-0 bottom-0 w-1 rounded-l-2xl"
                         style={{ background: cat.color }} />
 
-                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ml-1"
+                      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ml-1"
                         style={{ background: `${cat.color}18` }}>
-                        {cat.emoji}
+                        <cat.Icon size={20} color={cat.color} />
                       </div>
-
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <p className="font-semibold text-gray-900 text-sm">{badge.title}</p>
                           {/* ── Earned tag — shown when student already has this badge ── */}
                           {isEarned && (
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                              ✓ Earned
+                            <span className="text-[10px] font-bold text-[#0f5e8b] bg-[#eff6ff] px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                              <Check size={12} /> Earned
                             </span>
                           )}
                         </div>
                         <p className="text-xs font-medium mt-0.5" style={{ color: cat.color }}>{cat.label}</p>
-                        <p className="text-xs text-amber-500 font-semibold mt-1">⭐ {badge.points} pts</p>
+                        <p className="text-xs text-[#0f5e8b] font-semibold mt-1"><Star size={12} className="inline-block align-text-bottom" /> {badge.points} pts</p>
                       </div>
 
                       {/* Radio + actions */}
                       <div className="flex flex-col items-end gap-2 flex-shrink-0"
                         onClick={e => e.stopPropagation()}>
-                        {/* Radio: filled amber if selected, grey checkmark if earned */}
+                        {/* Radio: filled primary if selected, grey checkmark if earned */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
                           isSelected
-                            ? 'border-amber-500 bg-amber-500'
+                            ? 'border-[#0f5e8b] bg-[#0f5e8b]'
                             : isEarned
                               ? 'border-gray-300 bg-gray-100'
-                              : 'border-gray-300 group-hover:border-amber-300'
+                              : 'border-gray-300 group-hover:border-[#0c4a6d]'
                         }`}>
                           {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
-                          {!isSelected && isEarned && <span className="text-[9px] text-gray-500">✓</span>}
+                          {!isSelected && isEarned && <Check size={10} className="text-gray-500" />}
                         </div>
 
                         {/* Edit + Delete on hover */}
@@ -414,12 +438,12 @@ const AwardBadgesModal: FC<Props> = ({
                               });
                               setFormMode('edit');
                             }}
-                            className="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-50 text-blue-400 hover:bg-blue-100 text-xs transition">
-                            ✏️
+                            className="w-6 h-6 flex items-center justify-center rounded-lg bg-[#eff6ff] text-[#0f5e8b] hover:bg-[#dbeafe] transition">
+                            <Edit2 size={14} />
                           </button>
                           <button onClick={() => setDeleteId(badge.id)}
-                            className="w-6 h-6 flex items-center justify-center rounded-lg bg-red-50 text-red-400 hover:bg-red-100 text-xs transition">
-                            🗑️
+                            className="w-6 h-6 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition">
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -431,13 +455,13 @@ const AwardBadgesModal: FC<Props> = ({
                 {!search && hook.badges.length < MAX_BADGES && (
                   <button
                     onClick={() => { setFormMode('create'); setEditBadge(null); }}
-                    className="col-span-1 sm:col-span-2 flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50/40 hover:bg-amber-50 hover:border-amber-300 transition-all cursor-pointer group">
-                    <div className="w-9 h-9 rounded-full bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center text-lg transition flex-shrink-0">
-                      ✨
+                    className="col-span-1 sm:col-span-2 flex items-center justify-center gap-3 p-4 rounded-2xl border-2 border-dashed border-[#0f5e8b] bg-[#f0f9ff] hover:bg-[#e0f2fe] hover:border-[#0c4a6d] transition-all cursor-pointer group">
+                    <div className="w-9 h-9 rounded-full bg-[#eff6ff] group-hover:bg-[#dbeafe] flex items-center justify-center text-[#0f5e8b] transition flex-shrink-0">
+                      <Plus size={18} />
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-semibold text-amber-700">Create a new badge in this mentorship</p>
-                      <p className="text-xs text-amber-500">{remaining} slot{remaining !== 1 ? 's' : ''} remaining</p>
+                      <p className="text-sm font-semibold text-[#0f5e8b]">Create a new badge in this mentorship</p>
+                      <p className="text-xs text-[#0f5e8b]">{remaining} slot{remaining !== 1 ? 's' : ''} remaining</p>
                     </div>
                   </button>
                 )}
@@ -445,7 +469,9 @@ const AwardBadgesModal: FC<Props> = ({
                 {/* Empty state when no badges and no search */}
                 {!search && hook.badges.length === 0 && (
                   <div className="col-span-2 flex flex-col items-center justify-center py-8 text-center">
-                    <div className="text-3xl mb-2">🏅</div>
+                    <div className="w-14 h-14 rounded-3xl bg-[#eff6ff] flex items-center justify-center mb-3">
+                      <Trophy size={28} className="text-[#0f5e8b]" />
+                    </div>
                     <p className="text-sm font-semibold text-gray-500">No badges created yet for {activeName}</p>
                   </div>
                 )}
@@ -453,7 +479,9 @@ const AwardBadgesModal: FC<Props> = ({
                 {/* No search results */}
                 {search && filtered.length === 0 && (
                   <div className="col-span-2 flex flex-col items-center justify-center py-8 text-center">
-                    <div className="text-3xl mb-2">🔍</div>
+                    <div className="w-14 h-14 rounded-3xl bg-[#eff6ff] flex items-center justify-center mb-3">
+                      <Search size={28} className="text-[#0f5e8b]" />
+                    </div>
                     <p className="text-sm text-gray-400">No badges match "{search}"</p>
                   </div>
                 )}
@@ -477,7 +505,7 @@ const AwardBadgesModal: FC<Props> = ({
                     value={note}
                     onChange={e => setNote(e.target.value)}
                     placeholder="e.g. Excellent performance this month!"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f5e8b] focus:bg-white transition"
                     autoFocus
                   />
                 )}
@@ -487,9 +515,9 @@ const AwardBadgesModal: FC<Props> = ({
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 {selectedBadge ? (
-                  <span>
-                    Selected: {getCat(selectedBadge.category).emoji}{' '}
-                    <span className="font-semibold text-gray-700">{selectedBadge.title} </span>
+                  <span className="flex items-center gap-2">
+                    <Star size={16} className="text-[#0f5e8b]" />
+                    <span>Selected: <span className="font-semibold text-gray-700">{selectedBadge.title}</span></span>
                   </span>
                 ) : 'No badge selected'}
               </div>
@@ -501,10 +529,10 @@ const AwardBadgesModal: FC<Props> = ({
                 <button
                   onClick={handleAward}
                   disabled={!selectedId || awarding}
-                  className="px-6 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition disabled:opacity-40 shadow-sm flex items-center gap-2">
+                  className="px-6 py-2.5 rounded-xl bg-[#0f5e8b] text-white text-sm font-bold hover:bg-[#0c4a6d] transition disabled:opacity-40 shadow-sm flex items-center gap-2">
                   {awarding
                     ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    : '🏅 Award Badge'}
+                    : <><Trophy size={16} /> Award Badge</>}
                 </button>
               </div>
             </div>

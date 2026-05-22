@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/edunestlogo.png";
-import { Moon, Sun, User, LogOut } from 'lucide-react';
-import { useTheme } from '../context/useTheme';
+import { User, LogOut } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 const navItems = [
@@ -29,7 +28,6 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeNavItem, setActiveNavItem] = useState("home");
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const authStore = useAuthStore();
   const isAuthenticated = authStore.isAuthenticated;
   const userName = authStore.userName;
@@ -70,13 +68,6 @@ const Navbar: React.FC = () => {
 
           {/* Desktop right actions */}
           <div className="hidden lg:flex items-center gap-4 ml-auto">
-            {/* Theme toggle */}
-            <button onClick={toggleTheme}
-              className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-200 transition"
-              aria-label="Toggle theme">
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
             {isAuthenticated ? (
               <>
                 <button
@@ -168,24 +159,18 @@ const Navbar: React.FC = () => {
             ))}
 
             <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-1 flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <button onClick={toggleTheme}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-200 transition"
-                  aria-label="Toggle theme">
-                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                </button>
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      className="text-sm text-gray-600 dark:text-gray-200 text-left hover:text-primary p-2 font-semibold rounded-lg flex items-center gap-2"
-                      onClick={() => {
-                        navigate('/mentor/dashboard');
-                        setIsOpen(false);
-                      }}
-                    >
-                      <User className="w-4 h-4" />
-                      {userName || 'Dashboard'}
-                    </button>
+              {isAuthenticated ? (
+                <>
+                  <button
+                    className="text-sm text-gray-600 dark:text-gray-200 text-left hover:text-primary p-2 font-semibold rounded-lg flex items-center gap-2"
+                    onClick={() => {
+                      navigate('/mentor/dashboard');
+                      setIsOpen(false);
+                    }}
+                  >
+                    <User className="w-4 h-4" />
+                    {userName || 'Dashboard'}
+                  </button>
                     <button
                       onClick={() => authStore.logout()}
                       className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 p-2 rounded-lg flex items-center gap-2"
@@ -201,7 +186,6 @@ const Navbar: React.FC = () => {
                     </button>
                   </Link>
                 )}
-              </div>
               <button
                 onClick={() => {
                   navigate("/register");

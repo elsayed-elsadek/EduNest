@@ -2,6 +2,7 @@
 
 import type { FC, ChangeEvent } from 'react';
 import { useState, useRef } from 'react';
+import { X, Camera, Edit, User } from 'lucide-react';
 import DashLayout from '../../../components/layout/Dash-layout';
 import ProfileSection from '../../../components/mentor-components/mentor-profile-com/ProfileSection';
 import { useMentorProfile } from '../../../hooks/Usementorprofile';
@@ -22,9 +23,7 @@ const EditModal: FC<EditModalProps> = ({ title, onClose, onSave, saving, childre
       <div className="flex items-center justify-between p-6 border-b border-gray-100">
         <h3 className="text-lg font-bold text-gray-900">{title}</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="w-5 h-5" />
         </button>
       </div>
       <div className="p-6 space-y-4">{children}</div>
@@ -34,7 +33,7 @@ const EditModal: FC<EditModalProps> = ({ title, onClose, onSave, saving, childre
           Cancel
         </button>
         <button onClick={onSave} disabled={saving}
-          className="px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-blue-700 transition disabled:opacity-50">
+          className="px-5 py-2 rounded-xl bg-[#0f5e8b] text-white text-sm font-semibold hover:bg-[#0c4a6d] transition disabled:opacity-50">
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
@@ -56,10 +55,10 @@ const Field: FC<FieldProps> = ({ label, value, onChange, type = 'text', placehol
     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">{label}</label>
     {type === 'textarea' ? (
       <textarea rows={4} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0f5e8b] resize-none" />
     ) : (
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]" />
     )}
   </div>
 );
@@ -172,22 +171,18 @@ const ProfilePage: FC = () => {
                           fetchPriority="high"
                         className="object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-50">
-                        👤
+                      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                        <User className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
                   </div>
                   {/* Camera overlay on hover */}
                   <div className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <Camera className="w-6 h-6 text-white" />
                   </div>
                   {saving && (
                     <div className="absolute inset-0 rounded-2xl bg-white/70 flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-[#0f5e8b] border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
@@ -202,11 +197,7 @@ const ProfilePage: FC = () => {
                     {profile?.experience}
                   </p>
                   <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <Camera className="w-3.5 h-3.5" />
                     Click on photo to change
                   </p>
                 </div>
@@ -214,10 +205,7 @@ const ProfilePage: FC = () => {
                 {/* Edit button */}
                 <button onClick={() => openEdit('personal')}
                   className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
+                  <Edit className="w-5 h-5" />
                 </button>
               </div>
 
@@ -261,7 +249,7 @@ const ProfilePage: FC = () => {
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">LinkedIn</label>
                     {profile?.links?.linkedin
                       ? <a href={ensureHttps(profile.links.linkedin)} target="_blank" rel="noopener noreferrer"
-                        className="text-sm text-blue-600 font-medium break-all hover:underline">
+                        className="text-sm text-[#0f5e8b] font-medium break-all hover:underline">
                         {profile.links.linkedin}
                       </a>
                       : <p className="text-sm text-gray-400">—</p>
@@ -271,7 +259,7 @@ const ProfilePage: FC = () => {
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">GitHub</label>
                     {profile?.links?.github
                       ? <a href={ensureHttps(profile.links.github)} target="_blank" rel="noopener noreferrer"
-                        className="text-sm text-blue-600 font-medium break-all hover:underline">
+                        className="text-sm text-[#0f5e8b] font-medium break-all hover:underline">
                         {profile.links.github}
                       </a>
                       : <p className="text-sm text-gray-400">—</p>

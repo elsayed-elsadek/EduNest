@@ -2,6 +2,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import DashLayout from '../../../components/layout/Dash-layout';
 import StudentSearch from '../../../components/mentor-components/studentslist-com/StudentSearch/StudentSearch';
@@ -10,8 +11,6 @@ import Pagination from '../../../components/common/Pagination/Pagination';
 import type { Student } from '../../../types/Students.types';
 import { getMentorStudents } from '../../../services/Studentsservice';
 import { extractStudentsData } from '../../../services/Studentsservice';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 // Helper 
 function isApiErrorResponse(res: unknown): res is { error: string } {
@@ -131,9 +130,7 @@ const StudentsList: FC = () => {
           {/* Error Banner */}
           {error && (
             <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-start gap-3">
-              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold">{error}</p>
                 <button
@@ -174,7 +171,7 @@ const StudentsList: FC = () => {
               ) : (
                 <div className="p-12 md:p-20 text-center">
                   <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FontAwesomeIcon icon={faSearch} className=''/>
+                    <Search className="w-8 h-8 text-gray-400" />
                   </div>
                   <p className="text-gray-400 font-medium text-sm md:text-base">
                     {searchQuery ? 'No students found matching your search.' : 'No students yet.'}

@@ -1,5 +1,6 @@
 
 import type { FC } from 'react';
+import { Search } from 'lucide-react';
 import StudentTableRow from './StudentTableRow';
 import type { Student } from '../../../../types/Students.types';
 
@@ -47,7 +48,7 @@ const StudentsTable: FC<StudentsTableProps> = ({ students, onViewProfile }) => {
                 <td colSpan={5} className="py-12 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
-                      <span className="text-3xl">🔍</span>
+                      <Search className="w-8 h-8 text-gray-400" />
                     </div>
                     <p className="text-gray-400 text-sm font-medium">No students found</p>
                   </div>

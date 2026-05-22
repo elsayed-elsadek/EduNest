@@ -23,7 +23,7 @@ interface ProjectsListProps {
 // ── Status config ─────────────────────────────────────────────────────────────
 const STATUS_CFG: Record<string, {
   label: string; bg: string; text: string; border: string;
-  stripe: string; Icon: FC<{ size?: number; className?: string }>;
+  stripe: string; Icon: FC<{ size?: number; className?: string; color?: string }>;
 }> = {
   SUBMITTED: {
     label: 'Pending Review', bg: '#fffbeb', text: '#92400e',
@@ -215,8 +215,8 @@ const ProjectsList: FC<ProjectsListProps> = ({
                               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
                               style={{ background: cfg.bg }}
                             >
-                   <Icon size={16} className={`text-[${cfg.stripe}]`} />    
-                                           </div>
+                              <Icon size={16} color={cfg.stripe} />
+                            </div>
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-0.5">

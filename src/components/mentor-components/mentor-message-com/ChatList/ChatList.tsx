@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
+import { Search, X, ChevronDown, Users, Plus } from 'lucide-react';
 import ChatItem from './ChatItem';
 import type { Chat, ChatTab } from '../../../../types/mentor-meaasges.types';
 import api from '../../../../services/api';
@@ -69,8 +70,8 @@ const ChatList: FC<ChatListProps> = ({
           <h2 className="text-xl font-bold text-gray-900">Messages</h2>
           {activeTab === 'groups' && onCreateRoom && (
             <button onClick={onCreateRoom} title="Create new group"
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#E8F3FF] text-[#2D9CDB] hover:bg-[#2D9CDB] hover:text-white transition font-bold text-lg">
-              ＋
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#E8F3FF] text-[#2D9CDB] hover:bg-[#2D9CDB] hover:text-white transition">
+              <Plus className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -89,13 +90,9 @@ const ChatList: FC<ChatListProps> = ({
             <button
               onClick={() => { setSearchQuery(''); searchRef.current?.focus(); }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >✕</button>
+            ><X className="w-4 h-4" /></button>
           ) : (
-            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           )}
         </div>
 
@@ -121,11 +118,9 @@ const ChatList: FC<ChatListProps> = ({
               className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide hover:bg-gray-50 rounded-lg transition-colors"
             >
               Filter by Mentorship
-              <span className={`text-gray-400 transition-transform ${
+              <ChevronDown className={`text-gray-400 transition-transform w-4 h-4 ${
                 showFilters ? 'rotate-180' : ''
-              }`}>
-                ▼
-              </span>
+              }`} />
             </button>
             {showFilters && (
               <div className="max-h-48 overflow-y-auto space-y-1 pr-1 mt-1"
@@ -181,19 +176,21 @@ const ChatList: FC<ChatListProps> = ({
           <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-3">
             {activeTab === 'groups' && !searchQuery && !activeMentorship && onCreateRoom ? (
               <>
-                <div className="w-16 h-16 rounded-full bg-[#E8F3FF] flex items-center justify-center text-3xl">👥</div>
+                <div className="w-16 h-16 rounded-full bg-[#E8F3FF] flex items-center justify-center">
+                  <Users className="w-8 h-8 text-[#2D9CDB]" />
+                </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-700 mb-1">No groups yet</p>
                   <p className="text-xs text-gray-400">Create a group for your mentorship</p>
                 </div>
                 <button onClick={onCreateRoom}
-                  className="px-5 py-2 bg-[#2D9CDB] text-white text-sm font-medium rounded-xl hover:bg-[#2589c3] transition">
-                  ＋ Create Group
+                  className="px-5 py-2 bg-[#2D9CDB] text-white text-sm font-medium rounded-xl hover:bg-[#2589c3] transition flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Create Group
                 </button>
               </>
             ) : (
               <>
-                <div className="text-3xl mb-1">🔍</div>
+                <Search className="w-8 h-8 text-gray-300 mb-1" />
                 <p className="text-sm text-gray-500">
                   {searchQuery ? `No results for "${searchQuery}"` : 'Nothing here yet'}
                 </p>
