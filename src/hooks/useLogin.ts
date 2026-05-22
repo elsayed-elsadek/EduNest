@@ -1,10 +1,32 @@
 import React, { useState } from "react";
 import type { LoginFormData, FormErrors } from "../types/auth";
 import { loginUser, sendOtp } from "../services/authService";
+import { getStudentProfile } from "../services/student-roleService/Studentprofileservice";
+import api from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
-import { getFirstNameFromToken, getFirstNameFromUser } from "../utils/jwt";
+import { getFirstNameFromToken, getFirstNameFromUser, getRoleFromToken, getUserFromToken } from "../utils/jwt";
+
+/**
+ * Determines the dashboard path based on user role
+ * @param role The user role from JWT token
+ * @returns The appropriate dashboard path
+ */
+const getDashboardPath = (role: string): string => {
+  switch (role) {
+    case 'ROLE_MENTOR':
+      return '/mentor/dashboard';
+    case 'ROLE_STUDENT':
+      return '/student/dashboard';
+    case 'ROLE_ADMIN':
+      return '/admin/dashboard';
+    default:
+      // Default fallback for unknown roles
+      console.warn('Unknown role:', role, '- redirecting to mentor dashboard');
+      return '/mentor/dashboard';
+  }
+};
 
 export const useLogin = () => {
 
@@ -51,20 +73,50 @@ export const useLogin = () => {
 
       if (jwt) {
         toast.success(statusMessage);
+
+        // Extract user information from JWT token
+        const tokenUser = getUserFromToken(jwt);
         const user = (apiResponse?.user ?? responseObj?.user) as Record<string, unknown> | undefined;
-        let userName = getFirstNameFromUser(user);
+
+        // Get user details with fallbacks
+        let userName = tokenUser?.fullName || getFirstNameFromUser(user);
         if (!userName) userName = getFirstNameFromToken(jwt);
         if (!userName && user) {
           const full = String(user.name ?? user.fullName ?? user.full_name ?? user.firstName ?? user.first_name ?? '');
           userName = full.trim().split(/\s+/)[0] || '';
         }
+
+        // Get role from JWT token
+        const userRole = tokenUser?.role || getRoleFromToken(jwt) || (user?.role ? String(user.role) : '');
+
+        // Get email with fallbacks
+        const userEmail = tokenUser?.email ||
+                         (user?.email ? String(user.email) : formData.email) ||
+                         formData.email;
+
+        // Set authentication data
         useAuthStore.getState().setAuth({
           token: jwt,
-          userName: userName || (user?.email ? String(user.email).split('@')[0] : ''),
-          userEmail: (user?.email ? String(user.email) : formData.email) ?? formData.email,
-          userRole: (user?.role ? String(user.role) : '') ?? '',
+          userName: userName || userEmail.split('@')[0],
+          userEmail: userEmail,
+          userRole: userRole,
         });
-        
+
+        // Fetch profile image for students
+        if (userRole === 'ROLE_STUDENT') {
+          try {
+            const profileResponse = await getStudentProfile();
+            const profileImageUrl = profileResponse.apiResponse.profile.profileImageUrl;
+            if (profileImageUrl) {
+              const baseUrl = api.defaults.baseURL?.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '') || '';
+              const fullAvatarUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${baseUrl}${profileImageUrl}`;
+              useAuthStore.getState().updateProfile({ userAvatar: fullAvatarUrl });
+            }
+          } catch (error) {
+            console.warn('Failed to fetch student profile image:', error);
+          }
+        }
+
         // Save Remember Me preference
         if (formData.rememberMe) {
           useAuthStore.getState().setRememberMe(formData.email, true);
@@ -72,9 +124,12 @@ export const useLogin = () => {
         } else {
           useAuthStore.getState().setRememberMe('', false);
         }
-        
-        navigate("/mentor/dashboard");
-        
+
+        // Role-based redirection
+        const redirectPath = getDashboardPath(userRole);
+        console.log('🔄 Redirecting to:', redirectPath, 'Role:', userRole);
+        navigate(redirectPath);
+
       } else {
         // لم يتم إرجاع توكن، نعتبرها محاولة فاشلة
         toast.error(statusMessage || "Login failed. Please check your credentials.");

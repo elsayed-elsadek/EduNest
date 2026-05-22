@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { wsService } from '../services/Websocketservice';
 import {
@@ -25,13 +25,6 @@ export const useNotifications = () => {
   const [loading,       setLoading      ] = useState(false);
   const [error,         setError        ] = useState<string | null>(null);
 
-  //  Reset mountedRef to true on every mount (fixes StrictMode double-invoke) 
-  const mountedRef = useRef(true);
-  useEffect(() => {
-    mountedRef.current = true;           //  reset on each mount
-    return () => { mountedRef.current = false; };
-  }, []);
-
   const extractError = (err: unknown): string => {
     if (!err || typeof err !== 'object') return 'Something went wrong';
     const e = err as Record<string, unknown>;
@@ -42,7 +35,7 @@ export const useNotifications = () => {
     return typeof e.message === 'string' ? e.message : 'Something went wrong';
   };
 
-  //  Fetch all notifications
+  // ── Fetch all notifications ────────────────────────────────────────────────
   const fetchNotifications = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -58,7 +51,7 @@ export const useNotifications = () => {
     }
   }, [token]);
 
-  //  Fetch unread count 
+  // ── Fetch unread count ─────────────────────────────────────────────────────
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
     try {
@@ -67,7 +60,7 @@ export const useNotifications = () => {
     } catch { /* silent */ }
   }, [token]);
 
-  // Mark single as read
+  // ── Mark single as read ───────────────────────────────────────────────────
   const handleMarkRead = useCallback(async (id: string) => {
     setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, isRead: true, isNew: false } : n)
@@ -83,7 +76,7 @@ export const useNotifications = () => {
     }
   }, []);
 
-  // Mark all as read 
+  // ── Mark all as read ──────────────────────────────────────────────────────
   const handleMarkAllRead = useCallback(async () => {
     const snapshot = notifications;
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true, isNew: false })));
@@ -96,7 +89,7 @@ export const useNotifications = () => {
     }
   }, [notifications, fetchUnreadCount]);
 
-  //  Dismiss single 
+  // ── Dismiss single ────────────────────────────────────────────────────────
   const handleDismiss = useCallback(async (id: string) => {
     const snapshot = notifications;
     setNotifications(prev => prev.filter(n => n.id !== id));
@@ -108,7 +101,7 @@ export const useNotifications = () => {
     }
   }, [notifications, fetchUnreadCount]);
 
-  // Delete all
+  // ── Delete all ────────────────────────────────────────────────────────────
   const handleDeleteAll = useCallback(async () => {
     const snapshot = notifications;
     setNotifications([]);
@@ -121,33 +114,42 @@ export const useNotifications = () => {
     }
   }, [notifications, fetchUnreadCount]);
 
-  // WebSocket: real-time push
+  // ── WebSocket: subscribe only ──────────────────────────────────────────────
+  // ✅ الـ connect بيتعمل مرة واحدة بس في WebSocketProvider
+  // الـ hook ده بس بيعمل subscribe على الـ notifications topic
   useEffect(() => {
     if (!token || !isHydrated) return;
 
-    let subscribed = false;
+    let isMounted = true;
 
-    wsService.connect(token, () => {
-      // Guard: don't subscribe if component unmounted between connect and callback
-      if (!mountedRef.current) return;
-      subscribed = true;
-
-      wsService.subscribeToNotifications((data) => {
-        if (!mountedRef.current) return;
-        const dto = data as NotificationApiDto;
-        setNotifications(prev => [toUiNotification(dto), ...prev]);
+    const handleNotification = (data: unknown) => {
+      if (!isMounted) return;
+      const dto = data as NotificationApiDto;
+      const notification = toUiNotification(dto);
+      setNotifications(prev => [notification, ...prev]);
+      if (!notification.isRead) {
         setUnreadCount(prev => prev + 1);
+      }
+    };
+
+    if (wsService.isConnected) {
+      // ✅ الـ connection جاهزة — subscribe على طول
+      wsService.subscribeToNotifications(handleNotification);
+    } else {
+      // ✅ الـ connection لسه شغالة — حط الـ subscribe في queue
+      wsService.connect(token, () => {
+        if (!isMounted) return;
+        wsService.subscribeToNotifications(handleNotification);
       });
-    });
+    }
 
     return () => {
-      if (subscribed) {
-        wsService.unsubscribe('/user/queue/notifications');
-      }
+      isMounted = false;
+      wsService.unsubscribe('/user/queue/notifications', handleNotification);
     };
   }, [token, isHydrated]);
 
-  //  Initial load 
+  // ── Initial data load ─────────────────────────────────────────────────────
   useEffect(() => {
     if (isHydrated && token) {
       fetchNotifications();

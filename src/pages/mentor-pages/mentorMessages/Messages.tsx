@@ -151,7 +151,7 @@ const Messages = () => {
           />
         </div>
 
-        {/* ✅ التغيير الوحيد: أضفنا min-w-0 هنا */}
+      
         <div
           className={`flex-1 min-w-0 flex flex-col ${!selectedChatId ? 'hidden lg:flex' : 'flex'}`}
           style={{ height: '100%', minHeight: 0 }}

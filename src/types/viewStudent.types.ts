@@ -1,3 +1,6 @@
+
+import type { ComponentType } from 'react';
+
 export interface Student {
   id:                   string;
   name:                 string;
@@ -13,8 +16,10 @@ export interface Student {
 export interface Mentorship {
   id:               string;
   name:             string;
-  icon:             string;
-  iconColor:        string;
+  imageUrl?:        string;   // absolute URL from API mentorship cover image
+  icon:             string;   // fallback string label if no image
+  iconComponent?:   ComponentType<{ size?: number; className?: string }>;
+  iconColor:        string;   // fallback bg color if no image
   startDate:        string;
   totalPoints:      number;
   quizzes:          number;
@@ -28,7 +33,7 @@ export interface Project {
   projectSubmissionId: number | string;
   projectTitle:        string;
   mentorshipTitle:     string;
-  status:              'SUBMITTED' | 'Approved' | 'Rejected' | 'Pending Review';
+  status:              'SUBMITTED' | 'Approved' | 'Rejected' | 'Pending Review' | 'GRADED' | 'REJECTED';
   submittedAt:         string;
   gradedAt?:           string | null;
   submissionLink?:     string;
@@ -44,10 +49,9 @@ export interface SocialMedia {
   url?:     string;
 }
 
-// ── Awarded badge (from profile API badges array) ─────────────────────────────
 export interface AwardedBadge {
-  id:               number;   // award record id
-  badgeId:          number;   // badge definition id ← used for earnedBadgeIds
+  id:               number;
+  badgeId:          number;
   badgeTitle:       string;
   studentId:        number;
   studentFullName:  string;

@@ -11,48 +11,66 @@ interface RestoreFormData {
 
 export const useRestoreForm = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState<RestoreFormData>({
     email: '',
     otp: ''
   });
+
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'email' | 'otp'>('email'); // Multi-step form
+  const [step, setStep] = useState<'email' | 'otp'>('email');
   const [restoreEmail, setRestoreEmail] = useState('');
 
+  // ✅ Validate Email
   const validateEmail = (): boolean => {
     const newErrors: FormErrors = {};
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(formData.email)) {
+    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(formData.email)) {
       newErrors.email = 'Invalid email format';
     }
-    setErrors(newErrors);
+
+    setErrors(prev => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
 
+  //  Validate OTP
   const validateOtp = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!formData.otp || formData.otp.length !== 6) {
+
+    if (!/^\d{6}$/.test(formData.otp)) {
       newErrors.otp = 'OTP must be 6 digits';
     }
-    setErrors(newErrors);
+
+    setErrors(prev => ({ ...prev, ...newErrors }));
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = useCallback((field: keyof RestoreFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: undefined }));
-  }, []);
+  // Handle Input Change
+  const handleInputChange = useCallback(
+    (field: keyof RestoreFormData, value: string) => {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    },
+    []
+  );
 
+  //  Send OTP
   const sendOtpHandler = async () => {
     if (!validateEmail()) return;
-    
+
     setLoading(true);
     try {
       await sendRestoreOtp(formData.email);
+
       toast.success('OTP sent to your email. Check your inbox!');
       setRestoreEmail(formData.email);
+
+      // (اختياري) تخزين في localStorage
+      localStorage.setItem('restoreEmail', formData.email);
+
       setStep('otp');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -62,26 +80,55 @@ export const useRestoreForm = () => {
     }
   };
 
+  //  Confirm OTP
   const confirmHandler = async () => {
     if (!validateOtp()) return;
 
+    if (!restoreEmail) {
+      toast.error('Session expired, please try again');
+      return;
+    }
+
     setLoading(true);
     try {
-      await confirmRestore(restoreEmail || formData.email, formData.otp);
+      await confirmRestore(restoreEmail, formData.otp);
+
       toast.success('Account restored successfully! You can now login.');
+
       localStorage.removeItem('restoreEmail');
       navigate('/login');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      const msg = error.response?.data?.message || 'Invalid or expired OTP';
+      const msg =
+        error.response?.data?.message || 'Invalid or expired OTP';
       toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
+  //  Resend OTP
   const resendOtp = async () => {
-    await sendOtpHandler();
+    if (!restoreEmail) return;
+
+    setLoading(true);
+    try {
+      await sendRestoreOtp(restoreEmail);
+      toast.success('OTP resent successfully');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || 'Failed to resend OTP'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //  Go Back to Email Step
+  const goBack = () => {
+    setStep('email');
+    setFormData(prev => ({ ...prev, otp: '' }));
   };
 
   return {
@@ -94,7 +141,6 @@ export const useRestoreForm = () => {
     sendOtpHandler,
     confirmHandler,
     resendOtp,
-    goBack: () => setStep('email')
+    goBack
   };
 };
-

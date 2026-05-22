@@ -73,6 +73,50 @@ export function getFirstNameFromToken(token: string): string {
 }
 
 /**
+ * Extracts the user role from a JWT token
+ * @param token The JWT token string
+ * @returns The user role or empty string if not found
+ */
+export function getRoleFromToken(token: string): string {
+  const payload = decodeToken(token);
+  if (!payload) return "";
+
+  // Extract role from authorities field (supports both string and array formats)
+  const authorities = payload.authorities;
+  if (typeof authorities === 'string') {
+    return authorities;
+  }
+  if (Array.isArray(authorities) && authorities.length > 0) {
+    return String(authorities[0]);
+  }
+
+  // Fallback to other common role fields
+  return String(payload.role || payload.userRole || payload.authority || "");
+}
+
+/**
+ * Extracts user information from a JWT token
+ * @param token The JWT token string
+ * @returns User information object
+ */
+export function getUserFromToken(token: string): {
+  username: string;
+  fullName: string;
+  role: string;
+  email?: string;
+} | null {
+  const payload = decodeToken(token);
+  if (!payload) return null;
+
+  return {
+    username: String(payload.username || payload.sub || ""),
+    fullName: String(payload.fullName || payload.name || ""),
+    role: getRoleFromToken(token),
+    email: payload.username && typeof payload.username === 'string' && payload.username.includes('@') ? payload.username : undefined,
+  };
+}
+
+/**
  * Extracts the first name from a user object
  * @param user The user object
  * @returns The first name or empty string if not found
@@ -81,7 +125,7 @@ export function getFirstNameFromUser(
   user: Record<string, unknown> | undefined
 ): string {
   if (!user || typeof user !== "object") return "";
-  
+
   const firstName =
     (user.firstName ? String(user.firstName) : "") ||
     (user.first_name ? String(user.first_name) : "") ||
@@ -89,7 +133,7 @@ export function getFirstNameFromUser(
     (user.fullName ? String(user.fullName) : "") ||
     (user.full_name ? String(user.full_name) : "") ||
     "";
-  
+
   // Return just the first word if it's a full name
   return firstName.trim().split(/\s+/)[0] || "";
 }

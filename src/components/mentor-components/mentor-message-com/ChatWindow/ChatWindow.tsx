@@ -46,6 +46,8 @@ const ChatWindow: FC<ChatWindowProps> = ({
     setEditingId(null); setEditingContent('');
   };
 
+  const visibleMessages = messages.filter(m => !m.deleted && m.content !== '');
+
   // ── Case-insensitive email comparison ──────────────────────────────────────
   const isOwn = (msg: Message) =>
     !!currentUserId &&
@@ -74,12 +76,12 @@ const ChatWindow: FC<ChatWindowProps> = ({
         className="flex-1 min-h-0 overflow-y-auto px-5 py-4 bg-[#FAFAFA] space-y-1"
         style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}
       >
-        {messages.length === 0 ? (
+        {visibleMessages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-sm text-gray-400">No messages yet. Say hello! 👋</p>
           </div>
         ) : (
-          messages.map(message => {
+          visibleMessages.map(message => {
             const own = isOwn(message);
 
             if (editingId === message.id) {

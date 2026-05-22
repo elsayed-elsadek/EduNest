@@ -1,6 +1,6 @@
 
 import type { FC } from 'react';
-import { Calendar, FileText, MessageCircle, X, Clock, Play, Eye } from 'lucide-react';
+import { Calendar, MessageCircle, X, Clock, Play, Eye, Bell, Megaphone, CheckSquare, FolderOpen, HelpCircle, Award, Scroll, Video, BookOpen } from 'lucide-react';
 import type { Notification } from '../../../../types/mentornotification.types';
 import { useMarkReadOnView } from '../../../../hooks/Usemarkreadonview';
 
@@ -18,10 +18,17 @@ const NotificationCard: FC<NotificationCardProps> = ({
   onMarkRead,
 }) => {
   const iconConfig = {
-    session:    { icon: Calendar,       bg: 'bg-[#FFF5F5]', color: 'text-[#FF5C5C]', border: 'border-[#FF5C5C]' },
-    assignment: { icon: FileText,       bg: 'bg-[#FFF7ED]', color: 'text-[#F97316]', border: 'border-[#F97316]' },
-    message:    { icon: MessageCircle,  bg: 'bg-[#FFFBEB]', color: 'text-[#F59E0B]', border: 'border-[#F59E0B]' },
-    general:    { icon: FileText,       bg: 'bg-[#F0F9FF]', color: 'text-[#0EA5E9]', border: 'border-[#0EA5E9]' },
+    announcement: { icon: Megaphone,   bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
+    quiz:         { icon: BookOpen,    bg: 'bg-[#FEF3C7]', color: 'text-[#B45309]', border: 'border-[#B45309]' },
+    session:      { icon: Calendar,    bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
+    task:         { icon: CheckSquare, bg: 'bg-[#ECFDF5]', color: 'text-[#059669]', border: 'border-[#059669]' },
+    project:      { icon: FolderOpen,  bg: 'bg-[#F5F3FF]', color: 'text-[#7C3AED]', border: 'border-[#7C3AED]' },
+    support:      { icon: HelpCircle,  bg: 'bg-[#ECFDF5]', color: 'text-[#0F766E]', border: 'border-[#0F766E]' },
+    badge:        { icon: Award,       bg: 'bg-[#FDF2F8]', color: 'text-[#C026D3]', border: 'border-[#C026D3]' },
+    certificate:  { icon: Scroll,      bg: 'bg-[#ECFEFF]', color: 'text-[#0891B2]', border: 'border-[#0891B2]' },
+    live_session: { icon: Video,      bg: 'bg-[#FEF2F2]', color: 'text-[#B91C1C]', border: 'border-[#B91C1C]' },
+    message:      { icon: MessageCircle,bg: 'bg-[#F0FDF4]', color: 'text-[#15803D]', border: 'border-[#15803D]' },
+    general:      { icon: Bell,       bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
   };
 
   const config = iconConfig[notification.type] || iconConfig.general;

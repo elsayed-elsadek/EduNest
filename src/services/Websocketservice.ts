@@ -11,9 +11,10 @@ type MessageCallback = (data: unknown) => void;
 class WebSocketService {
   private client:           Client | null = null;
   private subscriptions:    Map<string, StompSubscription> = new Map();
+  private listeners:        Map<string, Set<MessageCallback>> = new Map();
   private pendingCallbacks: (() => void)[] = [];
   private isConnected_:     boolean = false;
-  private isConnecting_:    boolean = false;   // ← NEW: guard against double-connect
+  private isConnecting_:    boolean = false;
 
   connect(token: string, onConnected?: () => void): void {
     // Already fully connected — run callback immediately
@@ -22,7 +23,7 @@ class WebSocketService {
       return;
     }
 
-    // just queue the callback — don't create a second client
+    // Already connecting — just queue the callback, don't create a second client
     if (this.isConnecting_) {
       if (onConnected) this.pendingCallbacks.push(onConnected);
       return;
@@ -40,18 +41,22 @@ class WebSocketService {
         this.isConnecting_ = false;
         console.log('✅ WebSocket connected');
         onConnected?.();
-        this.pendingCallbacks.forEach(cb => cb());
+        // flush all queued callbacks
+        const pending = [...this.pendingCallbacks];
         this.pendingCallbacks = [];
+        pending.forEach(cb => cb());
       },
 
       onStompError: (f) => {
         this.isConnecting_ = false;
         console.error('❌ STOMP error:', f.headers['message']);
       },
+
       onWebSocketError: (e) => {
         this.isConnecting_ = false;
         console.error('❌ WS error:', e);
       },
+
       onDisconnect: () => {
         this.isConnected_  = false;
         this.isConnecting_ = false;
@@ -65,32 +70,66 @@ class WebSocketService {
   disconnect(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
     this.subscriptions.clear();
+    this.listeners.clear();
+    this.pendingCallbacks = []; // ✅ امسح أي callbacks معلقة
     this.client?.deactivate();
-    this.isConnected_  = false;
-    this.isConnecting_ = false;
+    this.client         = null;
+    this.isConnected_   = false;
+    this.isConnecting_  = false;
   }
 
   private _subscribe(destination: string, cb: MessageCallback): void {
-    if (!this.client) return;
+    const registerListener = () => {
+      const listeners = this.listeners.get(destination) ?? new Set<MessageCallback>();
+      listeners.add(cb);
+      this.listeners.set(destination, listeners);
+    };
+
+    registerListener();
 
     const doSub = () => {
-      if (this.subscriptions.has(destination)) return;
-      // Guard: only subscribe if STOMP is actually connected
       if (!this.client?.connected) return;
+      if (this.subscriptions.has(destination)) return;
+
+      const listeners = this.listeners.get(destination);
+      if (!listeners || listeners.size === 0) return;
+
       const sub = this.client.subscribe(destination, (msg) => {
-        try   { cb(JSON.parse(msg.body)); }
-        catch { cb(msg.body); }
+        const listenersSet = this.listeners.get(destination);
+        if (!listenersSet || listenersSet.size === 0) return;
+
+        let payload: unknown;
+        try   { payload = JSON.parse(msg.body); }
+        catch { payload = msg.body; }
+
+        listenersSet.forEach(listener => listener(payload));
       });
+
       this.subscriptions.set(destination, sub);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    this.isConnected_ ? doSub() : this.pendingCallbacks.push(doSub);
+    if (this.isConnected_) {
+      doSub();
+    } else {
+      this.pendingCallbacks.push(doSub);
+    }
   }
 
-  unsubscribe(destination: string): void {
-    this.subscriptions.get(destination)?.unsubscribe();
-    this.subscriptions.delete(destination);
+  unsubscribe(destination: string, cb?: MessageCallback): void {
+    const listeners = this.listeners.get(destination);
+    if (!listeners) return;
+
+    if (cb) {
+      listeners.delete(cb);
+      if (listeners.size > 0) return;
+    }
+
+    const sub = this.subscriptions.get(destination);
+    if (sub) {
+      sub.unsubscribe();
+      this.subscriptions.delete(destination);
+    }
+    this.listeners.delete(destination);
   }
 
   subscribeToNotifications(cb: MessageCallback): void {
@@ -110,11 +149,19 @@ class WebSocketService {
   }
 
   sendToRoom(roomId: number | string, content: string): void {
-    this.client?.publish({ destination: `/app/chat/${roomId}`, body: content });
+    if (!this.client?.connected) {
+      console.warn('⚠️ Cannot send message — WebSocket not connected');
+      return;
+    }
+    this.client.publish({ destination: `/app/chat/${roomId}`, body: content });
   }
 
   sendPrivateMessage(recipientEmail: string, content: string): void {
-    this.client?.publish({
+    if (!this.client?.connected) {
+      console.warn('⚠️ Cannot send message — WebSocket not connected');
+      return;
+    }
+    this.client.publish({
       destination: '/app/chat.private',
       body: JSON.stringify({ recipientEmail, content }),
     });

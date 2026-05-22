@@ -85,7 +85,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
     return () => document.removeEventListener('mousedown', close);
   }, [showMenu]);
 
-  if (message.deleted) {
+  if (message.deleted || message.content === '') {
     return (
       <div className={`flex items-end gap-2 mb-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
         <MiniAvatar name={displayName} src={message.senderAvatar} />
@@ -96,7 +96,7 @@ const MessageBubble: FC<MessageBubbleProps> = ({
             </span>
           )}
           <div className="px-4 py-2.5 rounded-2xl text-sm italic text-gray-400 border border-gray-200 bg-gray-50">
-            🚫 You deleted this message
+            You deleted this message
           </div>
           <span className="text-[10px] text-gray-400 mt-0.5 mx-1">
             {formatTime(message.timestamp)}
@@ -149,13 +149,13 @@ const MessageBubble: FC<MessageBubbleProps> = ({
           {onEdit && (
             <button onClick={() => { setShowMenu(false); onEdit(); }}
               className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3">
-              ✏️ Edit
+               Edit
             </button>
           )}
           {onDelete && (
             <button onClick={() => { setShowMenu(false); onDelete(); }}
               className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 flex items-center gap-3">
-              🗑️ Delete
+              Delete
             </button>
           )}
         </div>

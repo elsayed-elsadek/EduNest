@@ -1,0 +1,34 @@
+import type { FC } from 'react';
+import { Star } from 'lucide-react';
+import StatCard from './StatCard';
+import type { StatsCardsProps } from './StatsCards.types';
+
+const StatsCards: FC<StatsCardsProps> = ({ data }) => {
+  const { completedCount, averageProgress,  totalPoints } = data;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Completed */}
+      <StatCard label="Completed">
+        <span>{completedCount}</span>
+        <span className="text-base font-semibold text-blue-600">Mentorships</span>
+      </StatCard>
+
+      {/* Average Progress */}
+      <StatCard label="Average Progress">
+        <span>{averageProgress}%</span>
+        <span className="text-sm font-semibold text-yellow-500">
+        
+        </span>
+      </StatCard>
+
+      {/* Total Points */}
+      <StatCard label="Total Points">
+        <span>{totalPoints.toLocaleString()}</span>
+        <Star className="w-6 h-6 text-yellow-500" />
+      </StatCard>
+    </div>
+  );
+};
+
+export default StatsCards;

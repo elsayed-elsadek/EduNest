@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { Mail, Phone, Instagram, Linkedin, Facebook, Twitter } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const quickLinks = [
   { name: "Home", id: "home" },
@@ -38,12 +39,12 @@ const FooterSection: React.FC = memo(() => {
               The future belongs to the curious. Let's build yours together.
             </p>
 
-            <a
-              href="/register"
-              className="py-3 px-10 inline-block bg-primary dark:bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 dark:hover:bg-blue-700 transition"
+            <Link
+              to="/register"
+              className="py-3 px-10 inline-block bg-primary hover:bg-[var(--primary-dark)] text-white rounded-2xl font-semibold"
             >
               Register Now
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -53,7 +54,7 @@ const FooterSection: React.FC = memo(() => {
 
           <div className="md:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 cursor-pointer ">
-              <div className="w-10 h-10 bg-primary dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 bg-primary dark:bg-[var(--primary-500)] rounded-full flex items-center justify-center text-white font-bold">
                 E
               </div>
               <span className="font-semibold text-lg">EduNest</span>
@@ -82,25 +83,25 @@ const FooterSection: React.FC = memo(() => {
             <div className="flex gap-3 mt-6">
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Instagram className="w-4 h-4 text-white" />
               </a>
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Linkedin className="w-4 h-4 text-white" />
               </a>
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Facebook className="w-4 h-4 text-white" />
               </a>
               <a
                 href="#"
-                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-blue-600 rounded-full transition"
+                className="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-[var(--primary-500)] rounded-full transition"
               >
                 <Twitter className="w-4 h-4 text-white" />
               </a>

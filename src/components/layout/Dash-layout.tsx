@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MentorSidebar from "../common/common-dash/MentorSidebar";
 import { MentorNavbar } from "../common/common-dash";
+import { useNotifications } from "../../hooks/Usenotifications";
 import { useAuthStore } from "../../store/authStore";
 import { getMentorProfile, extractMentorProfile } from "../../services/Mentorprofileservice";
 import api from "../../services/api";
@@ -30,6 +31,8 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
       if (name) setAuth({ token, userName: name });
     }
   }, [token, userName, setAuth]);
+
+  const { unreadCount } = useNotifications();
 
   useEffect(() => {
     if (!token) {
@@ -99,7 +102,7 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
         <div className="z-20">
           <MentorNavbar
             pageTitle={pageTitle}
-            notificationCount={5}
+            notificationCount={unreadCount}
             onMenuClick={() => setSidebarOpen(true)}
           />
         </div>

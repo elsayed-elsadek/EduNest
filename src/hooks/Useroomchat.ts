@@ -126,13 +126,28 @@ export const useRoomChat = () => {
 
       wsService.subscribeToRoom(room.roomId!, (data) => {
         if (!mountedRef.current) return;
-        const dto = data as RoomMessageDto;
+        const dto = data as RoomMessageDto & { type?: string; messageId?: number };
+
+        if (dto.type === 'DELETE' && dto.messageId) {
+          setMessages(prev => {
+            const filtered = prev.filter(m => m.id !== String(dto.messageId));
+            const newLast = filtered[filtered.length - 1];
+            setRooms(rooms => sortByRecent(rooms.map(r =>
+              r.roomId === room.roomId
+                ? { ...r, lastMessage: newLast?.content ?? '', timestamp: newLast?.timestamp ?? r.timestamp }
+                : r
+            )));
+            return filtered;
+          });
+          return;
+        }
+
         const incoming = toMessage(dto);
 
         setMessages(prev => {
-          const exists = prev.some(m => m.id === incoming.id);
-          if (exists) {
-            // WS echo of an edit → update content
+          const existing = prev.find(m => m.id === incoming.id);
+          if (existing) {
+            if (incoming.content === existing.content) return prev;
             return prev.map(m => m.id === incoming.id
               ? { ...m, content: incoming.content, edited: true }
               : m
@@ -171,15 +186,32 @@ export const useRoomChat = () => {
   const handleDeleteMessage = useCallback(async (messageId: string): Promise<void> => {
     const roomId = activeRoomRef.current?.roomId;
     if (!roomId) return;
-    // Remove immediately (optimistic) — no deleted placeholder to avoid crash
-    setMessages(prev => prev.filter(m => m.id !== messageId));
+
+    setMessages(prev => {
+      const filtered = prev.filter(m => m.id !== messageId);
+      const newLast = filtered[filtered.length - 1];
+      setRooms(rooms => sortByRecent(rooms.map(r =>
+        r.roomId === roomId
+          ? { ...r, lastMessage: newLast?.content ?? '', timestamp: newLast?.timestamp ?? r.timestamp }
+          : r
+      )));
+      return filtered;
+    });
+
     try {
       await apiDeleteMsg(roomId, Number(messageId));
     } catch {
-      // On failure refetch to restore
       const res = await getRoomMessages(roomId, 30).catch(() => null);
-      if (res && mountedRef.current)
-        setMessages([...res.apiResponse.Messages].reverse().map(toMessage));
+      if (res && mountedRef.current) {
+        const msgs = [...res.apiResponse.Messages].reverse().map(toMessage);
+        setMessages(msgs);
+        const newLast = msgs[msgs.length - 1];
+        setRooms(prev => sortByRecent(prev.map(r =>
+          r.roomId === roomId
+            ? { ...r, lastMessage: newLast?.content ?? '', timestamp: newLast?.timestamp ?? r.timestamp }
+            : r
+        )));
+      }
     }
   }, []);
 

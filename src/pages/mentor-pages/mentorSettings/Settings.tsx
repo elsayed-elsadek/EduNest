@@ -7,10 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import DashLayout from '../../../components/layout/Dash-layout';
 import SettingItem from '../../../components/mentor-components/mentor-setting-com/SettingItem';
 import SettingToggle from '../../../components/mentor-components/mentor-setting-com/SettingToggle';
-import { Mail, Lock, Moon, Trash2, Edit2, X, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Trash2, Edit2, X, Eye, EyeOff } from 'lucide-react';
 import { useMentorSettings } from '../../../hooks/Usementorsettings';
 import { useAuthStore } from '../../../store/authStore';
-import { useTheme } from '../../../context/useTheme';
 
 
 //  Modal wrapper
@@ -58,7 +57,7 @@ const Input: FC<InputProps> = ({ label, value, onChange, type = 'text', placehol
         {showToggle && (
           <button type="button" onClick={() => setShow(!show)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-            {show ? <EyeOff size={15} /> : <Eye size={15} />}
+            {show ? <Eye size={15} /> : <EyeOff size={15} />}
           </button>
         )}
       </div>
@@ -92,8 +91,6 @@ const Settings: FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [deactivatePassword, setDeactivatePassword] = useState('');
-  const { theme, toggleTheme } = useTheme();
-
 
   const closeModal = () => {
     setModal(null);
@@ -175,17 +172,6 @@ const Settings: FC = () => {
                       Change Password
                     </button>
                   }
-                />
-              </div>
-
-              {/* Dark Mode */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6">
-                <SettingToggle
-                  label="Dark Mode"
-                  description="Switch between light and dark"
-                  checked={theme === 'dark'}
-                  onChange={toggleTheme}
-                  icon={<Moon className="w-5 h-5" />}
                 />
               </div>
 

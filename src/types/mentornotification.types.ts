@@ -1,6 +1,15 @@
 
 import { formatTimeAgo } from '../utils/formatTimeago';
-export type NotificationApiType = 'TASK' | 'SESSION' | 'QUIZ' | 'ANNOUNCEMENT';
+export type NotificationApiType =
+  | 'ANNOUNCEMENT'
+  | 'QUIZ'
+  | 'SESSION'
+  | 'TASK'
+  | 'PROJECT'
+  | 'SUPPORT'
+  | 'BADGE'
+  | 'CERTIFICATE'
+  | 'LIVE_SESSION';
 
 export interface NotificationApiDto {
   id:      number;
@@ -21,7 +30,16 @@ export interface PaginatedNotifications {
 }
 
 //  UI shape (used in components) 
-export type NotificationType = 'session' | 'assignment' | 'message' | 'general';
+export type NotificationType =
+  | 'announcement'
+  | 'quiz'
+  | 'session'
+  | 'task'
+  | 'project'
+  | 'support'
+  | 'badge'
+  | 'certificate'
+  | 'live_session';
 
 export interface Notification {
   id:           string;
@@ -42,18 +60,23 @@ export interface NotificationStats {
 
 
 const TYPE_MAP: Record<NotificationApiType, NotificationType> = {
-  TASK:         'assignment',
+  ANNOUNCEMENT: 'announcement',
+  QUIZ:         'quiz',
   SESSION:      'session',
-  QUIZ:         'assignment',
-  ANNOUNCEMENT: 'general',
+  TASK:         'task',
+  PROJECT:      'project',
+  SUPPORT:      'support',
+  BADGE:        'badge',
+  CERTIFICATE:  'certificate',
+  LIVE_SESSION: 'live_session',
 };
 
 export const toUiNotification = (dto: NotificationApiDto): Notification => ({
   id:        String(dto.id),
-  type:      TYPE_MAP[dto.type] ?? 'general',
+  type:      TYPE_MAP[dto.type] ?? 'announcement',
   title:     dto.title,
   message:   dto.content,
-  isRead:    dto.read,          // ← map read → isRead
+  isRead:    dto.read,
   isNew:     !dto.read,
 timestamp: formatTimeAgo(dto.time),
 });

@@ -1,5 +1,5 @@
 
-import api from './api';
+import api, { API_BASE_URL } from './api';
 
 const BASE = 'api/v1/dashboard';
 
@@ -115,9 +115,18 @@ function mapStudentsList(arr: Record<string, unknown>[]): Student[] {
     );
 
     const email  = String(item.email ?? item.studentEmail ?? '');
-    const avatar = item.avatar       ? String(item.avatar)
-                 : item.profileImage ? String(item.profileImage)
-                 : undefined;
+    // Support multiple possible image fields and resolve to absolute URL
+    const rawAvatar = item.profileImageUrl ?? item.profileImage ?? item.profileImagePath ?? item.avatar ?? item.profileImageUrl;
+    let avatar: string | undefined = undefined;
+    if (rawAvatar) {
+      const raw = String(rawAvatar);
+      try {
+        // new URL handles absolute and relative paths; base API URL ensures correct origin
+        avatar = new URL(raw, API_BASE_URL).toString();
+      } catch {
+        avatar = raw;
+      }
+    }
 
     return { id, name, email, avatar, activeMentorships, completedMentorships };
   });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import DashLayout from '../../../components/layout/Dash-layout';
 import { getProjectDashboard, type FullProjectDashboard, type ProjectListItem } from '../../../services/projectService';
-import { Briefcase, CheckCircle, Clock, BarChart2, Search, Plus, Eye, MoreVertical, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Briefcase, CheckCircle, Clock, BarChart2, Search, Eye, MoreVertical, Edit, Trash2, ArrowLeft } from 'lucide-react';
 import { type ProjectResponse } from '../../../services/projectService';
 import { EditProjectModal, DeleteProjectModal } from './components/ProjectModals';
 

@@ -1,5 +1,6 @@
 
 import { useEffect, useState, type FC } from 'react';
+import { X, AlertCircle, Trash2 } from 'lucide-react';
 import { getRoomMembers, type RoomMemberDto } from '../../../services/Roomchatservice';
 
 interface Props {
@@ -49,7 +50,7 @@ const MembersPanel: FC<Props> = ({
         </div>
         <button onClick={onClose}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition">
-          ✕
+          <X className="w-5 h-5" />
         </button>
       </div>
 
@@ -62,7 +63,7 @@ const MembersPanel: FC<Props> = ({
         )}
         {error && (
           <div className="flex flex-col items-center justify-center h-32 gap-2 text-gray-400">
-            <span className="text-2xl">⚠️</span>
+            <AlertCircle className="w-8 h-8" />
             <p className="text-sm">Failed to load members</p>
           </div>
         )}
@@ -125,7 +126,7 @@ const MembersPanel: FC<Props> = ({
                 onClick={() => setConfirmDel(true)}
                 className="w-full py-2 rounded-xl border border-red-200 text-sm font-medium text-red-500 hover:bg-red-50 transition flex items-center justify-center gap-2"
               >
-                🗑️ Delete Group
+                <Trash2 className="w-4 h-4" /> Delete Group
               </button>
             ) : (
               <div className="space-y-1.5">

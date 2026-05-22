@@ -1,0 +1,22 @@
+import api from '../api';
+import type { Quiz, Question, Answer, QuizSubmissionResponse } from '../../';
+
+export const getQuizDetails = async (id: number): Promise<Quiz> => {
+  const response = await api.get(`/api/v1/quiz/${id}`);
+  return response.data.apiResponse['Quiz Details'];
+};
+
+export const getQuizQuestions = async (quizId: number): Promise<Question[]> => {
+  const response = await api.get(`/api/v1/question/fetch/${quizId}`);
+  return response.data.apiResponse['Quiz Questions'];
+};
+
+export const submitQuizAnswers = async (
+  quizId: number,
+  answers: Answer[]
+): Promise<QuizSubmissionResponse> => {
+  const response = await api.post(`/api/v1/submit-quiz-answer/${quizId}`, {
+    answers,
+  });
+  return response.data.apiResponse;
+};

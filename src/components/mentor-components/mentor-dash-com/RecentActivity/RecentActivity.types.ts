@@ -1,6 +1,8 @@
 
-
 export interface StudentActivity {
+  /** optional extra field used by some implementations */
+  title?: unknown;
+
   id: string;
   studentName: string;
   studentAvatar?: string;
@@ -9,6 +11,7 @@ export interface StudentActivity {
   timestamp: string;
   type: 'submission' | 'question' | 'completion';
 }
+
 
 export interface RecentActivityListProps {
   activities?: StudentActivity[];

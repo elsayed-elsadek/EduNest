@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* global CSS settings */
 *,
 *::before,
 *::after {
@@ -28,29 +26,23 @@ body {
   overflow-x: hidden;
 }
 
-
-/* smooth theme transitions */
 html, body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
-
-
 
 /* ============================================
    CSS VARIABLES
    ============================================ */
 :root {
   --sidebar-bg: #0c2d48;
-  --active-bg:   #f7f7f8;; /* نفس لون بادي اللايت */
+  --active-bg: #f7f7f8;
 
-  /* Primary gradient colors */
   --primary-from: #154d71;
   --primary-via: #2a7fa8;
   --primary-to: #33a1e0;
   --primary-500: #0f5e8b;
   --primary-dark: #0f3550;
 
-  /* Blue gradient */
   --blue-from: #33A1E0;
   --blue-to: #2176AE;
 }
@@ -63,7 +55,7 @@ html, body {
   --dark-text: #e5e7eb;
 
   --sidebar-bg: #071627;
-  --active-bg: #0b1220; /* نفس لون بادي الدارك */
+  --active-bg: #0b1220;
   --accent: #d4af37;
 }
 
@@ -119,16 +111,27 @@ a {
 .hero-image {
   @apply w-[360px] h-[400px] rounded-[30px] overflow-hidden;
 }
-img {
 
+img {
   aspect-ratio: 1024 / 1034;
-  /* object-fit: cover; */
+}
+
+.native-password-toggle-hidden::-ms-clear,
+.native-password-toggle-hidden::-ms-reveal,
+.native-password-toggle-hidden::-webkit-textfield-decoration-button,
+.native-password-toggle-hidden::-webkit-textfield-decoration-container,
+.native-password-toggle-hidden::-webkit-contacts-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .text-primary { color: var(--primary-500); }
 .bg-primary   { background-color: var(--primary-500); }
-
-.btn-primary { background-color: var(--primary-500); }
+.btn-primary  { background-color: var(--primary-500); }
 
 .btn-blue-gradient {
   background-image: linear-gradient(90deg, var(--blue-from), var(--blue-to));
@@ -200,10 +203,9 @@ img {
 /* ============================================
    SIDEBAR INVERTED CURVES
    ============================================ */
-
-.inverted-curve-top,
-.inverted-curve-bottom {
+.inverted-curve-top {
   position: absolute;
+  top: -20px;
   right: 0;
   width: 20px;
   height: 20px;
@@ -212,32 +214,58 @@ img {
   z-index: 10;
 }
 
-.inverted-curve-top {
-  top: -20px;
-  border-bottom-right-radius: 20px;
-  box-shadow: 8px 8px 0 0 var(--active-bg);
-}
-
-.inverted-curve-bottom {
-  bottom: -20px;
-  border-top-right-radius: 20px;
-  box-shadow: 8px -8px 0 0 var(--active-bg);
-}
-
 .inverted-curve-top::before {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: var(--sidebar-bg);
   border-bottom-right-radius: 20px;
+  box-shadow: 5px 5px 0 5px var(--active-bg);
+}
+
+.inverted-curve-bottom {
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .inverted-curve-bottom::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: var(--sidebar-bg);
   border-top-right-radius: 20px;
+  box-shadow: 5px -5px 0 5px var(--active-bg);
 }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================
+   CHAT UNREAD BADGE ANIMATION
+   ============================================ */
+@keyframes chatBadgePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+    transform: scale(1.1);
+  }
+}

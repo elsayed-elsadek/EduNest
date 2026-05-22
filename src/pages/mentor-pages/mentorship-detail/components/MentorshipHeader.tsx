@@ -82,7 +82,7 @@ const MentorshipHeader: FC<MentorshipHeaderProps> = ({
                     className="flex items-center gap-3 w-full sm:w-auto px-5 py-3 
        bg-white hover:bg-gray-200 
        rounded-xl text-sm font-medium
-       border-l-4 border-gray-700 transition"
+        transition"
                 >
                     <i className="fa-regular fa-file-lines text-lg text-gray-700"></i>
                     Create Content

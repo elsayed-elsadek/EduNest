@@ -1,7 +1,6 @@
-
-
+﻿import { useState, useRef, useEffect } from 'react';
 import type { FC, KeyboardEvent } from 'react';
-import { useState } from 'react';
+import { Send } from 'lucide-react';
 
 interface MessageInputProps {
   onSend: (message: string) => void;
@@ -10,15 +9,24 @@ interface MessageInputProps {
 
 const MessageInput: FC<MessageInputProps> = ({ onSend, disabled }) => {
   const [message, setMessage] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = 'auto';
+    ta.style.height = `${Math.min(ta.scrollHeight, 140)}px`;
+  }, [message]);
 
   const handleSend = () => {
-    if (message.trim() && !disabled) {
-      onSend(message.trim());
-      setMessage('');
-    }
+    if (disabled) return;
+    const trimmed = message.trim();
+    if (!trimmed) return;
+    onSend(trimmed);
+    setMessage('');
   };
 
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -27,65 +35,29 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, disabled }) => {
 
   return (
     <div className="p-4 bg-white border-t border-gray-200">
-      <div className="flex items-center gap-3">
-        {/* Plus Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
+      <div className="flex items-end gap-3 min-w-0">
+        <div className="flex-1 min-w-0">
+          <textarea
+            ref={textareaRef}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message..."
+            disabled={disabled}
+            rows={1}
+            className="w-full min-h-[48px] max-h-[140px] px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm text-gray-900 placeholder-gray-500
+              focus:outline-none focus:ring-2 focus:ring-[#0c2d48]/30 focus:border-[#0c2d48]/50 transition-all resize-none overflow-hidden"
+          />
+        </div>
 
-        {/* Image Upload Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </button>
-
-        {/* Attachment Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-          </svg>
-        </button>
-
-        {/* Sticker Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
-
-        {/* Input */}
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Type a message..."
-          disabled={disabled}
-          className="flex-1 px-4 py-2.5 bg-[#F5F5F5] border-none rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D9CDB] disabled:opacity-50"
-        />
-
-        {/* Text Format Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-          </svg>
-        </button>
-
-        {/* Emoji Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
-
-        {/* Thumbs Up Button */}
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-          </svg>
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={disabled || !message.trim()}
+          className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-[#2D9CDB] text-white transition-transform duration-150 ease-out hover:bg-[#1f85c6] hover:-translate-y-0.5 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
+          aria-label="Send message"
+        >
+          <Send className="w-5 h-5" />
         </button>
       </div>
     </div>
@@ -93,5 +65,3 @@ const MessageInput: FC<MessageInputProps> = ({ onSend, disabled }) => {
 };
 
 export default MessageInput;
-
-

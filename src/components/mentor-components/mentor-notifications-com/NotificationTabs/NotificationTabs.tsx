@@ -1,5 +1,6 @@
 
 import type { FC } from 'react';
+import { Check } from 'lucide-react';
 
 interface NotificationTabsProps {
   activeTab: 'all' | 'unread';
@@ -60,9 +61,7 @@ const NotificationTabs: FC<NotificationTabsProps> = ({
           >
 
             <div className="w-4 h-4 border-[1.5px] border-green-600 dark:border-green-400 rounded-[4px] flex items-center justify-center group-hover:bg-green-600/10">
-              <svg width="10" height="8" viewBox="0 0 12 10" fill="none" className="text-green-600 dark:text-green-400">
-                <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" strokeWidth={3} />
             </div>
             Mark All as Read
           </button>

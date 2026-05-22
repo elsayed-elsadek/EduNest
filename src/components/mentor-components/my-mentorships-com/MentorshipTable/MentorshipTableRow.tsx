@@ -2,8 +2,10 @@
 import type { FC } from 'react';
 import { Fragment } from 'react';
 import { Eye, MoreVertical, Star, Edit2, Trash2 } from 'lucide-react';
+import NoCover from '../../../../components/student-components/common/Nocover/Nocover';
 import { Menu, Transition } from '@headlessui/react';
 import type { Mentorship } from '../../../../types/mentorship.types';
+import { API_BASE_URL } from '../../../../services/api';
 
 interface MentorshipTableRowProps {
   mentorship: Mentorship;
@@ -22,30 +24,29 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
       {/* 1. Mentorship Info */}
       <td className="py-4 px-4 md:px-6">
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors overflow-hidden">
             {mentorship.coverImageUrl ? (
-              <img 
-                src={`http://localhost:8080${mentorship.coverImageUrl}`} 
-                alt="" 
+              <img
+                src={`${API_BASE_URL}${mentorship.coverImageUrl}`}
+                alt=""
                 title={mentorship.coverImageUrl}
                 className="w-full h-full object-cover rounded-lg cursor-pointer"
                 loading="lazy"
-                onError={(e) => { 
+                onError={(e) => {
                   console.warn('Image load failed:', mentorship.coverImageUrl);
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
                 onClick={() => onDetails(mentorship.id)}
               />
             ) : (
-              <span className="text-base md:text-xl cursor-pointer" 
-                   onClick={() => onDetails(mentorship.id)}>
-                {mentorship.icon}
-              </span>
+              <button onClick={() => onDetails(mentorship.id)} className="w-full h-full">
+                <NoCover title={mentorship.title} className="w-full h-full rounded-lg" />
+              </button>
             )}
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-[12px] cursor-pointer md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 leading-tight"
-            onClick={() => onDetails(mentorship.id)}>
+              onClick={() => onDetails(mentorship.id)}>
               {mentorship.title} </h3>
             <p className="hidden md:block text-[11px] text-gray-400 font-medium mt-0.5">
               {mentorship.level}
@@ -69,7 +70,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
 
       {/* 3. Total Enroll */}
       <td className="hidden sm:table-cell py-4 px-4 md:px-6 font-bold text-gray-900 dark:text-gray-100 text-sm">
-        {mentorship.totalEnrolled}
+        {mentorship?.totalEnrolled || 0}
       </td>
 
       {/* 4. Revenue */}
@@ -100,7 +101,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
           </button>
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button 
+            <Menu.Button
               aria-label="More options for mentorship"
               className="p-1.5 rounded-lg border border-primary text-primary hover:bg-primary/10 dark:hover:bg-primary dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
