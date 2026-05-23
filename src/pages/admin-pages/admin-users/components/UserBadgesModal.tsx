@@ -168,7 +168,7 @@ const UserBadgesModal: React.FC<UserBadgesModalProps> = ({
                 return (
                   <div 
                     key={badge.id}
-                    className={`flex items-start justify-between p-4 rounded-xl border transition-all duration-200 ${details.bg}`}
+                    className={`flex items-start justify-between p-4 rounded-xl border transition-all duration-200 gap-3 ${details.bg}`}
                   >
                     <div className="flex items-start gap-3.5 flex-1 min-w-0">
                       <div className="mt-0.5 text-slate-700">
@@ -200,15 +200,23 @@ const UserBadgesModal: React.FC<UserBadgesModalProps> = ({
                       </div>
                     </div>
 
-                    {mode === 'remove' && (
-                      <button
-                        onClick={() => handleRemove(badge.id, badge.badgeName || badge.badgeType)}
-                        className="ml-3 p-2 bg-rose-100/60 hover:bg-rose-200/80 text-rose-600 rounded-lg transition-colors border border-rose-200 flex-shrink-0"
-                        title="Remove Badge"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    )}
+                    {/* Right Section: Type Label & Remove Action */}
+                    <div className="flex items-center gap-2.5 flex-shrink-0">
+                      {badge.badgeType && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-white/60 border border-current/10 uppercase tracking-wider">
+                          {badge.badgeType.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                      {mode === 'remove' && (
+                        <button
+                          onClick={() => handleRemove(badge.id, badge.badgeName || badge.badgeType)}
+                          className="p-2 bg-rose-100/60 hover:bg-rose-200/80 text-rose-600 rounded-lg transition-colors border border-rose-200"
+                          title="Remove Badge"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}

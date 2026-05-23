@@ -6,7 +6,6 @@ import { useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashLayout from '../../../components/layout/Dash-layout';
 import SettingItem from '../../../components/mentor-components/mentor-setting-com/SettingItem';
-import SettingToggle from '../../../components/mentor-components/mentor-setting-com/SettingToggle';
 import { Mail, Lock, Trash2, Edit2, X, Eye, EyeOff } from 'lucide-react';
 import { useMentorSettings } from '../../../hooks/Usementorsettings';
 import { useAuthStore } from '../../../store/authStore';

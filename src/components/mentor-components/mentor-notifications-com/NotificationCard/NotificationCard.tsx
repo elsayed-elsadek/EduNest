@@ -1,6 +1,6 @@
 
 import type { FC } from 'react';
-import { Calendar, MessageCircle, X, Clock, Play, Eye, Bell, Megaphone, CheckSquare, FolderOpen, HelpCircle, Award, Scroll, Video, BookOpen } from 'lucide-react';
+import { Calendar, MessageCircle, X, Clock, Play, Eye, Bell, Megaphone, CheckSquare, FolderOpen, HelpCircle, Award, Scroll, Video, BookOpen, GraduationCap } from 'lucide-react';
 import type { Notification } from '../../../../types/mentornotification.types';
 import { useMarkReadOnView } from '../../../../hooks/Usemarkreadonview';
 
@@ -27,6 +27,8 @@ const NotificationCard: FC<NotificationCardProps> = ({
     badge:        { icon: Award,       bg: 'bg-[#FDF2F8]', color: 'text-[#C026D3]', border: 'border-[#C026D3]' },
     certificate:  { icon: Scroll,      bg: 'bg-[#ECFEFF]', color: 'text-[#0891B2]', border: 'border-[#0891B2]' },
     live_session: { icon: Video,      bg: 'bg-[#FEF2F2]', color: 'text-[#B91C1C]', border: 'border-[#B91C1C]' },
+    mentorship:   { icon: GraduationCap, bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
+    review:       { icon: MessageCircle,bg: 'bg-[#F0FDF4]', color: 'text-[#15803D]', border: 'border-[#15803D]' },
     message:      { icon: MessageCircle,bg: 'bg-[#F0FDF4]', color: 'text-[#15803D]', border: 'border-[#15803D]' },
     general:      { icon: Bell,       bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
   };

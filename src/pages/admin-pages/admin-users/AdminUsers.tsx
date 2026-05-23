@@ -7,13 +7,15 @@ import {
 } from '../../../services/admin-role-service/Admindashboardservice';
 import type { UserSummaryData } from '../../../types/admin-role-types/admin-dash.types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Award, Bell, ChevronDown, Loader2, X, Crown, Handshake, Medal, Star } from 'lucide-react';
+import {  Bell, ChevronDown, Loader2, X, Github, Linkedin, Globe, Award, Trash2 } from 'lucide-react';
 import UserList from './components/UserList';
 import { API_BASE_URL } from '../../../services/api';
 import SendNotificationModal from './components/SendNotificationModal';
 import SendEmailModal from './components/SendEmailModal';
 import AssignBadgeModal from './components/AssignBadgeModal';
 import UserBadgesModal from './components/UserBadgesModal';
+import CreateBadgeModal from './components/CreateBadgeModal';
+import DeleteBadgeModal from './components/DeleteBadgeModal';
 
 type UnknownBadge = {
   badge?: { id?: number; title?: string };
@@ -22,6 +24,9 @@ type UnknownBadge = {
   userBadgeId?: number;
   badgeTitle?: string;
   recognitionNote?: string;
+  name?: string;
+  description?: string;
+  type?: string;
 };
 
 const Users: React.FC = () => {
@@ -36,6 +41,8 @@ const Users: React.FC = () => {
   const [isBadgesListModalOpen, setIsBadgesListModalOpen] = useState(false);
   const [badgesListModalMode, setBadgesListModalMode] = useState<'view' | 'remove'>('view');
   const [badgesListUser, setBadgesListUser] = useState<UserSummaryData | null>(null);
+  const [isCreateBadgeModalOpen, setIsCreateBadgeModalOpen] = useState(false);
+  const [isDeleteBadgeModalOpen, setIsDeleteBadgeModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -199,10 +206,59 @@ const Users: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Achievement</h3>
-            <div className="bg-yellow-50 border border-yellow-100 text-yellow-800 rounded-lg p-3 flex items-center gap-3 text-sm font-medium">
-              <Award className="text-yellow-500" size={20} />
-              {userDetails && !isStudent && mentorDetails && mentorDetails.totalSessions > 10 ? 'Top Contributor 2026' : 'Active Member'}
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">Social Media</h3>
+            <div className="flex flex-wrap gap-2.5">
+              {userDetails?.socialMedia && userDetails.socialMedia.length > 0 ? (
+                userDetails.socialMedia.map((social: { name?: string; url?: string }, idx: number) => {
+                  const name = social.name?.toUpperCase();
+                  const url = social.url;
+                  
+                  if (name === 'GITHUB') {
+                    return (
+                      <a
+                        key={url || idx}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition-all shadow-xs"
+                      >
+                        <Github size={14} className="text-slate-500" />
+                        GitHub
+                      </a>
+                    );
+                  }
+                  if (name === 'LINKEDIN') {
+                    return (
+                      <a
+                        key={url || idx}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 hover:text-blue-800 rounded-xl text-xs font-semibold transition-all shadow-xs"
+                      >
+                        <Linkedin size={14} className="text-blue-500" />
+                        LinkedIn
+                      </a>
+                    );
+                  }
+                  return (
+                    <a
+                      key={url || idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition-all shadow-xs"
+                    >
+                      <Globe size={14} className="text-slate-500" />
+                      {social.name}
+                    </a>
+                  );
+                })
+              ) : (
+                <div className="text-xs text-slate-400 bg-slate-50/50 border border-slate-100 rounded-xl p-3 w-full text-center">
+                  No social profiles connected.
+                </div>
+              )}
             </div>
           </div>
 
@@ -212,33 +268,42 @@ const Users: React.FC = () => {
               <div className="flex flex-col gap-2">
                 {userDetails.adminBadges.map((badge: unknown, index: number) => {
                   const typedBadge = badge as UnknownBadge;
-                  const bId = typedBadge.badge?.id ?? typedBadge.badgeId ?? typedBadge.id ?? index;
-                  const title = typedBadge.badge?.title ?? typedBadge.badgeTitle ?? 'Admin Badge';
-                  const note = typedBadge.recognitionNote ?? '';
+                  const bId = typedBadge.id ?? typedBadge.badge?.id ?? typedBadge.badgeId ?? index;
+                  const title = typedBadge.name ?? typedBadge.badge?.title ?? typedBadge.badgeTitle ?? 'Admin Badge';
+                  const note = typedBadge.description ?? typedBadge.recognitionNote ?? '';
                   const uBadgeId = typedBadge.id ?? typedBadge.userBadgeId ?? typedBadge.badgeId;
+                  const type = typedBadge.type;
 
-                  const BadgeIcon = bId === 1 ? Award
-                    : bId === 2 ? Crown
-                    : bId === 3 ? Star
-                    : bId === 4 ? Handshake
-                    : Medal;
-                  const colorClass = bId === 1 ? 'bg-amber-50 text-amber-800 border-amber-100'
-                    : bId === 2 ? 'bg-blue-50 text-blue-800 border-blue-100'
-                      : bId === 3 ? 'bg-emerald-50 text-emerald-800 border-emerald-100'
-                        : bId === 4 ? 'bg-purple-50 text-purple-800 border-purple-100'
-                          : 'bg-rose-50 text-rose-800 border-rose-100';
+                  const emoji = type === 'ACADEMIC_EXCELLENCE' ? '🎓'
+                    : type === 'TOP_MENTOR' ? '🧑‍🏫'
+                    : type === 'COMMUNITY_LEADER' ? '🏆'
+                    : type === 'INNOVATOR_AWARD' ? '💡'
+                    : (bId === 1 ? '🏆' : bId === 2 ? '👑' : bId === 3 ? '⭐' : bId === 4 ? '🤝' : '🎨');
 
-                  return (
+                  const colorClass = type === 'ACADEMIC_EXCELLENCE' ? 'bg-amber-50 text-amber-800 border-amber-100'
+                    : type === 'TOP_MENTOR' ? 'bg-blue-50 text-blue-800 border-blue-100'
+                    : type === 'COMMUNITY_LEADER' ? 'bg-emerald-50 text-emerald-800 border-emerald-100'
+                    : type === 'INNOVATOR_AWARD' ? 'bg-rose-50 text-rose-800 border-rose-100'
+                    : (bId === 1 ? 'bg-amber-50 text-amber-800 border-amber-100'
+                      : bId === 2 ? 'bg-blue-50 text-blue-800 border-blue-100'
+                        : bId === 3 ? 'bg-emerald-50 text-emerald-800 border-emerald-100'
+                          : bId === 4 ? 'bg-purple-50 text-purple-800 border-purple-100'
+                            : 'bg-rose-50 text-rose-800 border-rose-100');
+
+                   return (
                     <div key={uBadgeId || index} className={`flex items-center justify-between p-2.5 rounded-xl border text-sm font-medium transition-all ${colorClass}`}>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl bg-white/80 flex items-center justify-center text-slate-700">
-                          <BadgeIcon size={18} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{title}</span>
-                          {note && <span className="text-[10px] opacity-70 mt-0.5">{note}</span>}
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span className="text-lg flex-shrink-0">{emoji}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-semibold truncate">{title}</span>
+                          {note && <span className="text-[10px] opacity-70 mt-0.5 truncate">{note}</span>}
                         </div>
                       </div>
+                      {type && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-white/60 border border-current/10 uppercase tracking-wider flex-shrink-0 ml-2">
+                          {type.replace(/_/g, ' ')}
+                        </span>
+                      )}
                     </div>
                   );
                 })}
@@ -257,9 +322,27 @@ const Users: React.FC = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8 flex flex-col gap-6 bg-slate-50/50 min-h-screen font-sans text-slate-800">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">User Directory</h1>
-        <p className="text-slate-500 text-xs sm:text-sm">Manage and monitor all active mentors, students, and system staff.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">User Directory</h1>
+          <p className="text-slate-500 text-xs sm:text-sm">Manage and monitor all active mentors, students, and system staff.</p>
+        </div>
+        <div className="flex items-center gap-3 self-start sm:self-auto">
+          <button
+            onClick={() => setIsDeleteBadgeModalOpen(true)}
+            className="flex items-center gap-2 bg-white  border border-slate-200 hover:border-rose-100 text-slate-600 hover:text-rose-600 px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
+          >
+            <Trash2 size={16} />
+            Delete Badge
+          </button>
+          <button
+            onClick={() => setIsCreateBadgeModalOpen(true)}
+            className="flex items-center gap-2 bg-[var(--primary-500)] hover:bg-[var(--primary-dark)] text-white px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
+          >
+            <Award size={16} />
+            Create Badge
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col xl:flex-row gap-6 flex-1 min-h-0">
@@ -430,6 +513,24 @@ const Users: React.FC = () => {
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ADMIN_USER_DETAILS_KEY })}
         />
       )}
+
+      <CreateBadgeModal
+        isOpen={isCreateBadgeModalOpen}
+        onClose={() => setIsCreateBadgeModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ADMIN_USER_DETAILS_KEY });
+          queryClient.invalidateQueries({ queryKey: ['admin', 'badges', 'all'] });
+        }}
+      />
+
+      <DeleteBadgeModal
+        isOpen={isDeleteBadgeModalOpen}
+        onClose={() => setIsDeleteBadgeModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ADMIN_USER_DETAILS_KEY });
+          queryClient.invalidateQueries({ queryKey: ['admin', 'badges', 'all'] });
+        }}
+      />
     </div>
   );
 };
