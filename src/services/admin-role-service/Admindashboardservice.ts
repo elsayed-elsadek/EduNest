@@ -1,5 +1,9 @@
+
+
 import api from '../api';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { NOTIFICATION_TYPES } from '../../types/mentornotification.types';
+import { formatTimeAgo } from '../../utils/formatTimeago';
 import type {
   AdminDashboardApiResponse,
   StatCardData,
@@ -10,7 +14,6 @@ import type {
   AdminUsersDashboardSummaryResponse,
 } from '../../types/admin-role-types/admin-dash.types';
 
-// يمكنك إضافة التايبس هنا أو في ملف التايبس الخاص بك للـ User Details
 export interface UserDetailsResponse {
   apiResponse: {
     message: string;
@@ -46,8 +49,7 @@ export interface UserDetailsResponse {
       totalCompletedMentorships: number;
       totalBadgesEarned: number;
       socialMedia: Array<{ name: string; url: string }>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      adminBadges: any[];
+      adminBadges: unknown[];
     };
   };
 }
@@ -57,7 +59,7 @@ export const ADMIN_DASHBOARD_KEY = ['admin', 'dashboard', 'full'] as const;
 const fetchAdminDashboard = async (months: number): Promise<AdminDashboardApiResponse> => {
   const { data } = await api.get<AdminDashboardApiResponse>('api/v1/admin/dashboard/full', {
     params: {
-      months,               
+      months,
       notificationPage: 0,
       notificationSize: 10,
       mentorPage:       0,
@@ -67,7 +69,7 @@ const fetchAdminDashboard = async (months: number): Promise<AdminDashboardApiRes
   return data;
 };
 
-//  Helpers 
+// ── Helpers ──────────────────────────────────────────────────────────────────
 const formatRevenue = (amount: number): string => {
   if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
   if (amount >= 1_000)     return `$${(amount / 1_000).toFixed(1)}K`;
@@ -83,34 +85,31 @@ const formatCount = (n: number): string => {
 const shortMonth = (month: string): string => month.slice(0, 3).toUpperCase();
 
 const notifTypeToActivityType = (type: string): ActivityType => {
+  const upperType = type?.toUpperCase() ?? '';
+
   const map: Record<string, ActivityType> = {
-    SESSION:      'session',
-    TASK:         'task',
-    QUIZ:         'quiz',
-    PROJECT:      'project',
-    SUPPORT:      'support',
-    BADGE:        'badge',
-    CERTIFICATE:  'certificate',
-    LIVE_SESSION: 'live_session',
-    ANNOUNCEMENT: 'announcement',
-    PAYMENT:      'payment',
+    ANNOUNCEMENT: NOTIFICATION_TYPES.ANNOUNCEMENT,
+    QUIZ:         NOTIFICATION_TYPES.QUIZ,
+    SESSION:      NOTIFICATION_TYPES.SESSION,
+    TASK:         NOTIFICATION_TYPES.TASK,
+    PROJECT:      NOTIFICATION_TYPES.PROJECT,
+    SUPPORT:      NOTIFICATION_TYPES.SUPPORT,
+    BADGE:        NOTIFICATION_TYPES.BADGE,
+    CERTIFICATE:  NOTIFICATION_TYPES.CERTIFICATE,
+    LIVE_SESSION: NOTIFICATION_TYPES.LIVE_SESSION,
+    MENTORSHIP:   NOTIFICATION_TYPES.MENTORSHIP,
+    REVIEW:       NOTIFICATION_TYPES.REVIEW,
+    VERIFIED:     'verified',
     ALERT:        'alert',
+    PAYMENT:      'payment',
   };
-  return map[type?.toUpperCase()] ?? 'announcement';
+
+  return map[upperType] ?? 'other';
 };
 
-const timeAgo = (dateStr: string): string => {
-  const diff  = Date.now() - new Date(dateStr).getTime();
-  const mins  = Math.floor(diff / 60_000);
-  const hours = Math.floor(diff / 3_600_000);
-  const days  = Math.floor(diff / 86_400_000);
-  if (mins  < 1)  return 'just now';
-  if (mins  < 60) return `${mins}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
-};
+const timeAgo = (dateStr: string): string => formatTimeAgo(dateStr);
 
-// Transform 
+// ── Transform ─────────────────────────────────────────────────────────────────
 const transformDashboardData = (raw: AdminDashboardApiResponse) => {
   const { cards, sessionsChart, notifications, topMentors } = raw.apiResponse.dashboard;
 
@@ -147,38 +146,43 @@ const transformDashboardData = (raw: AdminDashboardApiResponse) => {
   return { stats, chartData, mentors, events };
 };
 
-
 export const useAdminDashboard = (months = 0) => {
   return useQuery({
     queryKey:  [...ADMIN_DASHBOARD_KEY, { months }],
     queryFn:   () => fetchAdminDashboard(months),
-    staleTime: 5  * 60 * 1000,   
+    staleTime: 5  * 60 * 1000,
     gcTime:    15 * 60 * 1000,
     refetchOnWindowFocus: false,
     select: transformDashboardData,
   });
 };
 
+// ── Users Dashboard ───────────────────────────────────────────────────────────
 export const ADMIN_USERS_DASHBOARD_KEY = ['admin', 'users', 'dashboard-summary'] as const;
 
-const fetchAdminUsersDashboard = async (months: number, page: number, size: number): Promise<AdminUsersDashboardSummaryResponse> => {
-  const { data } = await api.get<AdminUsersDashboardSummaryResponse>('api/v1/admin/users/dashboard-summary', {
-    params: { months, page, size },
-  });
+const fetchAdminUsersDashboard = async (
+  months: number,
+  page: number,
+  size: number,
+): Promise<AdminUsersDashboardSummaryResponse> => {
+  const { data } = await api.get<AdminUsersDashboardSummaryResponse>(
+    'api/v1/admin/users/dashboard-summary',
+    { params: { months, page, size } },
+  );
   return data;
 };
 
 export const useAdminUsersDashboard = (months = 6, page = 0, size = 10) => {
   return useQuery({
     queryKey: [...ADMIN_USERS_DASHBOARD_KEY, { months, page, size }],
-    queryFn: () => fetchAdminUsersDashboard(months, page, size),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+    queryFn:  () => fetchAdminUsersDashboard(months, page, size),
+    staleTime: 5  * 60 * 1000,
+    gcTime:    15 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 };
 
-// الـ API الجديد لجلب تفاصيل الـ User بالـ ID كاملة
+// ── User Details ──────────────────────────────────────────────────────────────
 export const ADMIN_USER_DETAILS_KEY = ['admin', 'users', 'details'] as const;
 
 const fetchAdminUserDetails = async (id: number): Promise<UserDetailsResponse> => {
@@ -189,87 +193,71 @@ const fetchAdminUserDetails = async (id: number): Promise<UserDetailsResponse> =
 export const useAdminUserDetails = (id: number | null) => {
   return useQuery({
     queryKey: [...ADMIN_USER_DETAILS_KEY, id],
-    queryFn: () => fetchAdminUserDetails(id!),
-    enabled: !!id, // يشتغل فقط لو الـ id موجود ومش null
+    queryFn:  () => fetchAdminUserDetails(id!),
+    enabled:  !!id,
     staleTime: 2 * 60 * 1000,
   });
 };
 
-// 1. تعريف الـ Interface الخاص بالبيانات المطلوبة للـ Request Body
+// ── Send Notification ─────────────────────────────────────────────────────────
 export interface SendNotificationPayload {
   userId: number;
   title: string;
   content: string;
 }
 
-// 2. دالة الـ API لإرسال الإشعار (POST Request)
 const sendAdminNotification = async (payload: SendNotificationPayload) => {
   const { data } = await api.post('api/v1/admin/users/send-notification', payload);
   return data;
 };
 
-// 3. Custom Hook لاستخدامه داخل الـ Component بكل سهولة مع إدارة الـ Loading والـ Success
 export const useAdminSendNotification = () => {
-  return useMutation({
-    mutationFn: sendAdminNotification,
-  });
+  return useMutation({ mutationFn: sendAdminNotification });
 };
 
-// 4. تعريف الـ Interface الخاص بالبيانات المطلوبة لإرسال بريد إلكتروني
+// ── Send Email ────────────────────────────────────────────────────────────────
 export interface SendEmailPayload {
   userId: number;
   subject: string;
   message: string;
 }
 
-// 5. دالة الـ API لإرسال البريد الإلكتروني (POST Request)
 const sendAdminEmail = async (payload: SendEmailPayload) => {
   const { data } = await api.post('api/v1/admin/users/send-email', payload);
   return data;
 };
 
-// 6. Custom Hook لإرسال البريد الإلكتروني مع إدارة الـ Loading والـ Success
 export const useAdminSendEmail = () => {
-  return useMutation({
-    mutationFn: sendAdminEmail,
-  });
+  return useMutation({ mutationFn: sendAdminEmail });
 };
 
-// 7. تعريف الـ Interface الخاص ببيانات إسناد الشارة (Assign Badge)
+// ── Assign Badge ──────────────────────────────────────────────────────────────
 export interface AssignBadgePayload {
   userId: number;
   badgeId: number;
   recognitionNote: string;
 }
 
-// 8. دالة الـ API لإسناد الشارة (POST Request)
 const assignAdminBadge = async (payload: AssignBadgePayload) => {
   const { data } = await api.post('api/admin/badges/assign', payload);
   return data;
 };
 
-// 9. Custom Hook لإسناد الشارة
 export const useAdminAssignBadge = () => {
-  return useMutation({
-    mutationFn: assignAdminBadge,
-  });
+  return useMutation({ mutationFn: assignAdminBadge });
 };
 
-// 10. دالة الـ API لحذف الشارة (DELETE Request)
+// ── Remove Badge ──────────────────────────────────────────────────────────────
 const removeAdminBadge = async (userBadgeId: number) => {
   const { data } = await api.delete(`api/admin/badges/${userBadgeId}`);
   return data;
 };
 
-// 11. Custom Hook لحذف الشارة
 export const useAdminRemoveBadge = () => {
-  return useMutation({
-    mutationFn: removeAdminBadge,
-  });
+  return useMutation({ mutationFn: removeAdminBadge });
 };
 
-
-// 12. تعريف الـ Interfaces والـ Query Hook لجلب شارات المستخدم المحدد
+// ── User Badges ───────────────────────────────────────────────────────────────
 export interface AdminUserBadge {
   id: number;
   userId: number;
@@ -297,11 +285,30 @@ const fetchUserBadges = async (userId: number): Promise<UserBadgesResponse> => {
 export const useAdminUserBadges = (userId: number | null) => {
   return useQuery({
     queryKey: ['admin', 'users', 'badges', userId],
-    queryFn: () => fetchUserBadges(userId!),
-    enabled: !!userId,
+    queryFn:  () => fetchUserBadges(userId!),
+    enabled:  !!userId,
     staleTime: 1 * 60 * 1000,
   });
 };
 
+// ── 🆕 Delete Single Notification ────────────────────────────────────────────
+// DELETE /api/v1/admin/notifications/{id}
+const deleteAdminNotification = async (id: number) => {
+  const { data } = await api.delete(`api/v1/admin/notifications/${id}`);
+  return data;
+};
 
+export const useAdminDeleteNotification = () => {
+  return useMutation({ mutationFn: deleteAdminNotification });
+};
 
+// ── 🆕 Delete ALL Notifications ───────────────────────────────────────────────
+// DELETE /api/v1/admin/notifications/delete-all
+const deleteAllAdminNotifications = async () => {
+  const { data } = await api.delete('api/v1/admin/notifications/delete-all');
+  return data;
+};
+
+export const useAdminDeleteAllNotifications = () => {
+  return useMutation({ mutationFn: deleteAllAdminNotifications });
+};

@@ -13,31 +13,38 @@ import {
   Scroll,
   Video,
   BookOpen,
+  GraduationCap,
 } from 'lucide-react';
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
 import Footer from '../../../components/student-components/common/Footer/Footer';
 import { useNotifications } from '../../../hooks/Usenotifications';
-import type { Notification } from '../../../types/mentornotification.types';
+import type { Notification, NotificationType } from '../../../types/mentornotification.types';
 
-// ── Icon helper 
-const NotifIcon: FC<{ type: Notification['type']; isRead: boolean }> = ({ type, isRead }) => {
-  const configs = {
-    announcement: { bg: 'bg-blue-100',   text: 'text-blue-600',  icon: <Megaphone className="w-5 h-5" /> },
-    quiz:         { bg: 'bg-amber-100',  text: 'text-amber-600', icon: <BookOpen className="w-5 h-5" /> },
-    session:      { bg: 'bg-sky-100',   text: 'text-sky-600',   icon: <CalendarDays className="w-5 h-5" /> },
-    task:         { bg: 'bg-amber-100',  text: 'text-amber-700', icon: <CheckSquare className="w-5 h-5" /> },
-    project:      { bg: 'bg-violet-100', text: 'text-violet-600', icon: <FolderOpen className="w-5 h-5" /> },
-    support:      { bg: 'bg-emerald-100',text: 'text-emerald-600',icon: <HelpCircle className="w-5 h-5" /> },
-    badge:        { bg: 'bg-fuchsia-100',text: 'text-fuchsia-600',icon: <Award className="w-5 h-5" /> },
-    certificate:  { bg: 'bg-cyan-100',   text: 'text-cyan-600',   icon: <Scroll className="w-5 h-5" /> },
-    live_session: { bg: 'bg-red-100',    text: 'text-red-600',    icon: <Video className="w-5 h-5" /> },
-    message:      { bg: 'bg-green-100',  text: 'text-green-600',  icon: <MessageCircle className="w-5 h-5" /> },
-    general:      { bg: 'bg-gray-100',   text: 'text-gray-600',   icon: <Bell className="w-5 h-5" /> },
-  };
-  const c = configs[type] ?? configs.general;
+// ── Icon configuration (matches NotificationType) ────────────────────────────
+const NOTIF_CONFIGS: Record<NotificationType, {
+  bg: string;
+  text: string;
+  icon: React.ReactNode;
+}> = {
+  announcement: { bg: 'bg-purple-100', text: 'text-purple-600', icon: <Megaphone className="w-5 h-5" /> },
+  quiz: { bg: 'bg-amber-100', text: 'text-amber-600', icon: <BookOpen className="w-5 h-5" /> },
+  session: { bg: 'bg-green-100', text: 'text-green-600', icon: <CalendarDays className="w-5 h-5" /> },
+  task: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: <CheckSquare className="w-5 h-5" /> },
+  project: { bg: 'bg-violet-100', text: 'text-violet-600', icon: <FolderOpen className="w-5 h-5" /> },
+  support: { bg: 'bg-emerald-100', text: 'text-emerald-600', icon: <HelpCircle className="w-5 h-5" /> },
+  badge: { bg: 'bg-fuchsia-100', text: 'text-fuchsia-600', icon: <Award className="w-5 h-5" /> },
+  certificate: { bg: 'bg-cyan-100', text: 'text-cyan-600', icon: <Scroll className="w-5 h-5" /> },
+  live_session: { bg: 'bg-red-100', text: 'text-red-600', icon: <Video className="w-5 h-5" /> },
+  mentorship: { bg: 'bg-blue-100', text: 'text-blue-600', icon: <GraduationCap className="w-5 h-5" /> },
+  review: { bg: 'bg-indigo-100', text: 'text-indigo-600', icon: <MessageCircle className="w-5 h-5" /> },
+};
+
+// ── Icon component ──────────────────────────────────────────────────────────
+const NotifIcon: FC<{ type: NotificationType; isRead: boolean }> = ({ type, isRead }) => {
+  const config = NOTIF_CONFIGS[type] ?? NOTIF_CONFIGS.announcement;
   return (
-    <div className={`w-10 h-10 rounded-full ${isRead ? 'bg-gray-100' : c.bg} flex items-center justify-center flex-shrink-0 text-lg`}>
-      {c.icon}
+    <div className={`w-10 h-10 rounded-full ${isRead ? 'bg-gray-100' : config.bg} flex items-center justify-center flex-shrink-0 text-lg`}>
+      <div className={isRead ? 'text-gray-600' : config.text}>{config.icon}</div>
     </div>
   );
 };

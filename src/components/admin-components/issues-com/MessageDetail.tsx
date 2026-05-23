@@ -1,5 +1,5 @@
 import { type FC, useState } from 'react';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Bell, MessageCircle, Send } from 'lucide-react';
 import type { AdminMessage, MessageStatus } from '../../../types/admin-role-types/issues.types';
 import StatusPill            from './StatusPill';
 import SendNotificationModal from './SendNotificationModal';
@@ -35,8 +35,8 @@ const MessageDetail: FC<MessageDetailProps> = ({
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full bg-white
                       text-gray-400 gap-3">
-        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-3xl">
-          💬
+        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
+          <MessageCircle size={32} className="text-gray-400" />
         </div>
         <p className="text-[14px] font-medium">Select an issue to view its details</p>
       </div>
@@ -123,7 +123,7 @@ const MessageDetail: FC<MessageDetailProps> = ({
         {/* Message body */}
         <div className="border border-gray-100 rounded-xl p-4 md:p-5">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-[13px]">💬</span>
+            <MessageCircle className="w-4 h-4 text-gray-500" />
             <span className="text-[13px] font-bold text-gray-900">Message Content</span>
           </div>
           <p className="text-[13.5px] text-gray-700 leading-relaxed whitespace-pre-line">
@@ -153,7 +153,12 @@ const MessageDetail: FC<MessageDetailProps> = ({
                        rounded-xl text-[13px] font-semibold text-gray-600 hover:bg-gray-50
                        transition-colors disabled:opacity-50"
           >
-            {sendingNotif ? 'Preparing…' : '🔔 Send Notification'}
+            {sendingNotif ? 'Preparing…' : (
+              <>
+                <Bell className="w-4 h-4" />
+                Send Notification
+              </>
+            )}
           </button>
           <button
             onClick={() => {
@@ -166,7 +171,12 @@ const MessageDetail: FC<MessageDetailProps> = ({
                        text-[13px] font-semibold text-white transition-colors disabled:opacity-50"
             style={{ background: '#0f5e8b' }}
           >
-            {sendingReply ? 'Sending…' : 'Send Email ➤'}
+            {sendingReply ? 'Sending…' : (
+              <>
+                <span>Send Email</span>
+                <Send className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </div>

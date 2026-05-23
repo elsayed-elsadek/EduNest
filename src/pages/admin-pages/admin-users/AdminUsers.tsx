@@ -7,7 +7,7 @@ import {
 } from '../../../services/admin-role-service/Admindashboardservice';
 import type { UserSummaryData } from '../../../types/admin-role-types/admin-dash.types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Award, Bell, ChevronDown, Loader2, X } from 'lucide-react';
+import { Award, Bell, ChevronDown, Loader2, X, Crown, Handshake, Medal, Star } from 'lucide-react';
 import UserList from './components/UserList';
 import { API_BASE_URL } from '../../../services/api';
 import SendNotificationModal from './components/SendNotificationModal';
@@ -26,7 +26,7 @@ type UnknownBadge = {
 
 const Users: React.FC = () => {
   const [page, setPage] = useState(0);
-  const size = 10;
+  const size = 4;
   const [months, setMonths] = useState(6);
   const [period, setPeriod] = useState<'Monthly' | 'Yearly'>('Monthly');
   const [selectedUser, setSelectedUser] = useState<UserSummaryData | null>(null);
@@ -45,6 +45,7 @@ const Users: React.FC = () => {
   const dashboardSummary = data?.apiResponse?.dashboardSummary;
   const monthlyUsers = dashboardSummary?.monthlyUsers || [];
   const allUsersPaginated = dashboardSummary?.allUsersPaginated;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const users = allUsersPaginated?.content || [];
   const totalElements = allUsersPaginated?.totalElements || 0;
   const totalPages = allUsersPaginated?.totalPages || 1;
@@ -216,7 +217,11 @@ const Users: React.FC = () => {
                   const note = typedBadge.recognitionNote ?? '';
                   const uBadgeId = typedBadge.id ?? typedBadge.userBadgeId ?? typedBadge.badgeId;
 
-                  const emoji = bId === 1 ? '🏆' : bId === 2 ? '👑' : bId === 3 ? '⭐' : bId === 4 ? '🤝' : '🎨';
+                  const BadgeIcon = bId === 1 ? Award
+                    : bId === 2 ? Crown
+                    : bId === 3 ? Star
+                    : bId === 4 ? Handshake
+                    : Medal;
                   const colorClass = bId === 1 ? 'bg-amber-50 text-amber-800 border-amber-100'
                     : bId === 2 ? 'bg-blue-50 text-blue-800 border-blue-100'
                       : bId === 3 ? 'bg-emerald-50 text-emerald-800 border-emerald-100'
@@ -226,7 +231,9 @@ const Users: React.FC = () => {
                   return (
                     <div key={uBadgeId || index} className={`flex items-center justify-between p-2.5 rounded-xl border text-sm font-medium transition-all ${colorClass}`}>
                       <div className="flex items-center gap-2.5">
-                        <span className="text-lg">{emoji}</span>
+                        <div className="w-9 h-9 rounded-xl bg-white/80 flex items-center justify-center text-slate-700">
+                          <BadgeIcon size={18} />
+                        </div>
                         <div className="flex flex-col">
                           <span className="font-semibold">{title}</span>
                           {note && <span className="text-[10px] opacity-70 mt-0.5">{note}</span>}
@@ -310,7 +317,7 @@ const Users: React.FC = () => {
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   />
                   <Bar dataKey="users" radius={[6, 6, 0, 0]} barSize={window.innerWidth < 640 ? 24 : 48}>
-                    {chartData.map((entry, index) => (
+                    {chartData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={index === chartData.length - 1 || index === chartData.length - 2 ? '#0f5e8b' : '#93c5fd'} />
                     ))}
                   </Bar>
@@ -320,7 +327,7 @@ const Users: React.FC = () => {
           </div>
 
           {/* جدول المستخدمين */}
-          <div className="w-full overflow-x-auto">
+          <div className="w-full">
             <UserList
               users={users}
               selectedUser={selectedUser}

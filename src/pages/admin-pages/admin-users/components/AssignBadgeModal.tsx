@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Award, Loader2 } from 'lucide-react';
+import { X, Award, Crown, Lightbulb, Medal, ChevronDown, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminAssignBadge } from '../../../../services/admin-role-service/Admindashboardservice';
 
@@ -10,12 +10,19 @@ interface AssignBadgeModalProps {
   userName: string;
   onSuccess?: () => void;
 }
-const AVAILABLE_BADGES = [
-  { id: 0, title: 'ACADEMIC_EXCELLENCE', emoji: '🎓', color: '#F59E0B', description: 'Awarded to users who contribute significantly to the community.' },
-  { id: 1, title: 'TOP_MENTOR', emoji: '🧑‍🏫', color: '#3B82F6', description: 'Recognized for excellent mentoring and student guidance.' },
-  { id: 3, title: 'COMMUNITY_LEADER', emoji: '🏆', color: '#10B981', description: 'Awarded to students who achieve exceptional results.' },
-  // { id: 4, title: 'Helpful Hand', emoji: '🤝', color: '#8B5CF6', description: 'Recognized for helping peers in group chats and projects.' },
-  { id: 5, title: 'INNOVATOR_AWARD', emoji: '💡', color: '#EC4899', description: 'Awarded for creative solutions and project presentation.' },
+type BadgeOption = {
+  id: number;
+  title: string;
+  icon: typeof Award;
+  color: string;
+  description: string;
+};
+
+const AVAILABLE_BADGES: BadgeOption[] = [
+  { id: 0, title: 'ACADEMIC_EXCELLENCE', icon: Award, color: '#F59E0B', description: 'Awarded to users who contribute significantly to the community.' },
+  { id: 1, title: 'TOP_MENTOR', icon: Crown, color: '#3B82F6', description: 'Recognized for excellent mentoring and student guidance.' },
+  { id: 3, title: 'COMMUNITY_LEADER', icon: Medal, color: '#10B981', description: 'Awarded to students who achieve exceptional results.' },
+  { id: 5, title: 'INNOVATOR_AWARD', icon: Lightbulb, color: '#EC4899', description: 'Awarded for creative solutions and project presentation.' },
 ];
 
 const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
@@ -74,6 +81,7 @@ onError: (error: unknown) => {
   };
 
   const selectedBadge = AVAILABLE_BADGES.find(b => b.id === badgeId) ?? AVAILABLE_BADGES[0];
+  const SelectedBadgeIcon = selectedBadge.icon;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -125,7 +133,7 @@ onError: (error: unknown) => {
                   </option>
                 ))}
               </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">▾</div>
+              <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
             </div>
           </div>
 
@@ -135,7 +143,7 @@ onError: (error: unknown) => {
               className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
               style={{ backgroundColor: `${selectedBadge.color}15` }}
             > 
-              {selectedBadge.emoji}
+              <SelectedBadgeIcon size={20} className="text-slate-700" />
             </div>
             <div>
               <p className="font-semibold text-slate-800 text-sm">{selectedBadge.title}</p>

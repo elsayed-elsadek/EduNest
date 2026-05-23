@@ -1,5 +1,5 @@
 import { type FC, useState } from 'react';
-import { Trash2, RefreshCw } from 'lucide-react';
+import { Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
 import type { FilterTab } from '../../../types/admin-role-types/issues.types';
 import { useIssues }    from '../../../hooks/admin-roleHooks/Useissues';
 import InboxList        from '../../../components/admin-components/issues-com/InboxList';
@@ -54,7 +54,7 @@ const IssuesPage: FC = () => {
     return (
       <div className="flex items-center justify-center h-full bg-white">
         <div className="text-center text-gray-400">
-          <p className="text-2xl mb-2">⚠️</p>
+          <AlertTriangle className="mx-auto h-10 w-10 text-red-400 mb-3" />
           <p className="text-sm font-medium">Failed to load messages</p>
         </div>
       </div>

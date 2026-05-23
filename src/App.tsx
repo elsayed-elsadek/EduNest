@@ -160,7 +160,8 @@ function App() {
           
           {/* Protected Mentor Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR']} />} />
-          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR', 'ROLE_ADMIN']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR'
+          ]} />}>
             <Route path="/mentor/dashboard" element={<MentorDash />} />
             <Route path="/mentor/mentorships" element={<MyMentorships />} />
             <Route path="/mentor/mentorships/create" element={<CreateMentorship />} />
