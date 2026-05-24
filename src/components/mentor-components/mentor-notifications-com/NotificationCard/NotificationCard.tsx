@@ -1,8 +1,7 @@
 
 import type { FC } from 'react';
-import { Calendar, MessageCircle, X, Clock, Play, Eye, Bell, Megaphone, CheckSquare, FolderOpen, HelpCircle, Award, Scroll, Video, BookOpen } from 'lucide-react';
+import { Calendar, MessageCircle, X, Clock, Play, Eye, Bell, Megaphone, CheckSquare, FolderOpen, HelpCircle, Award, Scroll, Video, BookOpen, GraduationCap } from 'lucide-react';
 import type { Notification } from '../../../../types/mentornotification.types';
-import { useMarkReadOnView } from '../../../../hooks/Usemarkreadonview';
 
 interface NotificationCardProps {
   notification: Notification;
@@ -27,6 +26,8 @@ const NotificationCard: FC<NotificationCardProps> = ({
     badge:        { icon: Award,       bg: 'bg-[#FDF2F8]', color: 'text-[#C026D3]', border: 'border-[#C026D3]' },
     certificate:  { icon: Scroll,      bg: 'bg-[#ECFEFF]', color: 'text-[#0891B2]', border: 'border-[#0891B2]' },
     live_session: { icon: Video,      bg: 'bg-[#FEF2F2]', color: 'text-[#B91C1C]', border: 'border-[#B91C1C]' },
+    mentorship:   { icon: GraduationCap, bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
+    review:       { icon: MessageCircle,bg: 'bg-[#F0FDF4]', color: 'text-[#15803D]', border: 'border-[#15803D]' },
     message:      { icon: MessageCircle,bg: 'bg-[#F0FDF4]', color: 'text-[#15803D]', border: 'border-[#15803D]' },
     general:      { icon: Bell,       bg: 'bg-[#EFF6FF]', color: 'text-[#2563EB]', border: 'border-[#2563EB]' },
   };
@@ -34,17 +35,8 @@ const NotificationCard: FC<NotificationCardProps> = ({
   const config = iconConfig[notification.type] || iconConfig.general;
   const Icon   = config.icon;
 
-  // Auto mark-read when card is visible
-  const cardRef = useMarkReadOnView({
-    id:         notification.id,
-    isRead:     notification.isRead,
-    onMarkRead: onMarkRead ?? (() => {}),
-    delay: 1500,
-  });
-
   return (
     <div
-      ref={cardRef}
       className={`
         relative bg-white rounded-[20px] p-4 sm:p-6
         border-l-[6px] transition-all duration-300
@@ -84,6 +76,15 @@ const NotificationCard: FC<NotificationCardProps> = ({
             <p className="text-[13px] sm:text-[14px] text-gray-500 leading-relaxed line-clamp-2">
               {notification.message}
             </p>
+
+            {!notification.isRead && onMarkRead && (
+              <button
+                onClick={() => onMarkRead(notification.id)}
+                className="mt-2 text-xs font-semibold text-[#0c2d48] hover:underline transition-colors"
+              >
+                Mark as read
+              </button>
+            )}
           </div>
 
           <div className="flex items-center md:flex-row-reverse gap-4 sm:gap-6 shrink-0 mt-2 md:mt-0 md:ml-auto">

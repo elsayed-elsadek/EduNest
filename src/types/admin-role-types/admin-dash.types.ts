@@ -1,48 +1,49 @@
 
-export type TrendDirection = 'up' | 'down' | 'neutral';
+import type { NotificationType } from '../mentornotification.types';
 
+export type TrendDirection = 'up' | 'down' | 'neutral';
 
 export interface AdminDashboardApiResponse {
   apiResponse: {
     message: string;
     dashboard: {
       cards: {
-        totalStudents:        number;
-        totalMentors:         number;
-        activeMentorships:    number;
+        totalStudents: number;
+        totalMentors: number;
+        activeMentorships: number;
         completedMentorships: number;
-        totalRevenue:         number;
+        totalRevenue: number;
       };
       sessionsChart: {
-        month:         string;
-        year:          number;
+        month: string;
+        year: number;
         totalSessions: number;
       }[];
       notifications: {
         content: {
-          id:        number;
-          title:     string;
-          content:   string;
-          type:      string;
+          id: number;
+          title: string;
+          content: string;
+          type: string;
           createdAt: string;
         }[];
-        page:          number;
-        size:          number;
+        page: number;
+        size: number;
         totalElements: number;
-        totalPages:    number;
+        totalPages: number;
       };
       topMentors: {
         content: {
-          fullName:        string;
-          email:           string;
+          fullName: string;
+          email: string;
           profileImageUrl: string | null;
-          totalStudents:   number;
-          totalRevenue:    number;
+          totalStudents: number;
+          totalRevenue: number;
         }[];
-        page:          number;
-        size:          number;
+        page: number;
+        size: number;
         totalElements: number;
-        totalPages:    number;
+        totalPages: number;
       };
     };
   };
@@ -80,59 +81,50 @@ export interface AdminUsersDashboardSummaryResponse {
   };
 }
 
-//  UI Types 
+// ────────────────────────────────── UI Types ──────────────────────────────────
 
 export interface StatCardData {
-  id:        string;
-  label:     string;
-  value:     string;
-  iconType:  'students' | 'mentors' | 'mentorships' | 'revenue';
+  id: string;
+  label: string;
+  value: string;
+  iconType: 'students' | 'mentors' | 'mentorships' | 'revenue';
 }
 
 export interface ChartPoint {
-  month:    string;
+  month: string;
   sessions: number;
 }
 
 export interface TopMentor {
-  rank:            number;
-  name:            string;
-  email:           string;
-  students:        number;
-  revenue:         string;
+  rank: number;
+  name: string;
+  email: string;
+  students: number;
+  revenue: string;
   profileImageUrl: string | null;
 }
 
-export type ActivityType =
-  | 'mentorship'
-  | 'verified'
-  | 'alert'
-  | 'payment'
-  | 'session'
-  | 'task'
-  | 'announcement'
-  | 'quiz'
-  | 'project'
-  | 'support'
-  | 'badge'
-  | 'certificate'
-  | 'live_session';
+/**
+ * 🎯 Unified activity type — mirrors NotificationType + admin-specific types
+ * PAYMENT and other admin actions map to "other" if not in NotificationType
+ */
+export type ActivityType = NotificationType | 'verified' | 'alert' | 'payment' | 'other';
 
 export interface ActivityEvent {
-  id:          number;
-  type:        ActivityType;
-  title:       string;
+  id: number;
+  type: ActivityType;
+  title: string;
   description: string;
-  linkText?:   string;
-  timeLabel:   string;
-  isAlert:     boolean;
+  linkText?: string;
+  timeLabel: string;
+  isAlert: boolean;
 }
 
-//  Component Props 
+// ─────────────────────────── Component Props ──────────────────────────────
 
 export interface DashboardHeaderProps {
-  onExport:   () => void;
-  onRefresh:  () => void;
+  onExport: () => void;
+  onRefresh: () => void;
   isLoading?: boolean;
 }
 
@@ -145,7 +137,7 @@ export interface StatCardProps {
 }
 
 export interface EngagementChartProps {
-  data:          ChartPoint[];
+  data: ChartPoint[];
   selectedRange: string;
   onRangeChange: (r: string) => void;
 }

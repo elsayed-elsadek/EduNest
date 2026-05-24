@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { X, Award, Loader2, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Trash2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAdminAssignBadge, useAdminAllBadges } from '../../../../services/admin-role-service/Admindashboardservice';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAdminAllBadges, useAdminDeleteBadge } from '../../../../services/admin-role-service/Admindashboardservice';
 
-interface AssignBadgeModalProps {
+interface DeleteBadgeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userId: number;
-  userName: string;
   onSuccess?: () => void;
 }
 
@@ -20,21 +19,20 @@ const getBadgeStyle = (type: string) => {
   return { emoji: '🏅', color: '#64748B' };
 };
 
-const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
+const DeleteBadgeModal: React.FC<DeleteBadgeModalProps> = ({
   isOpen,
   onClose,
-  userId,
-  userName,
   onSuccess,
 }) => {
   const [badgeId, setBadgeId] = useState<number | null>(null);
-  const [recognitionNote, setRecognitionNote] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  const { data: allBadgesData, isLoading: isBadgesLoading } = useAdminAllBadges();
-  const availableBadges = useMemo(() => allBadgesData?.apiResponse?.badges || [], [allBadgesData?.apiResponse?.badges]);
+  const queryClient = useQueryClient();
 
-  const assignBadgeMutation = useAdminAssignBadge();
+  const { data: allBadgesData, isLoading: isBadgesLoading } = useAdminAllBadges();
+  const availableBadges = allBadgesData?.apiResponse?.badges || [];
+
+  const deleteBadgeMutation = useAdminDeleteBadge();
 
   // Set default badge once badges are loaded
   useEffect(() => {
@@ -49,44 +47,69 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
     e.preventDefault();
     setErrorMsg('');
 
-    if (!badgeId || !recognitionNote.trim()) {
-      setErrorMsg('Please select a badge and enter a note.');
+    if (!badgeId) {
+      setErrorMsg('Please select a badge to delete.');
       return;
     }
 
-    assignBadgeMutation.mutate(
-      { userId, badgeId, recognitionNote },
-      {
-        onSuccess: () => {
-          setRecognitionNote('');
-          if (availableBadges.length > 0) {
-            setBadgeId(availableBadges[0].id);
-          } else {
-            setBadgeId(null);
-          }
-          onClose();
-          toast.success('Badge assigned successfully!');
-          if (onSuccess) {
-            onSuccess();
-          }
-        },
-        onError: (error: unknown) => {
-          const err = error as {
-            response?: { data?: { errorMessages?: { error?: string }; message?: string } };
-            message?: string;
-          };
-
-          const errMsg =
-            err?.response?.data?.errorMessages?.error ||
-            err?.response?.data?.message ||
-            err?.message ||
-            'Failed to assign badge. User might already have this badge.';
-
-          setErrorMsg(errMsg);
-          toast.error(errMsg);
-        },
+    toast((t) => (
+      <div className="flex flex-col gap-2.5 p-1 font-sans">
+        <p className="text-xs font-semibold text-slate-800">
+          Are you sure you want to delete this badge globally?
+        </p>
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => toast.dismiss(t.id)}
+            className="px-2.5 py-1.5 text-[10px] font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors border border-slate-100"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              toast.dismiss(t.id);
+              executeDelete(badgeId);
+            }}
+            className="px-2.5 py-1.5 text-[10px] font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors shadow-sm"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 5000,
+      position: 'top-right',
+      style: {
+        borderRadius: '16px',
+        background: '#ffffff',
+        border: '1px solid #f1f5f9',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
       }
-    );
+    });
+  };
+
+  const executeDelete = (id: number) => {
+    deleteBadgeMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success('Admin badge deleted successfully!');
+        queryClient.invalidateQueries({ queryKey: ['admin', 'badges', 'all'] });
+        setBadgeId(null);
+        onClose();
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: (error: any) => {
+        const errMsg =
+          error?.response?.data?.errorMessages?.error ||
+          error?.response?.data?.message ||
+          error?.message ||
+          'Failed to delete badge. It has already been assigned and cannot be deleted.';
+        setErrorMsg(errMsg);
+        toast.error(errMsg);
+      },
+    });
   };
 
   const activeBadge = availableBadges.find(b => b.id === badgeId);
@@ -95,22 +118,22 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Background Overlay */}
-      <div
-        className="absolute inset-0 bg-slate-900/40 transition-opacity"
+      <div 
+        className="absolute inset-0 bg-slate-900/40 transition-opacity" 
         onClick={onClose}
       />
 
       {/* Modal Content */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-md mx-4 relative z-10 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
-
+        
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div>
-            <h3 className="font-bold text-slate-800 text-base">Assign Admin Badge</h3>
-            <p className="text-xs text-slate-400 mt-0.5">To: <span className="font-semibold text-[var(--primary-500)]">{userName}</span></p>
+            <h3 className="font-bold text-slate-800 text-base">Delete Admin Badge</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Remove an unassigned recognition badge globally</p>
           </div>
-          <button
-            onClick={onClose}
+          <button 
+            onClick={onClose} 
             className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
           >
             <X size={18} />
@@ -128,7 +151,7 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
           {/* Select Badge */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Select Badge Type
+              Select Badge to Delete
             </label>
             <div className="relative">
               <select
@@ -149,17 +172,17 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
                   <option>No badges available</option>
                 )}
               </select>
-              <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">▾</div>
             </div>
           </div>
 
           {/* Icon preview */}
           {!isBadgesLoading && activeBadge && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50">
-              <div
+              <div 
                 className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
                 style={{ backgroundColor: `${activeStyle.color}15` }}
-              >
+              > 
                 {activeStyle.emoji}
               </div>
               <div className="min-w-0 flex-1">
@@ -169,19 +192,10 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
             </div>
           )}
 
-          {/* Recognition Note */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Recognition Note
-            </label>
-            <textarea
-              rows={3}
-              value={recognitionNote}
-              onChange={(e) => setRecognitionNote(e.target.value)}
-              placeholder="e.g., Recognized for exceptional dedication this term."
-              className="px-3 py-2 border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 transition-all bg-slate-50/30 resize-none"
-              required
-            />
+          {/* Warning Message */}
+          <div className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3 flex flex-col gap-1">
+            <span className="font-bold">⚠️ Important Notice:</span>
+            <span>You can only delete badges that have never been assigned to any user. Assigned badges cannot be deleted.</span>
           </div>
 
           {/* Footer Actions */}
@@ -189,25 +203,25 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              disabled={assignBadgeMutation.isPending || isBadgesLoading}
+              disabled={deleteBadgeMutation.isPending || isBadgesLoading}
               className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={assignBadgeMutation.isPending || isBadgesLoading || availableBadges.length === 0}
-              className="px-4 py-2 text-sm font-semibold text-white bg-[var(--primary-500)] hover:bg-[var(--primary-dark)] rounded-lg transition-colors flex items-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={deleteBadgeMutation.isPending || isBadgesLoading || availableBadges.length === 0}
+              className="px-4 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors flex items-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {assignBadgeMutation.isPending ? (
+              {deleteBadgeMutation.isPending ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  Assigning...
+                  Deleting...
                 </>
               ) : (
                 <>
-                  <Award size={16} />
-                  Assign Badge
+                  <Trash2 size={16} />
+                  Delete Badge
                 </>
               )}
             </button>
@@ -218,4 +232,4 @@ const AssignBadgeModal: React.FC<AssignBadgeModalProps> = ({
   );
 };
 
-export default AssignBadgeModal;
+export default DeleteBadgeModal;

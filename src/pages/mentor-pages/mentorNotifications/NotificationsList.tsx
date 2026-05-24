@@ -1,13 +1,16 @@
 import type { FC } from 'react';
 import { useState, useMemo } from 'react';
-import { Bell } from 'lucide-react';
-import DashLayout       from '../../../components/layout/Dash-layout';
+import { Bell,  ChevronLeft, ChevronRight } from 'lucide-react';
+import DashLayout from '../../../components/layout/Dash-layout';
 import NotificationTabs from '../../../components/mentor-components/mentor-notifications-com/NotificationTabs/NotificationTabs';
 import NotificationCard from '../../../components/mentor-components/mentor-notifications-com/NotificationCard/NotificationCard';
 import { useNotifications } from '../../../hooks/Usenotifications';
 
+const PAGE_SIZE = 6;
+
 const NotificationsList: FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
+  const [currentPage, setCurrentPage] = useState(0);
 
   const {
     notifications,
@@ -17,22 +20,24 @@ const NotificationsList: FC = () => {
     handleMarkRead,
     handleMarkAllRead,
     handleDismiss,
+    handleDeleteAll,
   } = useNotifications();
 
-  // Filter by active tab
-  const filteredNotifications = useMemo(() => {
-    if (activeTab === 'unread') return notifications.filter(n => !n.isRead);
-    return notifications;
+  const filtered = useMemo(() => {
+    const list = activeTab === 'unread'
+      ? notifications.filter(n => !n.isRead)
+      : notifications;
+    return list;
   }, [activeTab, notifications]);
 
-  const handleAction = (id: string) => {
-    // Mark as read when action button is clicked
-    handleMarkRead(id);
+  // reset to page 0 when tab changes
+  const handleTabChange = (tab: 'all' | 'unread') => {
+    setActiveTab(tab);
+    setCurrentPage(0);
   };
 
-  const handleDismissCard = (id: string) => {
-    handleDismiss(id);
-  };
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   return (
     <DashLayout pageTitle="Notifications">
@@ -56,21 +61,21 @@ const NotificationsList: FC = () => {
             </div>
           )}
 
-          {/* Tabs */}
-          <div className="flex items-center justify-between mb-3">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-4">
             <NotificationTabs
               activeTab={activeTab}
               allCount={notifications.length}
               unreadCount={unreadCount}
-              onTabChange={setActiveTab}
+              onTabChange={handleTabChange}
               onMarkAllRead={handleMarkAllRead}
+              onDeleteAll={notifications.length > 0 ? handleDeleteAll : undefined}
             />
           </div>
 
           {/* List */}
           <div className="space-y-4">
             {loading ? (
-              /* Skeleton */
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 animate-pulse">
                   <div className="flex gap-4 items-start">
@@ -82,14 +87,14 @@ const NotificationsList: FC = () => {
                   </div>
                 </div>
               ))
-            ) : filteredNotifications.length > 0 ? (
-              filteredNotifications.map((notification) => (
+            ) : paginated.length > 0 ? (
+              paginated.map(notification => (
                 <NotificationCard
                   key={notification.id}
                   notification={notification}
-                  onAction={handleAction}
+                  onAction={handleMarkRead}
                   onMarkRead={handleMarkRead}
-                  onDismiss={handleDismissCard}
+                  onDismiss={handleDismiss}
                 />
               ))
             ) : (
@@ -100,12 +105,51 @@ const NotificationsList: FC = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">No notifications</h3>
                 <p className="text-sm text-gray-500">
                   {activeTab === 'unread'
-                    ? "You're all caught up! No unread notifications."
+                    ? "You're all caught up!"
                     : "You don't have any notifications yet."}
                 </p>
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-1.5 mt-6">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                disabled={currentPage === 0}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200
+                           text-gray-400 hover:border-gray-300 hover:text-gray-600
+                           disabled:opacity-30 disabled:cursor-not-allowed transition"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition
+                    ${i === currentPage
+                      ? 'bg-primary text-white'
+                      : 'border border-gray-200 text-gray-500 hover:border-gray-300'
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={currentPage === totalPages - 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200
+                           text-gray-400 hover:border-gray-300 hover:text-gray-600
+                           disabled:opacity-30 disabled:cursor-not-allowed transition"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
 
         </div>
       </div>

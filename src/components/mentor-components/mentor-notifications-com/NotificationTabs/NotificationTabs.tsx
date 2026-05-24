@@ -1,6 +1,5 @@
 
 import type { FC } from 'react';
-import { Check } from 'lucide-react';
 
 interface NotificationTabsProps {
   activeTab: 'all' | 'unread';
@@ -8,6 +7,7 @@ interface NotificationTabsProps {
   allCount: number;
   onTabChange: (tab: 'all' | 'unread') => void;
   onMarkAllRead?: () => void;
+  onDeleteAll?: () => void;
 }
 
 const NotificationTabs: FC<NotificationTabsProps> = ({
@@ -16,6 +16,7 @@ const NotificationTabs: FC<NotificationTabsProps> = ({
   allCount,
   onTabChange,
   onMarkAllRead,
+  onDeleteAll,
 }) => {
   return (
     <div className="w-full space-y-3 mb-8">
@@ -54,17 +55,24 @@ const NotificationTabs: FC<NotificationTabsProps> = ({
       </div>
 
       {unreadCount > 0 && (
-        <div className="flex justify-end pr-2">
+        <div className="flex flex-wrap items-center justify-end gap-4 pr-2">
           <button
             onClick={onMarkAllRead}
-            className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-[13px] font-bold hover:opacity-80 transition-all group"
+            className="flex shrink-0 items-center gap-1.5 text-green-600 dark:text-green-400 text-[13px] font-bold hover:opacity-80 transition-all group"
           >
-
-            <div className="w-4 h-4 border-[1.5px] border-green-600 dark:border-green-400 rounded-[4px] flex items-center justify-center group-hover:bg-green-600/10">
-              <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" strokeWidth={3} />
+            <div className="px-3 py-1 border-[1.5px]  border-green-600 dark:border-green-400 rounded-xl flex items-center justify-center gap-2 group-hover:bg-green-600/10 whitespace-nowrap">
+              Mark All as Read
             </div>
-            Mark All as Read
           </button>
+
+          {onDeleteAll && (
+            <button
+              onClick={onDeleteAll}
+              className="flex shrink-0 items-center gap-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-600  hover:bg-red-100 transition-colors"
+            >
+              Clear All
+            </button>
+          )}
         </div>
       )}
     </div>

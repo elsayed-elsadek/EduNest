@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trash2, Award, Loader2, Calendar, FileText } from 'lucide-react';
+import { X, Trash2, Award, Crown, Handshake, Lightbulb, Medal, Loader2, Calendar, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
@@ -17,24 +17,30 @@ interface UserBadgesModalProps {
   onSuccess?: () => void;
 }
 
-const getBadgeDetails = (type?: string, name?: string) => {
+type BadgeDetails = {
+  icon: typeof Award;
+  color: string;
+  bg: string;
+};
+
+const getBadgeDetails = (type?: string, name?: string): BadgeDetails => {
   const t = `${type || ''} ${name || ''}`.toUpperCase();
   if (t.includes('ACADEMIC') || t.includes('EXCELLENCE')) {
-    return { emoji: '🎓', color: '#F59E0B', bg: 'bg-amber-50 text-amber-800 border-amber-100 hover:border-amber-200' };
+    return { icon: Award, color: '#F59E0B', bg: 'bg-amber-50 text-amber-800 border-amber-100 hover:border-amber-200' };
   }
   if (t.includes('MENTOR') || t.includes('TOP')) {
-    return { emoji: '🧑‍🏫', color: '#3B82F6', bg: 'bg-blue-50 text-blue-800 border-blue-100 hover:border-blue-200' };
+    return { icon: Crown, color: '#3B82F6', bg: 'bg-blue-50 text-blue-800 border-blue-100 hover:border-blue-200' };
   }
   if (t.includes('LEADER') || t.includes('COMMUNITY')) {
-    return { emoji: '🏆', color: '#10B981', bg: 'bg-emerald-50 text-emerald-800 border-emerald-100 hover:border-emerald-200' };
+    return { icon: Medal, color: '#10B981', bg: 'bg-emerald-50 text-emerald-800 border-emerald-100 hover:border-emerald-200' };
   }
-  if (t.includes('HELPFUL') || t.includes('HAND') || t.includes('🤝')) {
-    return { emoji: '🤝', color: '#8B5CF6', bg: 'bg-purple-50 text-purple-800 border-purple-100 hover:border-purple-200' };
+  if (t.includes('HELPFUL') || t.includes('HAND')) {
+    return { icon: Handshake, color: '#8B5CF6', bg: 'bg-purple-50 text-purple-800 border-purple-100 hover:border-purple-200' };
   }
-  if (t.includes('INNOVATOR') || t.includes('AWARD') || t.includes('💡')) {
-    return { emoji: '💡', color: '#EC4899', bg: 'bg-rose-50 text-rose-800 border-rose-100 hover:border-rose-200' };
+  if (t.includes('INNOVATOR') || t.includes('AWARD')) {
+    return { icon: Lightbulb, color: '#EC4899', bg: 'bg-rose-50 text-rose-800 border-rose-100 hover:border-rose-200' };
   }
-  return { emoji: '🏅', color: '#64748B', bg: 'bg-slate-50 text-slate-800 border-slate-100 hover:border-slate-200' };
+  return { icon: Medal, color: '#64748B', bg: 'bg-slate-50 text-slate-800 border-slate-100 hover:border-slate-200' };
 };
 
 const UserBadgesModal: React.FC<UserBadgesModalProps> = ({
@@ -149,6 +155,7 @@ const UserBadgesModal: React.FC<UserBadgesModalProps> = ({
             <div className="flex flex-col gap-3.5">
               {badges.map((badge) => {
                 const details = getBadgeDetails(badge.badgeType, badge.badgeName);
+                const BadgeIcon = details.icon;
                 const isAwardedAtValid = badge.awardedAt && !isNaN(Date.parse(badge.awardedAt));
                 const formattedDate = isAwardedAtValid 
                   ? new Date(badge.awardedAt).toLocaleDateString(undefined, {
@@ -161,10 +168,12 @@ const UserBadgesModal: React.FC<UserBadgesModalProps> = ({
                 return (
                   <div 
                     key={badge.id}
-                    className={`flex items-start justify-between p-4 rounded-xl border transition-all duration-200 ${details.bg}`}
+                    className={`flex items-start justify-between p-4 rounded-xl border transition-all duration-200 gap-3 ${details.bg}`}
                   >
                     <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                      <div className="text-2xl mt-0.5 select-none">{details.emoji}</div>
+                      <div className="mt-0.5 text-slate-700">
+                        <BadgeIcon size={24} />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-sm tracking-wide break-words">
                           {badge.badgeName || badge.badgeType}
@@ -191,15 +200,23 @@ const UserBadgesModal: React.FC<UserBadgesModalProps> = ({
                       </div>
                     </div>
 
-                    {mode === 'remove' && (
-                      <button
-                        onClick={() => handleRemove(badge.id, badge.badgeName || badge.badgeType)}
-                        className="ml-3 p-2 bg-rose-100/60 hover:bg-rose-200/80 text-rose-600 rounded-lg transition-colors border border-rose-200 flex-shrink-0"
-                        title="Remove Badge"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    )}
+                    {/* Right Section: Type Label & Remove Action */}
+                    <div className="flex items-center gap-2.5 flex-shrink-0">
+                      {badge.badgeType && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-white/60 border border-current/10 uppercase tracking-wider">
+                          {badge.badgeType.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                      {mode === 'remove' && (
+                        <button
+                          onClick={() => handleRemove(badge.id, badge.badgeName || badge.badgeType)}
+                          className="p-2 bg-rose-100/60 hover:bg-rose-200/80 text-rose-600 rounded-lg transition-colors border border-rose-200"
+                          title="Remove Badge"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}

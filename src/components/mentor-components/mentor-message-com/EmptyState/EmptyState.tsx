@@ -5,8 +5,8 @@ import { MessageCircle } from 'lucide-react';
 const EmptyState: FC = () => {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-white p-8">
-      <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
-        <MessageCircle className="w-12 h-12 text-blue-500 dark:text-blue-400" />
+      <div className="w-24 h-24 bg-[#f9f9f9] dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6">
+        <MessageCircle className="w-12 h-12 text-[#2D9CDB] dark:text-blue-400" />
       </div>
 
       <h3 className="text-xl font-bold text-gray-900 mb-2">
