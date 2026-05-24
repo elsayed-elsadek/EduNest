@@ -1,6 +1,6 @@
 
 import { type FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Trash2, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Trash2,  RefreshCw } from 'lucide-react';
 import ActivityItem from './ActivityItem';
 import LedgerPagination from '../payment-com/LedgerPagination';
 import type { LiveActivityStreamProps, ActivityEvent, ActivityType } from '../../../types/admin-role-types/admin-dash.types';
@@ -45,7 +45,7 @@ const LiveActivityStream: FC<LiveActivityStreamProps> = ({ events: initialEvents
   const [deletedIds,  setDeletedIds]  = useState<Set<number>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const [wsConnected, setWsConnected] = useState(false);
+  const [, setWsConnected] = useState(false);
   const [newCount,    setNewCount]    = useState(0);
   const mountedRef     = useRef(true);
   const subscribedRef  = useRef(false);
@@ -174,7 +174,7 @@ const LiveActivityStream: FC<LiveActivityStreamProps> = ({ events: initialEvents
             </span>
           )}
 
-          <span
+          {/* <span
             className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
               wsConnected
                 ? 'bg-emerald-50 text-emerald-600'
@@ -185,7 +185,7 @@ const LiveActivityStream: FC<LiveActivityStreamProps> = ({ events: initialEvents
               ? <><Wifi className="w-3 h-3" /> Live</>
               : <><WifiOff className="w-3 h-3" /> Offline</>
             }
-          </span>
+          </span> */}
         </div>
 
         {events.length > 0 && (

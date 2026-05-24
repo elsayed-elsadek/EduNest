@@ -14,13 +14,15 @@ import {
   Video,
   BookOpen,
   GraduationCap,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
 import Footer from '../../../components/student-components/common/Footer/Footer';
 import { useNotifications } from '../../../hooks/Usenotifications';
 import type { Notification, NotificationType } from '../../../types/mentornotification.types';
 
-// ── Icon configuration (matches NotificationType) ────────────────────────────
+//Icon configuration (matches NotificationType)
 const NOTIF_CONFIGS: Record<NotificationType, {
   bg: string;
   text: string;
@@ -37,6 +39,42 @@ const NOTIF_CONFIGS: Record<NotificationType, {
   live_session: { bg: 'bg-red-100', text: 'text-red-600', icon: <Video className="w-5 h-5" /> },
   mentorship: { bg: 'bg-blue-100', text: 'text-blue-600', icon: <GraduationCap className="w-5 h-5" /> },
   review: { bg: 'bg-indigo-100', text: 'text-indigo-600', icon: <MessageCircle className="w-5 h-5" /> },
+};
+
+const PAGE_SIZE = 6;
+
+const Pagination: FC<{ current: number; total: number; onChange: (p: number) => void }> = ({ current, total, onChange }) => {
+  if (total <= 1) return null;
+  return (
+    <div className="flex items-center gap-2 justify-end mt-4">
+      <button
+        onClick={() => onChange(Math.max(0, current - 1))}
+        className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+        aria-label="Previous page"
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+
+      {Array.from({ length: total }).map((_, i) => (
+        <button
+          key={i}
+          onClick={() => onChange(i)}
+          className="px-3 py-1 rounded-md text-sm"
+          style={current === i ? { backgroundColor: '#0c2d48', color: '#fff' } : undefined}
+        >
+          {i + 1}
+        </button>
+      ))}
+
+      <button
+        onClick={() => onChange(Math.min(total - 1, current + 1))}
+        className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+        aria-label="Next page"
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
 };
 
 // ── Icon component ──────────────────────────────────────────────────────────
@@ -110,6 +148,7 @@ const NotifCard: FC<{
 // ── Main page 
 const Notifications: FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
+  const [currentPage, setCurrentPage] = useState(0);
 
   const {
     notifications,
@@ -126,6 +165,14 @@ const Notifications: FC = () => {
     if (activeTab === 'unread') return notifications.filter(n => !n.isRead);
     return notifications;
   }, [activeTab, notifications]);
+
+  const handleTabChange = (tab: 'all' | 'unread') => {
+    setActiveTab(tab);
+    setCurrentPage(0);
+  };
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-[#F7F7F8] flex flex-col">
@@ -180,7 +227,7 @@ const Notifications: FC = () => {
               {(['all', 'unread'] as const).map(tab => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => handleTabChange(tab)}
                   className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all capitalize ${
                     activeTab === tab
                       ? 'bg-white text-gray-900 shadow-sm'
@@ -211,8 +258,8 @@ const Notifications: FC = () => {
                     </div>
                   </div>
                 ))
-              ) : filtered.length > 0 ? (
-                filtered.map(n => (
+              ) : paginated.length > 0 ? (
+                paginated.map(n => (
                   <NotifCard
                     key={n.id}
                     notification={n}
@@ -234,6 +281,12 @@ const Notifications: FC = () => {
                 </div>
               )}
             </div>
+
+            <Pagination
+              current={currentPage}
+              total={totalPages}
+              onChange={setCurrentPage}
+            />
           </div>
         </div>
       </main>

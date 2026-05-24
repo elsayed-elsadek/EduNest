@@ -2,7 +2,6 @@
 import type { FC } from 'react';
 import { Calendar, MessageCircle, X, Clock, Play, Eye, Bell, Megaphone, CheckSquare, FolderOpen, HelpCircle, Award, Scroll, Video, BookOpen, GraduationCap } from 'lucide-react';
 import type { Notification } from '../../../../types/mentornotification.types';
-import { useMarkReadOnView } from '../../../../hooks/Usemarkreadonview';
 
 interface NotificationCardProps {
   notification: Notification;
@@ -36,17 +35,8 @@ const NotificationCard: FC<NotificationCardProps> = ({
   const config = iconConfig[notification.type] || iconConfig.general;
   const Icon   = config.icon;
 
-  // Auto mark-read when card is visible
-  const cardRef = useMarkReadOnView({
-    id:         notification.id,
-    isRead:     notification.isRead,
-    onMarkRead: onMarkRead ?? (() => {}),
-    delay: 1500,
-  });
-
   return (
     <div
-      ref={cardRef}
       className={`
         relative bg-white rounded-[20px] p-4 sm:p-6
         border-l-[6px] transition-all duration-300
@@ -86,6 +76,15 @@ const NotificationCard: FC<NotificationCardProps> = ({
             <p className="text-[13px] sm:text-[14px] text-gray-500 leading-relaxed line-clamp-2">
               {notification.message}
             </p>
+
+            {!notification.isRead && onMarkRead && (
+              <button
+                onClick={() => onMarkRead(notification.id)}
+                className="mt-2 text-xs font-semibold text-[#0c2d48] hover:underline transition-colors"
+              >
+                Mark as read
+              </button>
+            )}
           </div>
 
           <div className="flex items-center md:flex-row-reverse gap-4 sm:gap-6 shrink-0 mt-2 md:mt-0 md:ml-auto">

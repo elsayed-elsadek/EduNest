@@ -39,8 +39,9 @@ interface InputProps {
   type?: string;
   placeholder?: string;
   showToggle?: boolean;
+  autoComplete?: string;
 }
-const Input: FC<InputProps> = ({ label, value, onChange, type = 'text', placeholder, showToggle }) => {
+const Input: FC<InputProps> = ({ label, value, onChange, type = 'text', placeholder, showToggle, autoComplete }) => {
   const [show, setShow] = useState(false);
   return (
     <div>
@@ -51,6 +52,7 @@ const Input: FC<InputProps> = ({ label, value, onChange, type = 'text', placehol
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
         />
         {showToggle && (
@@ -108,7 +110,12 @@ const Settings: FC = () => {
 
   const submitPassword = async () => {
     const ok = await handleChangePassword({ oldPassword, newPassword, confirmPassword });
-    if (ok) closeModal();
+    if (ok) {
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      closeModal();
+    }
   };
 
   const submitDeactivate = async () => {
@@ -166,7 +173,7 @@ const Settings: FC = () => {
                   value=""
                   icon={<Lock className="w-5 h-5" />}
                   actionButton={
-                    <button onClick={() => setModal('password')}
+                  <button onClick={() => { setOldPassword(''); setNewPassword(''); setConfirmPassword(''); setModal('password'); }}
                       className="whitespace-nowrap px-4 py-2 text-[12px] md:text-sm font-bold text-[#33A1E0] border border-blue-100 rounded-xl hover:bg-[#33A1E0] hover:text-white transition-all">
                       Change Password
                     </button>
@@ -270,19 +277,19 @@ const Settings: FC = () => {
       {/* ── Modal: Change Password ── */}
       {modal === 'password' && (
         <Modal title="Change Password" onClose={closeModal}>
-          <div className="space-y-4">
-            <Input label="Current Password" value={oldPassword} onChange={setOldPassword} showToggle />
-            <Input label="New Password" value={newPassword} onChange={setNewPassword} showToggle />
-            <Input label="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} showToggle />
+          <form autoComplete="off" className="space-y-4">
+            <Input label="Current Password" value={oldPassword} onChange={setOldPassword} showToggle autoComplete="current-password" />
+            <Input label="New Password" value={newPassword} onChange={setNewPassword} showToggle autoComplete="new-password" />
+            <Input label="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} showToggle autoComplete="new-password" />
             {error && <p className="text-xs text-red-500">{error}</p>}
             <div className="flex gap-3 pt-2">
-              <button onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600">Cancel</button>
-              <button onClick={submitPassword} disabled={loading || !oldPassword || !newPassword || !confirmPassword}
+              <button type="button" onClick={closeModal} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600">Cancel</button>
+              <button type="button" onClick={submitPassword} disabled={loading || !oldPassword || !newPassword || !confirmPassword}
                 className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold disabled:opacity-50">
                 {loading ? 'Saving...' : 'Save'}
               </button>
             </div>
-          </div>
+          </form>
         </Modal>
       )}
 
