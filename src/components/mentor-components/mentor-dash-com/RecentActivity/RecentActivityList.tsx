@@ -1,89 +1,62 @@
-
-
-import  type{ FC } from 'react';
+import type { FC } from 'react';
 import ActivityItem from './ActivityItem';
 import type { RecentActivityListProps } from './RecentActivity.types';
+import Pagination from '../Pagination/Pagination';
 
-const RecentActivityList: FC<RecentActivityListProps> = ({ 
-  activities = [
-    {
-      id: '1',
-      studentName: 'Maria Garcia',
-      action: 'Submitted final project',
-      mentorshipTitle: 'figma Basic',
-      timestamp: '30 minutes ago',
-      type: 'submission',
-    },
-    {
-      id: '2',
-      studentName: 'David Kim',
-      action: 'Asked a question in chat',
-      mentorshipTitle: 'figma Basic',
-      timestamp: '30 minutes ago',
-      type: 'question',
-    },
-    {
-      id: '3',
-      studentName: 'Alex Johnson',
-      action: 'Completed React module1',
-      mentorshipTitle: 'figma Basic',
-      timestamp: '30 minutes ago',
-      type: 'completion',
-    },
-  ],
-  maxDisplay = 3,
+interface RecentActivityListWithPaginationProps extends RecentActivityListProps {
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+}
 
+const RecentActivityList: FC<RecentActivityListWithPaginationProps> = ({
+  activities = [],
   title = 'Recent Students Activity',
+  currentPage = 0,
+  totalPages = 1,
+  onPageChange,
 }) => {
-  const displayedActivities = activities.slice(0, maxDisplay);
-  const hasMore = activities.length > maxDisplay;
-
   const handleView = (id: string) => {
     console.log('View activity:', id);
     // TODO: Navigate to activity detail
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-200">
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-200 dark:border-zinc-800 shadow-sm">
       {/* Header */}
-      <h2 className="text-base font-bold text-primary dark:text-blue-400 mb-4">
+      <h2 className="text-base font-bold text-[var(--primary-500)] dark:text-[var(--primary-400)] mb-4">
         {title}
       </h2>
 
       {/* Activities List */}
-      <div className="max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
-        {displayedActivities.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
-            <p className="font-medium">No notifications</p>
-            <p className="text-sm mt-1">You don't have any recent notifications.</p>
-          </div>
-        ) : (
-          displayedActivities.map((activity) => (
-            <ActivityItem 
-              key={activity.id} 
+      {activities.length === 0 ? (
+        <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+          <p className="font-medium">No notifications</p>
+          <p className="text-sm mt-1">You don&apos;t have any recent notifications.</p>
+        </div>
+      ) : (
+        <div className="space-y-1">
+          {activities.map((activity) => (
+            <ActivityItem
+              key={activity.id}
               activity={activity}
               onView={handleView}
             />
-          ))
-        )}
+          ))}
+        </div>
+      )}
 
-        {hasMore && (
-          <div className="pt-3">
-            <button
-              type="button"
-              className="w-full text-center text-sm font-semibold text-primary hover:text-primary/80"
-              onClick={() => console.log('View more notifications')}
-            >
-              View more
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Pagination */}
+      {onPageChange && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          className="mt-3"
+        />
+      )}
     </div>
   );
 };
 
-
 export default RecentActivityList;
-
-

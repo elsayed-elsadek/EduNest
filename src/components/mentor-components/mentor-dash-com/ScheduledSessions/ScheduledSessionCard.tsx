@@ -1,5 +1,4 @@
-
-import  type{ FC } from 'react';
+import { type FC } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faVideo,
@@ -7,53 +6,80 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import type { Session } from './ScheduledSessions.types';
 
+const BORDER_COLORS = {
+  live: 'border-l-green-500 bg-green-50/50',
+  qa: 'border-l-orange-500 bg-orange-50/50',
+  course: 'border-l-blue-500 bg-blue-50/50',
+};
+
+const TEXT_COLORS = {
+  live: 'text-green-700',
+  qa: 'text-orange-700',
+  course: 'text-blue-700',
+};
+
+// --- functions ---
+const formatSessionDate = (session: Session): string => {
+  if (session.sessionStartDate) {
+    const d = new Date(String(session.sessionStartDate).replace(' ', 'T'));
+    const valid = !Number.isNaN(d.getTime());
+    
+    return valid
+      ? d.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+      : String(session.sessionStartDate);
+  }
+  
+  const start = session.startTime ?? '';
+  const end = session.endTime ? `- ${session.endTime}` : '';
+  return `${start} ${end}`.trim();
+};
+
+// --- interfaces ---
 interface ScheduledSessionCardProps {
   session: Session;
 }
 
-
 const ScheduledSessionCard: FC<ScheduledSessionCardProps> = ({ session }) => {
-
   if (!session) return null;
 
-  const borderColors = {
-    live: 'border-l-green-500 bg-green-50/50',
-    qa: 'border-l-orange-500 bg-orange-50/50',
-    course: 'border-l-blue-500 bg-blue-50/50',
-  };
-
-  const textColors = {
-    live: 'text-green-700',
-    qa: 'text-orange-700',
-    course: 'text-blue-700',
-  };
-
-  const currentType = session.type || 'course'; 
-
-  // choose an icon based on session type
-  let icon = faVideo;
-  if (currentType === 'live') icon = faVideo;
-  else if (currentType === 'qa') icon = faQuestionCircle;
+  const currentType = (session.type as keyof typeof BORDER_COLORS) || 'course';
+  const icon = currentType === 'qa' ? faQuestionCircle : faVideo;
 
   return (
     <div className={`
       border-l-4 rounded-lg p-4 flex items-start gap-3
-      ${borderColors[currentType as keyof typeof borderColors]}
-      transition-all duration-200
-      hover:shadow-sm
+      transition-all duration-200 hover:shadow-sm
+      ${BORDER_COLORS[currentType]}
     `}>
       <FontAwesomeIcon icon={icon} className="w-5 h-5 text-gray-500 shrink-0 mt-1" />
+      
       <div className="flex-1">
-        <h4 className={`font-semibold text-sm mb-1 ${textColors[currentType as keyof typeof textColors]}`}>
-          {session.title}
-        </h4>
-        <p className="text-xs text-gray-600">
-          {session.startTime} {session.endTime ? `- ${session.endTime}` : ''}
-        </p>
+        {/* activity title */}
+        <div className="flex justify-between items-start gap-4">
+          <h4 className={`font-semibold text-sm ${TEXT_COLORS[currentType]}`}>
+            {session.title} 
+          </h4>
+          <span className="text-xs text-gray-600 whitespace-nowrap mt-0.5">
+            {formatSessionDate(session)}
+          </span>
+        </div>
+
+          {/* mentorship title  */}
+        {session.mentorshipTitle && (
+          <p className="text-xs text-gray-500 mt-1" style={{ color: 'inherit' }}>
+            {String(session.mentorshipTitle)}
+          </p>
+        )}
       </div>
     </div>
   );
 };
+
 export default ScheduledSessionCard;
-
-

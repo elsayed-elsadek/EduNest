@@ -35,13 +35,66 @@ export interface MentorDashboardResponse {
 }
 
 /** GET /api/v1/dashboard
- *  This single endpoint replaces the old individual calls for cards,
- *  reviews, sessions, revenue chart and notifications.  Accepts query
- *  parameters described in `MentorDashboardParams`.
+ *  Combined dashboard endpoint — used for the initial page load (cards,
+ *  notifications, revenue chart). Accepts query parameters described in
+ *  `MentorDashboardParams`.
  */
 export const getMentorDashboard = (
-  params?: MentorDashboardParams
+  params?: MentorDashboardParams,
 ) => handleRequest(api.get<MentorDashboardResponse>(`${BASE}`, { params }));
+
+// ─── Dedicated section endpoints ───────────────────────────────────────────
+
+/** Shape returned by GET /api/v1/dashboard/reviews */
+export interface DashboardReviewsResponse {
+  apiResponse: {
+    reviews: {
+      content: unknown[];
+      page: number;
+      size: number;
+      totalElements: number;
+      totalPages: number;
+    };
+  };
+}
+
+/** GET /api/v1/dashboard/reviews?page=&size= */
+export const getDashboardReviews = (page: number, size = 6) =>
+  handleRequest(
+    api.get<DashboardReviewsResponse>(`${BASE}/reviews`, { params: { page, size } }),
+  );
+
+/** Shape returned by GET /api/v1/dashboard/sessions */
+export interface DashboardSessionsResponse {
+  apiResponse: {
+    sessions: {
+      content: unknown[];
+      page: number;
+      size: number;
+      totalElements: number;
+      totalPages: number;
+    };
+  };
+}
+
+/** GET /api/v1/dashboard/sessions?page=&size= */
+export const getDashboardSessions = (page: number, size = 5) =>
+  handleRequest(
+    api.get<DashboardSessionsResponse>(`${BASE}/sessions`, { params: { page, size } }),
+  );
+
+/** Shape returned by GET /api/v1/dashboard/revenue-chart */
+export interface DashboardRevenueChartResponse {
+  apiResponse: {
+    'sales-chart': Array<{ month: string; year: number; totalRevenue: number }>;
+  };
+}
+
+/** GET /api/v1/dashboard/revenue-chart?months= */
+export const getDashboardRevenueChart = (months = 6) =>
+  handleRequest(
+    api.get<DashboardRevenueChartResponse>(`${BASE}/revenue-chart`, { params: { months } }),
+  );
 
 /** GET /api/v1/dashboard/{id}/top-learners */
 export const getTopLearners = (

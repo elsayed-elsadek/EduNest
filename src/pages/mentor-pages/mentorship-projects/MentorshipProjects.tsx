@@ -87,7 +87,7 @@ const MentorshipProjects: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ">
           <div>
             <div className="flex items-baseline gap-2 cursor-pointer text-gray-600 hover:text-gray-900" onClick={handleBackToMentorship}>
               {/* <span className="text-xl">{'<'}</span> */}
@@ -111,7 +111,7 @@ const MentorshipProjects: React.FC = () => {
               <p className="text-sm text-gray-500 font-medium">Total Projects</p>
               <h3 className="text-2xl font-bold mt-1 text-gray-900">{stats?.totalProjects || 0}</h3>
             </div>
-            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-[var(--primary-500)]">
               <Briefcase size={20} />
             </div>
           </div>
@@ -185,7 +185,7 @@ const MentorshipProjects: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse mb-4">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
                   <th className="p-4 font-medium">Project Title</th>
@@ -198,14 +198,19 @@ const MentorshipProjects: React.FC = () => {
               <tbody className="divide-y divide-gray-100">
                 {projectsList.length > 0 ? projectsList.map((item: ProjectListItem) => (
                   <tr key={item.project.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-4">
+                    <td className="p-4 cursor-pointer">
+                    <Link 
+                     to={`/mentor/mentorships/${id}/projects/${item.project.id}`}>
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 rounded text-blue-500">
+                        <div className="p-2 bg-blue-50 rounded text-[var(--primary-500)]">
                           <Briefcase size={16} />
                         </div>
                         <span className="font-semibold text-gray-900">{item.project.title}</span>
                       </div>
+                    </Link>
+
                     </td>
+
                     <td className="p-4">
                       {item.project.status === 'PUBLISHED' ? (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
@@ -217,8 +222,8 @@ const MentorshipProjects: React.FC = () => {
                         </span>
                       )}
                     </td>
-                    <td className="p-4 font-medium">
-                      <span className="text-blue-600">{item.submissionsCount}/{item.totalStudents}</span>
+                    <td className="px-10 font-medium">
+                      <span className="text-[var(--primary-500)]">{item.submissionsCount}/{item.totalStudents}</span>
                     </td>
                     <td className="p-4 text-sm text-gray-500">
                       {item.project.createdAt ? new Date(item.project.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}
@@ -227,7 +232,7 @@ const MentorshipProjects: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <Link 
                           to={`/mentor/mentorships/${id}/projects/${item.project.id}`}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[var(--primary-500)] bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
                         >
                           <Eye size={16} /> Details
                         </Link>
@@ -240,7 +245,7 @@ const MentorshipProjects: React.FC = () => {
                           )}
                           <button 
                             onClick={() => setActiveDropdown(activeDropdown === item.project.id ? null : item.project.id)}
-                            className="relative z-50 p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg border border-gray-200"
+                            className="relative z-5 p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg border border-gray-200"
                           >
                             <MoreVertical size={16} />
                           </button>
@@ -276,7 +281,7 @@ const MentorshipProjects: React.FC = () => {
           </div>
 
           {/* Pagination */}
-          {projectsPage && projectsPage.totalPages > 1 && (
+          {projectsPage && projectsPage.totalPages > 10&& (
             <div className="p-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
               <p>Showing <select className="border-gray-200 rounded p-1 mx-1"><option>10</option></select> items in one page</p>
               <div className="flex gap-1">

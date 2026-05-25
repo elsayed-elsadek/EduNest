@@ -1,12 +1,16 @@
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FileText, CheckCircle, Clock, XCircle, Search, Filter, HelpCircle, Plus, ArrowLeft } from 'lucide-react';
+import { FileText, CheckCircle, Clock, XCircle, Search, Filter, HelpCircle, Plus, ArrowLeft, Edit2 } from 'lucide-react';
+
 import DashLayout from '../../../components/layout/Dash-layout';
 import type { QuizOverviewResponse, Submission } from '../../../services/mentorshipsContent/quiz';
 import { getQuizOverview } from '../../../services/mentorshipsContent/quiz';
 import { useAuthStore } from '../../../store/authStore';
 import toast from 'react-hot-toast';
+import EditQuizModal from './components/EditQuizModal';
+
+
 
 const QuizDetail: FC = () => {
     const { id: mentorshipId, quizId } = useParams<{ id: string, quizId: string }>();
@@ -16,6 +20,11 @@ const QuizDetail: FC = () => {
     const [data, setData] = useState<QuizOverviewResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Edit modal
+    const [editQuizId, setEditQuizId] = useState<number | null>(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -44,7 +53,8 @@ const QuizDetail: FC = () => {
         };
 
         loadQuizDetails();
-    }, [quizId, token, page]);
+    }, [quizId, token, page, refreshTrigger]);
+
 
     if (loading && !data) {
         return (
@@ -70,6 +80,14 @@ const QuizDetail: FC = () => {
     }
 
     const { quizStatistics: stats, submissions = [] } = data || {};
+
+    const triggerRefresh = () => setRefreshTrigger((prev) => prev + 1);
+
+    const openEdit = () => {
+        if (!quizId) return;
+        setEditQuizId(Number(quizId));
+    };
+
 
     const filteredSubmissions = submissions.filter((sub: Submission) => {
         const matchesSearch = sub.studentName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -111,14 +129,27 @@ const QuizDetail: FC = () => {
                             </span>
                         </div>
                     </div>
-                    <button
-                        onClick={() => navigate(`/mentor/mentorships/${mentorshipId}/quizzes/${quizId}/questions`)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-[#0f5e8b] text-white rounded-xl font-medium hover:bg-[#0a4a6e] transition-colors shadow-sm"
-                    >
-                        <Plus size={20} />
-                        Create Questions
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {/* Edit (from outside / header) */}
+                        <button
+                            onClick={openEdit}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white text-[#0f5e8b] border border-[#d1e9f3] rounded-xl font-medium hover:bg-blue-50 transition-colors shadow-sm"
+                            title="Edit Quiz"
+                        >
+                            <Edit2 size={18} />
+                            Edit
+                        </button>
+
+                        <button
+                            onClick={() => navigate(`/mentor/mentorships/${mentorshipId}/quizzes/${quizId}/questions`)}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#0f5e8b] text-white rounded-xl font-medium hover:bg-[#0a4a6e] transition-colors shadow-sm"
+                        >
+                            <Plus size={20} />
+                            Create Questions
+                        </button>
+                    </div>
                 </div>
+
 
                 {/* Stats Grid */}
                 <div className="flex flex-wrap gap-12 py-4 border-b border-gray-100">
@@ -147,6 +178,7 @@ const QuizDetail: FC = () => {
 
                 {/* Search Bar */}
                 <div className="flex items-center justify-between pt-4">
+                  
                     <div className="px-4 py-2 bg-gray-50 rounded-xl flex items-center gap-3 w-72">
                         <Search className="text-gray-400" size={18} />
                         <input
@@ -254,8 +286,16 @@ const QuizDetail: FC = () => {
                 </div>
 
             </div>
+
+            <EditQuizModal
+                isOpen={!!editQuizId}
+                onClose={() => setEditQuizId(null)}
+                quizId={editQuizId}
+                onSuccess={triggerRefresh}
+            />
         </DashLayout>
     );
 };
+
 
 export default QuizDetail;

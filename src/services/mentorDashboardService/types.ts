@@ -12,7 +12,7 @@ export interface MentorshipApiResponse {
   duration?: number;
   revenue?: number;
   rating?: number;
-  totalEnrolled?: number;
+  totalEnroll?: number;
   enrolledCount?: number;
   status?: string;
   createdAt?: string;

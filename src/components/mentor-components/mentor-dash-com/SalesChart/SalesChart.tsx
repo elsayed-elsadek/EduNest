@@ -7,6 +7,7 @@ import {
   type FC,
   memo,
 } from 'react';
+
 import {
   BarChart,
   Bar,
@@ -18,23 +19,8 @@ import {
   Cell,
 } from 'recharts';
 import { Calendar, ChevronDown } from 'lucide-react';
-
-/* =======================
-   Types
-======================= */
-interface SalesData {
-  month: string;
-  value: number;
-  fillColor?: string;
-}
-
-interface SalesChartProps {
-  title?: string;
-  data?: SalesData[];
-  defaultPeriod?: PeriodKey;
-}
-
-type PeriodKey = '1month' | '3months' | '6months' | '1year';
+import { getDashboardRevenueChart } from '../../../../services/mentorDashboardService';
+import { type SalesChartProps, type PeriodKey, type SalesData } from './SalesChart.types';
 
 /* =======================
    Constants
@@ -94,16 +80,7 @@ const formatYAxis = (value: number) => {
   return value.toString();
 };
 
-const normalizeChartData = (data: SalesData[]) => {
-  if (!data || !Array.isArray(data)) return [];
-  return data
-    .map((item) => ({
-      month: String(item.month || ''),
-      value: Number(item.value) || 0,
-      fillColor: item.fillColor,
-    }))
-    .filter((item) => item.month);
-};
+
 
 /* =======================
    Tooltip (Memoized)
@@ -141,6 +118,7 @@ const SalesChart: FC<SalesChartProps> = ({
   title = 'Sales',
   data,
   defaultPeriod = '6months',
+  onPeriodChange,
 }) => {
   const [selectedPeriod, setSelectedPeriod] =
     useState<PeriodKey>(defaultPeriod);
@@ -148,26 +126,68 @@ const SalesChart: FC<SalesChartProps> = ({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  /* =======================
-     Derived Data
-  ======================= */
+  const periodToMonths: Record<PeriodKey, number> = useMemo(
+    () => ({
+      '1month': 1,
+      '3months': 3,
+      '6months': 6,
+      '1year': 12,
+    }),
+    []
+  );
+
+  const [remoteData, setRemoteData] = useState<SalesData[]>(() => {
+    if (data && data.length > 0) return data;
+    return MOCK_DATA['6months'];
+  });
+
+  const [isLoadingChart, setIsLoadingChart] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+
   const chartData = useMemo(() => {
-    let sourceData = data;
+    if (isLoadingChart) return [];
+    return remoteData;
+  }, [remoteData, isLoadingChart]);
 
-    if (sourceData === undefined) {
-      // If no data prop is passed at all, show mock data
-      sourceData = MOCK_DATA[selectedPeriod];
-    } else if (sourceData.length === 0) {
-      // If data is provided but it's an empty array (Sales = 0),
-      // we generate empty columns based on the current selected period's months
-      sourceData = MOCK_DATA[selectedPeriod].map((item) => ({
-        ...item,
-        value: 0,
-      }));
-    }
+  const fetchChart = useCallback(
+    async (period: PeriodKey) => {
+      const months = periodToMonths[period];
+      setIsLoadingChart(true);
 
-    return normalizeChartData(sourceData);
-  }, [selectedPeriod, data]);
+
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const res = await getDashboardRevenueChart(months);
+        const raw = (res as { apiResponse?: { 'sales-chart'?: unknown } })
+          ?.apiResponse?.['sales-chart'];
+
+        const mapped: SalesData[] = Array.isArray(raw)
+          ? raw
+              .map((item) => {
+                const obj = item as Record<string, unknown>;
+                return {
+                  month: String(obj.month ?? ''),
+                  value: Number(obj.totalRevenue ?? 0),
+                } satisfies SalesData;
+              })
+              .filter((d) => d.month)
+          : [];
+
+        setRemoteData(mapped.length ? mapped : MOCK_DATA[period]);
+      } catch (e: unknown) {
+        if ((e as { name?: string }).name === 'CanceledError') return;
+
+      } finally {
+        setIsLoadingChart(false);
+      }
+    },
+    [periodToMonths]
+  );
+
 
   const selectedLabel = useMemo(
     () => PERIODS.find((p) => p.value === selectedPeriod)?.label,
@@ -181,10 +201,30 @@ const SalesChart: FC<SalesChartProps> = ({
     setIsOpen((prev) => !prev);
   }, []);
 
-  const handleSelect = useCallback((period: PeriodKey) => {
-    setSelectedPeriod(period);
-    setIsOpen(false);
+  useEffect(() => {
+    // initial mount: if initial `data` came from parent, keep it until
+    // user changes period. Otherwise fetch immediately.
+    const shouldFetch = !(data && data.length > 0);
+    if (shouldFetch) {
+      void fetchChart(selectedPeriod);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    void fetchChart(selectedPeriod);
+  }, [selectedPeriod, fetchChart]);
+
+  const handleSelect = useCallback(
+    (period: PeriodKey) => {
+      setSelectedPeriod(period);
+      setIsOpen(false);
+      if (onPeriodChange) {
+        onPeriodChange(period);
+      }
+    },
+    [onPeriodChange]
+  );
 
   /* =======================
      Outside Click
@@ -304,9 +344,6 @@ const SalesChart: FC<SalesChartProps> = ({
   );
 };
 
-/* =======================
-   Memo Export (Smart Compare)
-======================= */
 export default memo(SalesChart, (prev, next) => {
   return (
     prev.title === next.title &&

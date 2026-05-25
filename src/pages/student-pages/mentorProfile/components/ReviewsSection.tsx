@@ -12,7 +12,8 @@ const ReviewsSection = ({ reviews }: ReviewsSectionProps) => {
     <section className="space-y-8">
        <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-slate-900">Student Reviews</h2>
-          <button className="bg-slate-100 text-slate-600 px-6 py-2 rounded-xl font-semibold text-sm hover:bg-slate-200 transition-all">Write a Review</button>
+          {/* i will add this button if backend is handled properly */}
+          {/* <button className="bg-slate-100 text-slate-600 px-6 py-2 rounded-xl font-semibold text-sm hover:bg-slate-200 transition-all">Write a Review</button> */}
        </div>
        
 {reviews.length > 0 && (

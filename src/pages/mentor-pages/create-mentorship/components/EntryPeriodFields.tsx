@@ -4,8 +4,7 @@ import type { MentorshipFormData } from '../types';
 interface Props {
     formData: MentorshipFormData;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setFieldValue: (field: keyof MentorshipFormData, value: any) => void;
+    setFieldValue: (field: keyof MentorshipFormData, value: MentorshipFormData[keyof MentorshipFormData]) => void;
     fieldErrors: Record<string, string>;
 }
 

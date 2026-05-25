@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, Link, Outlet } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useMentorshipDetails, useMentorshipOverview } from '../../../services/student-roleService/mentorshipDetails.api';
@@ -13,12 +13,14 @@ import Footer from '../../../components/student-components/common/Footer/Footer'
 const MentorshipDetailsPage = () => {
   const { mentorshipId } = useParams();
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(0);
 
   // 🔍 DEBUG LOG: Raw ID from URL
   console.log('[DEBUG] Raw mentorshipId from URL:', mentorshipId, typeof mentorshipId);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentPage(0);
   }, [mentorshipId]);
 
   const normalizedId = Number(mentorshipId ?? '');
@@ -28,7 +30,12 @@ const MentorshipDetailsPage = () => {
   console.log('[DEBUG] normalizedId:', normalizedId, 'hasValidId:', hasValidId, 'for raw:', mentorshipId);
 
   const { data, isLoading, isError, error } = useMentorshipDetails(normalizedId, hasValidId);
-  const { data: overviewData, isLoading: overviewLoading } = useMentorshipOverview(normalizedId, hasValidId);
+  const { data: overviewData, isLoading: overviewLoading } = useMentorshipOverview(
+    normalizedId,
+    currentPage,
+    5,
+    hasValidId
+  );
 
   // 🔍 DEBUG LOG: Query status
   console.log('[DEBUG] useMentorshipDetails - isLoading:', isLoading, 'isError:', isError, error?.message);
@@ -108,7 +115,11 @@ const MentorshipDetailsPage = () => {
                   <ProgressSection progress={enrolledData.progress} />
                   
                   {/* Upcoming Items */}
-                  <UpcomingItemsSection upcomingItems={enrolledData.upcomingItems} />
+                  <UpcomingItemsSection
+                    upcomingItems={enrolledData.upcomingItems}
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )}
               

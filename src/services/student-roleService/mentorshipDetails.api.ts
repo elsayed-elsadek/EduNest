@@ -185,17 +185,19 @@ export const fetchMentorshipDetails = async (
 // Fetch Mentorship Overview (with enrollment status and progress/upcoming items)
 export const fetchMentorshipOverview = async (
   mentorshipId: string | number,
+  page = 0,
+  size = 5,
   signal?: AbortSignal
 ): Promise<{ isEnrolled: boolean; afterEnroll: MentorshipOverviewEnrolled | null }> => {
-  console.log('[DEBUG] fetchMentorshipOverview - ID:', mentorshipId, 'URL:', `/api/v1/student/mentorships/${mentorshipId}/overview`);
+  console.log('[DEBUG] fetchMentorshipOverview - ID:', mentorshipId, 'Page:', page, 'Size:', size);
 
   const { data } = await api.get<MentorshipOverviewApiResponse>(
     `/api/v1/student/mentorships/${mentorshipId}/overview`,
     {
       params: {
         topMentorshipsLimit: 3,
-        UpcomingPage: 0,
-        UpcomingSize: 5,
+        UpcomingPage: page,
+        UpcomingSize: size,
       },
       signal,
     }
@@ -256,10 +258,15 @@ export const useMentorshipDetails = (mentorshipId: number | string, enabled = tr
 };
 
 // Custom Hook for Mentorship Overview (enrollment status + progress + upcoming items)
-export const useMentorshipOverview = (mentorshipId: number | string, enabled = true) => {
+export const useMentorshipOverview = (
+  mentorshipId: number | string,
+  page = 0,
+  size = 5,
+  enabled = true
+) => {
   return useQuery({
-    queryKey: mentorshipDetailsKeys.overview(mentorshipId),
-    queryFn: ({ signal }) => fetchMentorshipOverview(mentorshipId, signal),
+    queryKey: [...mentorshipDetailsKeys.overview(mentorshipId), page, size],
+    queryFn: ({ signal }) => fetchMentorshipOverview(mentorshipId, page, size, signal),
     enabled: enabled && !!mentorshipId,
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,

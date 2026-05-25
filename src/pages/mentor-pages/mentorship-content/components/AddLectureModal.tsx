@@ -85,7 +85,7 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium">
-            {isEditing ? 'Cancel' : 'Save as Draft'}
+            Cancel
           </button>
           <button type="submit" disabled={submitting} className="flex-1 py-2.5 rounded-xl bg-primary text-white font-medium disabled:opacity-60">
             {submitting ? 'Saving...' : isEditing ? 'Update Lecture' : 'Save Lecture'}

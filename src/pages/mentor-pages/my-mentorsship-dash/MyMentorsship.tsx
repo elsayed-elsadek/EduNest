@@ -10,48 +10,63 @@ import { useMentorshipsWithTransform, useDeleteMentorship } from '../../../hooks
 import { useAuthStore } from '../../../store/authStore';
 import type { Mentorship } from '../../../types/mentorship.types';
 
+type FilterStatus = 'all' | 'active' | 'draft' | 'completed';
+
 const MentorshipsList: FC = () => {
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
+  
+  // State
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'draft' | 'completed'>('all');
+  const [itemsPerPage, setItemsPerPage] = useState(6); // جعلناها 6 لتتطابق مع طلبك في الـ API
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Always call hooks at the top level - BEFORE any early returns
-  const pageIndex = currentPage - 1;
-  const { data, isLoading, error, refetch } = useMentorshipsWithTransform(pageIndex, itemsPerPage);
-  const deleteMutation = useDeleteMentorship();
-
-  // Transform data
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mentorships: Mentorship[] = data?.content ?? [];
-  const totalElements = data?.totalElements ?? 0;
-  const totalPages = data?.totalPages ?? 0;
-
-  // Filter mentorships client-side
-  const filteredMentorships = useMemo(() => {
-    if (statusFilter === 'all') return mentorships;
-    return mentorships.filter((item) => item.status === statusFilter);
-  }, [statusFilter, mentorships]);
-
-  // Redirect to login if no token (useEffect for navigation)
+  // Redirect to login if no token
   useEffect(() => {
     if (!token) {
       navigate('/login');
     }
   }, [token, navigate]);
 
-  // Reset to page 1 when filter or items per page changes
-  const handleFilterChange = (filter: 'all' | 'active' | 'draft' | 'completed') => {
+  const pageIndex = currentPage - 1;
+
+  // Data Fetching
+  const { data, isLoading, error, refetch } = useMentorshipsWithTransform(pageIndex, itemsPerPage);
+  const deleteMutation = useDeleteMentorship();
+
+  // Extract variables from data
+  const mentorships: Mentorship[] = data?.content ?? [];
+  const totalElements = data?.totalElements ?? 0;
+  const totalPages = data?.totalPages ?? 0;
+
+  // الفلترة محلياً (Client-side Filtering)
+  const filteredMentorships = useMemo(() => {
+    if (statusFilter === 'all') return mentorships;
+    return mentorships.filter((item) => item.status === statusFilter);
+  }, [statusFilter, mentorships]);
+
+  // Handlers
+  const handleFilterChange = (filter: FilterStatus) => {
     setStatusFilter(filter);
-    setCurrentPage(1);
     setIsFilterOpen(false);
   };
 
   const handleItemsPerPageChange = (val: number | string) => {
     setItemsPerPage(Number(val));
-    setCurrentPage(1);
+    setCurrentPage(1); 
+  };
+
+  const handleDeleteSuccess = (toastId: string) => {
+    toast.dismiss(toastId);
+    toast.success('Mentorship deleted successfully');
+  };
+
+  const handleDeleteError = (err: unknown) => {
+    const axiosErr = err as { response?: { data?: { errorMessages?: { error?: string } } } };
+    const msg = axiosErr.response?.data?.errorMessages?.error ?? 'Failed to delete mentorship';
+    console.error('❌ Error deleting mentorship:', msg);
+    toast.error(msg);
   };
 
   const confirmAndDeleteMentorship = (id: string) => {
@@ -71,16 +86,8 @@ const MentorshipsList: FC = () => {
           <button
             onClick={() => {
               deleteMutation.mutate(id, {
-                onSuccess: () => {
-                  toast.dismiss(t.id);
-                  toast.success('Mentorship deleted successfully');
-                },
-                onError: (err: unknown) => {
-                  const axiosErr = err as { response?: { data?: { errorMessages?: { error?: string } } } };
-                  const msg = axiosErr.response?.data?.errorMessages?.error ?? 'Failed to delete mentorship';
-                  console.error('❌ Error deleting mentorship:', msg);
-                  toast.error(msg);
-                },
+                onSuccess: () => handleDeleteSuccess(t.id),
+                onError: handleDeleteError,
               });
             }}
             className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
@@ -89,16 +96,74 @@ const MentorshipsList: FC = () => {
           </button>
         </div>
       </div>
-    ), {
-      duration: 8000,
-    });
+    ), { duration: 8000 });
+  };
+
+  // Render Helpers
+  const renderLoadingState = () => (
+    <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
+      <div className="relative w-14 h-14">
+        <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-blue-500 animate-spin"></div>
+      </div>
+      <div className="text-center">
+        <p className="text-gray-700 font-semibold">Loading...</p>
+        <p className="text-gray-500 text-sm mt-1">Fetching your mentorships</p>
+      </div>
+    </div>
+  );
+
+  const renderErrorState = () => (
+    <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
+      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+        <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div className="text-center">
+        <p className="text-gray-700 font-semibold">Error Loading Mentorships</p>
+        <p className="text-gray-500 text-sm mt-1">Please try again later</p>
+        <button
+          onClick={() => refetch()}
+          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderEmptyState = () => {
+    const isTotallyEmpty = totalElements === 0;
+    
+    return (
+      <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
+        <div className="text-center">
+          <p className="text-gray-700 font-semibold">
+            {isTotallyEmpty ? 'No Mentorships Yet' : `No ${statusFilter} Mentorships on this page`}
+          </p>
+          <p className="text-gray-500 text-sm mt-1">
+            {isTotallyEmpty
+              ? 'Create your first mentorship to get started'
+              : 'Try changing the filter or moving to another page.'}
+          </p>
+          {isTotallyEmpty && (
+            <button
+              onClick={() => navigate('/mentor/mentorships/create')}
+              className="mt-4 px-6 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[var(--primary-dark)] transition-colors"
+            >
+              Create Mentorship
+            </button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
     <DashLayout pageTitle="Dashboard / My Mentorships">
-
       <div className="bg-gray-50 dark:bg-[var(--dark-bg)] min-h-screen px-0 md:px-8 md:pt-4 pb-8">
-
+        
         {/* Header Section: Add button */}
         <div className="flex justify-end mb-6 px-4 md:px-0 pt-4 md:pt-0">
           <button
@@ -111,8 +176,8 @@ const MentorshipsList: FC = () => {
         </div>
 
         <div className="bg-white rounded-none md:rounded-3xl border-y md:border border-gray-100 shadow-sm overflow-hidden">
-
-          {/* Table Header / Title */}
+          
+          {/* Table Header / Title & Filter */}
           <div className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 md:border-none">
             <div>
               <h1 className="text-lg md:text-xl font-bold text-gray-900">Mentorships List</h1>
@@ -133,7 +198,7 @@ const MentorshipsList: FC = () => {
 
               {isFilterOpen && (
                 <div className="absolute right-0 mt-2 w-full sm:w-40 bg-white border border-gray-100 rounded-xl shadow-xl z-50 py-2">
-                  {(['all', 'active', 'draft', 'completed'] as const).map((s) => (
+                  {(['all', 'active', 'draft', 'completed'] as FilterStatus[]).map((s) => (
                     <button
                       key={s}
                       className="w-full text-left px-4 py-2 text-sm font-bold hover:bg-blue-50 capitalize text-gray-700"
@@ -147,66 +212,13 @@ const MentorshipsList: FC = () => {
             </div>
           </div>
 
-          {/* Table */}
-
+          {/* Table Content */}
           {isLoading ? (
-            <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
-              <div className="relative w-14 h-14">
-                <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-blue-500 animate-spin"></div>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-700 font-semibold">Loading...</p>
-                <p className="text-gray-500 text-sm mt-1">Fetching your mentorships</p>
-              </div>
-            </div>
+            renderLoadingState()
           ) : error ? (
-            <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <p className="text-gray-700 font-semibold">Error Loading Mentorships</p>
-                <p className="text-gray-500 text-sm mt-1">Please try again later</p>
-                <button
-                  onClick={() => refetch()}
-                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            </div>
+            renderErrorState()
           ) : filteredMentorships.length === 0 ? (
-            <div className="p-12 flex flex-col items-center justify-center gap-4 min-h-[400px]">
-
-           {/* /* حالة عدم وجود بيانات بعد الفلترة * / */}
-              <div className="text-center">
-                <p className="text-gray-700 font-semibold">
-                  {totalElements === 0
-                    ? 'No Mentorships Yet'
-                    : statusFilter === 'active'
-                      ? 'No Active Mentorships'
-                      : statusFilter === 'draft'
-                        ? 'No Draft Mentorships'
-                        : statusFilter === 'completed'
-                          ? 'No Completed Mentorships'
-                          : 'No Mentorships Yet'}
-                </p>
-                <p className="text-gray-500 text-sm mt-1">
-                  {totalElements === 0
-                    ? 'Create your first mentorship to get started'
-                    : 'There are mentorships in other statuses. Try changing the filter.'}
-                </p>
-                <button
-                  onClick={() => navigate('/mentor/mentorships/create')}
-                  className="mt-4 px-6 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[var(--primary-dark)] transition-colors"
-                >
-                  Create Mentorship
-                </button>
-              </div>
-            </div>
+            renderEmptyState()
           ) : (
             <MentorshipTable
               mentorships={filteredMentorships}
@@ -221,7 +233,7 @@ const MentorshipsList: FC = () => {
             />
           )}
 
-          {/* Footer / Pagination: Padding  */}
+          {/* Footer / Pagination */}
           {!isLoading && !error && totalElements > 0 && (
             <div className="p-4 md:p-6 border-t border-gray-50">
               <Pagination
@@ -241,4 +253,3 @@ const MentorshipsList: FC = () => {
 };
 
 export default MentorshipsList;
-

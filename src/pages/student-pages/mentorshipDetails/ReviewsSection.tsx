@@ -64,7 +64,7 @@ const ReviewItem = ({ review }: { review: any }) => (
         <span className="text-sm font-semibold text-slate-900">{review.rating}/5</span>
       </div>
     </div>
-    <p className="mt-4 text-slate-700 leading-relaxed">{review.feedback}</p>
+    <p className="mt-4 text-slate-700 leading-relaxed">"{review.feedback}"</p>
   </article>
 );
 
@@ -164,7 +164,7 @@ const ReviewsSection = () => {
               <p className="text-lg font-semibold text-slate-900">No reviews yet</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 text-center ">
               {reviewsPage.content.map((review) => <ReviewItem key={review.reviewId} review={review} />)}
             </div>
           )}

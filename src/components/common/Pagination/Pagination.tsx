@@ -59,7 +59,7 @@ const Pagination: FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 md:px-4 py-2 text-[11px] md:text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30 transition-colors"
+          className="px-3 md:px-4 py-2 text-[11px] md:text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[var(--primary-500)] dark:hover:text-gray-100 disabled:opacity-30 transition-colors"
         >
           Previous
         </button>
@@ -71,10 +71,10 @@ const Pagination: FC<PaginationProps> = ({
               disabled={page === '...'}
               onClick={() => typeof page === 'number' && onPageChange(page)}
               className={`w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-lg text-[11px] md:text-xs font-bold transition-all ${page === currentPage
-                ? 'bg-white shadow-[0px_2px_4px_rgba(0,0,0,0.05)] text-[#1A1C1E] scale-105'
+                ? 'bg-[var(--primary-500)] text-white scale-105 hover:bg-[var(--primary-500)] hover:text-white'
                 : page === '...'
-                  ? 'text-gray-400 cursor-default'
-                  : 'text-gray-500 hover:bg-white/50 hover:text-[#1A1C1E]'
+                  ? 'text-gray-400 cursor-default '
+                  : 'text-gray-500 hover:bg-[var(--primary-500)] hover:text-white'
                 }`}
             >
               {page}
@@ -85,7 +85,7 @@ const Pagination: FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || totalPages === 0}
-          className="px-3 md:px-4 py-2 text-[11px] md:text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-30 transition-colors"
+          className="px-3 md:px-4 py-2 text-[11px] md:text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[var(--primary-500)] dark:hover:text-gray-100 disabled:opacity-30 transition-colors"
         >
           Next
         </button>

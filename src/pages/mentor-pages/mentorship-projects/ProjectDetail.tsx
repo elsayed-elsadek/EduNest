@@ -3,7 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DashLayout from '../../../components/layout/Dash-layout';
 import toast from 'react-hot-toast';
 import { getProjectStatistics, gradeProjectSubmission, type ProjectStatistics, type TaskSubmission } from '../../../services/projectService';
-import { Download, CheckCircle, Clock, AlertCircle, Award, ArrowLeft } from 'lucide-react';
+import { Download, CheckCircle, Clock, AlertCircle, Award, ArrowLeft, Edit } from 'lucide-react';
+import { EditProjectModal } from './components/ProjectModals';
+
+
 
 const ProjectDetail: React.FC = () => {
   const { id, projectId } = useParams<{ id: string, projectId: string }>();
@@ -13,7 +16,12 @@ const ProjectDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
 
+  // Edit modal state
+  const [projectToEdit, setProjectToEdit] = useState<import('../../../services/projectService').ProjectResponse | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   // Modal state
+
   const [isGradeModalOpen, setIsGradeModalOpen] = useState(false);
   const [activeSubmission, setActiveSubmission] = useState<TaskSubmission | null>(null);
   const [score, setScore] = useState<number | string>('');
@@ -25,7 +33,24 @@ const ProjectDetail: React.FC = () => {
     try {
       setLoading(true);
       const res = await getProjectStatistics(projectId, { page, size: 10 });
+      // Note: EditProjectModal يحتاج ProjectResponse كاملة، و api الحالية هنا ترجع statistics فقط.
+      // لذلك سنبني object ProjectResponse جزئياً قدر الإمكان.
       setStats(res.projectStatistics);
+      setProjectToEdit({
+        id: Number(projectId),
+        title: res.projectStatistics.projectTitle,
+        goal: '',
+        brief: '',
+        descriptionUrl: null,
+        uploadedAttachmentPath: null,
+        startAt: new Date().toISOString(),
+        endAt: new Date().toISOString(),
+        points: res.projectStatistics.totalPoints || 100,
+        status: 'DRAFT',
+        weekId: 0,
+        createdAt: new Date().toISOString(),
+      });
+      setIsEditOpen(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load project details';
       setError(message);
@@ -104,13 +129,27 @@ const ProjectDetail: React.FC = () => {
         
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-baseline gap-4">
-          <div>
-            <div className="flex items-center gap-2 cursor-pointer text-gray-600 hover:text-gray-900" onClick={handleBackToProjects}>
-              <ArrowLeft size={20} />
-              <h1 className="text-2xl font-bold text-gray-900">{stats?.projectTitle || 'Project Details'}</h1>
+            <div>
+              <div className="flex items-center gap-2 cursor-pointer text-gray-600 hover:text-gray-900" onClick={handleBackToProjects}>
+                <ArrowLeft size={20} />
+                <h1 className="text-2xl font-bold text-gray-900">{stats?.projectTitle || 'Project Details'}</h1>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">Review student submissions and statistics</p>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Review student submissions and statistics</p>
-          </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!projectToEdit) return;
+                  setIsEditOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+              >
+                <Edit size={16} />
+                Edit
+              </button>
+            </div>
         </div>
 
         {/* Stats Cards */}
@@ -247,8 +286,17 @@ const ProjectDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Edit Project Modal */}
+      <EditProjectModal
+        project={projectToEdit}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSuccess={fetchStats}
+      />
+
       {/* Grade Modal Overlay */}
       {isGradeModalOpen && activeSubmission && (
+
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 bg-[var(--primary-500)]">

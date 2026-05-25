@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { Book, FileText, Activity, Users, ChevronRight, Briefcase } from "lucide-react";
+import { Book, FileText, Activity, Users, ArrowRight, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface MentorshipStatsCardsProps {
@@ -57,18 +57,23 @@ const MentorshipStatsCards: FC<MentorshipStatsCardsProps> = ({
         const Icon = card.icon;
 
         const content = (
-          <div className="flex items-center gap-3 w-full">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <Icon className="text-blue-500 w-5 h-5" />
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-50 rounded-lg shrink-0">
+                <Icon className="text-blue-500 w-5 h-5" />
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">{card.title}</p>
+                <p className="text-lg font-bold text-gray-900">{String(card.value)}</p>
+              </div>
             </div>
 
-            <div className="flex-1">
-              <p className="text-sm text-gray-500">{card.title}</p>
-              <p className="text-lg font-bold">{String(card.value)}</p>
-            </div>
-
+            {/* الأيقونة الجديدة مع الـ Hover States */}
             {card.link && (
-              <ChevronRight className="text-gray-400 w-5 h-5" />
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all duration-300 shrink-0">
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+              </div>
             )}
           </div>
         );
@@ -78,7 +83,8 @@ const MentorshipStatsCards: FC<MentorshipStatsCardsProps> = ({
             <Link
               key={index}
               to={card.link}
-              className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
+              // ضفنا group هنا عشان نتحكم في الـ hover بتاع العناصر اللي جواها
+              className="group bg-white rounded-xl p-4 shadow-sm hover:shadow-md border border-transparent hover:border-blue-100 transition-all"
             >
               {content}
             </Link>

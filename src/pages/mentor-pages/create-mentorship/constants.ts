@@ -14,5 +14,4 @@ export const categoryOptions = [
     'Business',
     'Data & AI',
     'Personal Development',
-    'Other',
 ];

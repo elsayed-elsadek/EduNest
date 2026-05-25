@@ -70,7 +70,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
 
       {/* 3. Total Enroll */}
       <td className="hidden sm:table-cell py-4 px-4 md:px-6 font-bold text-gray-900 dark:text-gray-100 text-sm">
-        {mentorship?.totalEnrolled || 0}
+        {mentorship.totalEnroll || 0}
       </td>
 
       {/* 4. Revenue */}

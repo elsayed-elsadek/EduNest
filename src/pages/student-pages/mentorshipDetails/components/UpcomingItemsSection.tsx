@@ -5,10 +5,14 @@ import type { PaginatedUpcomingItems } from '../../../../types/student-role-type
 
 interface UpcomingItemsSectionProps {
   upcomingItems?: PaginatedUpcomingItems;
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
 const UpcomingItemsSection: FC<UpcomingItemsSectionProps> = ({
   upcomingItems,
+  currentPage,
+  onPageChange,
 }) => {
   const navigate = useNavigate();
   const { mentorshipId } = useParams<{ mentorshipId: string }>();
@@ -81,7 +85,13 @@ const UpcomingItemsSection: FC<UpcomingItemsSectionProps> = ({
       </div>
 
       {/* Items */}
-      <div className="space-y-4">
+      <div
+        className={`space-y-4 ${
+          validItems.length > 3
+            ? 'max-h-[450px] overflow-y-auto pr-2 custom-scrollbar p-1 -m-1'
+            : ''
+        }`}
+      >
         {validItems.map((item) => {
           const dueDate = new Date(item.dueDate);
           const isOverdue = dueDate < new Date();
@@ -176,11 +186,50 @@ const UpcomingItemsSection: FC<UpcomingItemsSectionProps> = ({
 
       {/* Footer */}
       {upcomingItems && upcomingItems.totalPages > 1 && (
-        <div className="mt-8 border-t border-slate-200 pt-6 text-center">
+        <div className="mt-8 border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-500">
-            Showing {validItems.length} of{' '}
-            {upcomingItems.totalElements} items
+            Showing {currentPage * upcomingItems.size + 1} -{' '}
+            {Math.min(
+              (currentPage + 1) * upcomingItems.size,
+              upcomingItems.totalElements
+            )}{' '}
+            of {upcomingItems.totalElements} items
           </p>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: upcomingItems.totalPages }, (_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => onPageChange(index)}
+                className={`flex h-8 w-8 items-center justify-center rounded-xl text-xs font-bold transition-all ${
+                  currentPage === index
+                    ? 'bg-[var(--primary-500)] text-white shadow-sm'
+                    : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === upcomingItems.totalPages - 1}
+              className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </section>

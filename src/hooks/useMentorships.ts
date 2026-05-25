@@ -10,9 +10,7 @@ import type { Mentorship } from '../types/mentorship.types';
 export function useMentorships(page = 0, size = 5) {
   return useQuery({
     queryKey: [...queryKeys.mentorships, page, size],
-    queryFn: () => getMentorships(page, size),
-    // Override staleTime for this specific query (optional)
-    // staleTime: 2 * 60 * 1000, // 2 minutes
+    queryFn: () => getMentorships(page, size, undefined),
   });
 }
 
@@ -33,11 +31,11 @@ export function useDeleteMentorship() {
 
 /**
  * Helper function to transform API response to UI model
- * Can be used in components for data transformation
  */
 export function mapApiMentorshipToUi(item: unknown): Mentorship {
   const m = item as Record<string, unknown>;
-  const status = String(m.status ?? 'DRAFT').toUpperCase();
+  const statusRaw = m.status ?? m.mentorshipStatus;
+  const status = String(statusRaw ?? 'DRAFT').toUpperCase();
 
   const uiStatus =
     status === 'ACTIVE' || status === 'PUBLISHED' ? 'active' :
@@ -57,7 +55,7 @@ export function mapApiMentorshipToUi(item: unknown): Mentorship {
     coverImageUrl: (typeof m.coverImageUrl === 'string' ? m.coverImageUrl : null),
     level: String(m.difficultyLevel ?? m.level ?? 'ALL_LEVEL'),
     rating: Number(m.rating ?? 0),
-    totalEnrolled: Number(m.totalEnrolled ?? m.enrolledCount ?? m.students ?? 0),
+    totalEnroll: Number(m.totalEnroll ?? m.enrolledCount ?? m.students ?? 0),
     revenue: Number(m.price ?? m.revenue ?? 0),
     createdDate: dateStr,
     status: uiStatus,
@@ -70,14 +68,16 @@ export function mapApiMentorshipToUi(item: unknown): Mentorship {
 export function useMentorshipsWithTransform(page = 0, size = 5) {
   const { data, ...rest } = useMentorships(page, size);
   
-  const transformedData = data?.content?.map(mapApiMentorshipToUi) ?? [];
+  // معالجة شكل البيانات المتداخل القادم من الـ API
+  // data.apiResponse.mentorships أو data مباشرة
+  const rawData = (data as any)?.apiResponse?.mentorships ?? data;
+  const transformedData = rawData?.content?.map(mapApiMentorshipToUi) ?? [];
   
   return {
     ...rest,
     data: {
-      ...data,
+      ...rawData,
       content: transformedData,
     },
   };
 }
-

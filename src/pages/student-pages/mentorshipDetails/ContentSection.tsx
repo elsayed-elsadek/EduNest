@@ -32,7 +32,11 @@ const ContentSection: FC = () => {
   );
 
   const renderError = () => (
+<<<<<<< Updated upstream
     <div className="text-center py-6 text-gray-500">{'No content found.'}</div>
+=======
+    <div className="text-center py-6 text-gray-500">{ 'No content found.'}</div>
+>>>>>>> Stashed changes
   );
 
   const renderNotEnrolled = (message: string) => (
@@ -64,6 +68,13 @@ const ContentSection: FC = () => {
         <h3 className="font-semibold text-gray-900 text-lg">
           Mentorship Content
         </h3>
+        <button
+          type="button"
+          onClick={() => navigate(`/student/learning/${mentorshipId}`)}
+          className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-[var(--primary-dark)] transition-colors duration-200 shadow-sm"
+        >
+          Resume Learning
+        </button>
       </div>
 
       {/* States */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { X, CheckCircle, Clock, Loader2, Award } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { updateMentorshipStatus } from '../../../../services/mentorshipsContent/mentorship';
 import type { MentorshipStatus } from '../../../../services/mentorshipsContent/mentorship';
@@ -22,7 +22,7 @@ const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
     const [selectedStatus, setSelectedStatus] = useState<MentorshipStatus>(
         (() => {
             const upperStatus = currentStatus.toUpperCase();
-            return (upperStatus === 'DRAFT' || upperStatus === 'ACTIVE') 
+            return (upperStatus === 'DRAFT' || upperStatus === 'ACTIVE' || upperStatus === 'COMPLETED') 
                 ? (upperStatus as MentorshipStatus) 
                 : 'ACTIVE';
         })()
@@ -38,7 +38,7 @@ const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
             return;
         }
 
-        if (!['ACTIVE', 'DRAFT'].includes(selectedStatus)) {
+        if (!['ACTIVE', 'DRAFT', 'COMPLETED'].includes(selectedStatus)) {
             toast.error('Invalid status');
             return;
         }
@@ -135,6 +135,36 @@ const StatusChangeModal: React.FC<StatusChangeModalProps> = ({
                             </h3>
                             <p className="text-sm text-gray-500 mt-1">
                                 The mentorship is hidden from students. Use this to safely make edits and add content.
+                            </p>
+                        </div>
+                    </button>
+
+                    {/* COMPLETED Card */}
+                    <button
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={() => setSelectedStatus('COMPLETED')}
+                        className={`w-full flex items-start p-4 rounded-xl border-2 text-left transition-all ${
+                            selectedStatus === 'COMPLETED'
+                                ? 'border-blue-500 bg-blue-50/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                        <div className={`p-2 rounded-full mt-1 ${
+                            selectedStatus === 'COMPLETED' ? 'bg-blue-100' : 'bg-gray-100'
+                        }`}>
+                            <Award className={`w-6 h-6 ${
+                                selectedStatus === 'COMPLETED' ? 'text-blue-600' : 'text-gray-500'
+                            }`} />
+                        </div>
+                        <div className="ml-4">
+                            <h3 className={`font-semibold ${
+                                selectedStatus === 'COMPLETED' ? 'text-blue-900' : 'text-gray-900'
+                            }`}>
+                                COMPLETED
+                            </h3>
+                            <p className="text-sm text-gray-500 mt-1">
+                                The mentorship is fully completed. Students can still access the materials, but new content or enrollments are restricted.
                             </p>
                         </div>
                     </button>

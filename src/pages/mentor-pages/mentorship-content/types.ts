@@ -5,6 +5,8 @@ export interface ContentItem {
   title: string;
   id?: number | string;
   isDraft?: boolean;
+  /** weekId is stored so we can build a globally-unique composite key: weekId-type-id */
+  weekId?: number;
 }
 
 export interface ModuleState {

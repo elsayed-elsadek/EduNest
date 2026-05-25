@@ -1,11 +1,14 @@
+export type PeriodKey = '1month' | '3months' | '6months' | '1year';
 
 export interface SalesData {
   month: string;
   value: number;
-  label?: string;
+  fillColor?: string;
 }
 
 export interface SalesChartProps {
-  data?: SalesData[];
   title?: string;
+  data?: SalesData[];
+  defaultPeriod?: PeriodKey;
+  onPeriodChange?: (period: PeriodKey) => void;
 }

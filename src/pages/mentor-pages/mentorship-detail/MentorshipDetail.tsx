@@ -32,9 +32,18 @@ const MentorshipDetail: FC = () => {
   const [stats, setStats] = useState<MentorshipStats | null>(null);
   const [topLearners, setTopLearners] = useState<Learner[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+
+  const [reviewsPage, setReviewsPage] = useState(0);
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+  const [topPage, setTopPage] = useState(0);
+  const [topTotalPages, setTopTotalPages] = useState(1);
+
+  const REVIEWS_PAGE_SIZE = 6;
+  const TOP_PAGE_SIZE = 3;
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'dashboard'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'dashboard'>('dashboard');
   const [mentorshipDashboardStudents, setMentorshipDashboardStudents] = useState<Student[]>([]);
 
   const [weeks, setWeeks] = useState<WeekData[] | null>(null);
@@ -62,10 +71,12 @@ const MentorshipDetail: FC = () => {
         setMentorship(data);
 
         try {
-          const dashResponse = await getFullMentorshipDashboard(
-            mentorshipId,
-            { reviewsSize: 6, topSize: 3 }
-          );
+          const dashResponse = await getFullMentorshipDashboard(mentorshipId, {
+            reviewsPage,
+            reviewsSize: REVIEWS_PAGE_SIZE,
+            topPage,
+            topSize: TOP_PAGE_SIZE,
+          });
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const dash = (dashResponse as any)?.apiResponse?.dashboard;
@@ -74,6 +85,8 @@ const MentorshipDetail: FC = () => {
             setStats(dash.stats);
             setTopLearners(dash.topLearners?.content || []);
             setReviews(dash.reviews?.content || []);
+            setReviewsTotalPages(Number(dash.reviews?.totalPages ?? 1));
+            setTopTotalPages(Number(dash.topLearners?.totalPages ?? 1));
             setMentorshipDashboardStudents(dash.studentsRanks?.content || []);
           }
         } catch (e) {
@@ -81,15 +94,14 @@ const MentorshipDetail: FC = () => {
         }
       } catch (err) {
         const message =
-          err instanceof Error
-            ? err.message
-            : 'Failed to load mentorship details';
+          err instanceof Error ? err.message : 'Failed to load mentorship details';
 
         setError(message);
       } finally {
         setLoading(false);
       }
     };
+
 
     const loadContent = async () => {
       try {
@@ -128,7 +140,7 @@ const MentorshipDetail: FC = () => {
 
     loadMentorshipDetail();
     loadContent();
-  }, [mentorshipId, token, navigate]);
+  }, [mentorshipId, token, navigate, reviewsPage, topPage]);
 
   const handleCreateContentClick = () => {
     if (!mentorshipId) return;
@@ -213,8 +225,20 @@ const MentorshipDetail: FC = () => {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              <MentorshipReviews reviews={reviews} />
-              <MentorshipTopLearners topLearners={topLearners} />
+              <MentorshipReviews
+                reviews={reviews}
+                reviewsPage={reviewsPage}
+                reviewsTotalPages={reviewsTotalPages}
+                reviewsSize={REVIEWS_PAGE_SIZE}
+                onPageChange={(p) => setReviewsPage(p)}
+              />
+              <MentorshipTopLearners
+                topLearners={topLearners}
+                topPage={topPage}
+                topTotalPages={topTotalPages}
+                topSize={TOP_PAGE_SIZE}
+                onPageChange={(p) => setTopPage(p)}
+              />
             </div>
 
             <div className="overflow-x-auto">

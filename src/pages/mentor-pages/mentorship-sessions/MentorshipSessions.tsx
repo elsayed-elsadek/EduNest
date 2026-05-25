@@ -265,23 +265,23 @@ const MentorshipSessions: FC = () => {
 
                 {/* Pagination */}
                 {sessionsData && sessionsData.totalPages > 1 && (
-                    <div className="mt-8 flex items-center justify-between bg-white px-6 py-4 rounded-xl shadow-sm border border-gray-100">
-                        <span className="text-sm text-gray-500 font-medium">
-                            Showing {(page * size) + 1} to Math.min((page + 1) * size, sessionsData.totalElements) of {sessionsData.totalElements} entries
-                        </span>
+                    <div className="mt-8 flex items-center justify-end px-6 py-4 ">
+                        {/* <span className="text-sm text-gray-500 font-medium">
+                           Showing {sessions.length} items in this page 
+                        </span> */}
 
                         <div className="flex gap-2">
                             <button
                                 onClick={handlePrevPage}
                                 disabled={page === 0}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 shadow-sm border border-gray-500 rounded-lg hover:bg-[var(--primary-500)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 Previous
                             </button>
                             <button
                                 onClick={handleNextPage}
                                 disabled={page >= sessionsData.totalPages - 1}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border shadow-sm border-gray-500 rounded-lg hover:bg-[var(--primary-500)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 Next
                             </button>

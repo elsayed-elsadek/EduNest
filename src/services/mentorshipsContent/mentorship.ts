@@ -1,7 +1,7 @@
 import api from '../api';
 import { handleRequest } from './utils';
 
-export type MentorshipStatus = 'ACTIVE' | 'DRAFT';
+export type MentorshipStatus = 'ACTIVE' | 'DRAFT' | 'COMPLETED';
 
 export interface UpdateMentorshipStatusPayload {
     status: MentorshipStatus;

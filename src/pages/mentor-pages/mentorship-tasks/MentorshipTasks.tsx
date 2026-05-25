@@ -33,7 +33,7 @@ const MentorshipTasks: FC = () => {
 
     // Pagination
     const [page, setPage] = useState(0);
-    const size = 6;
+    const size = 5;
 
     // Actions state
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -241,7 +241,7 @@ const MentorshipTasks: FC = () => {
 
                 {/* ═══ Search Bar ═══ */}
                 <div className="bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 hover:border-blue-200 transition-colors">
-                    <Search className="text-blue-500" size={20} />
+                    <Search className="text-[var(--primary-500)]" size={20} />
                     <input
                         type="text"
                         placeholder="Search task..."
@@ -300,9 +300,12 @@ const MentorshipTasks: FC = () => {
                                 ) : (
                                     tasks.map((task: TaskResponseContent) => (
                                         <tr key={task.id} className="hover:bg-blue-50/30 transition-colors">
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 cursor-pointer"
+                                              onClick={() => navigate(`/mentor/mentorships/${mentorshipId}/tasks/${task.id}`)}
+                                            
+                                            >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                                    <div className="p-2 bg-blue-50 text-[var(--primary-500)] rounded-lg">
                                                         <ClipboardList size={18} />
                                                     </div>
                                                     <div>

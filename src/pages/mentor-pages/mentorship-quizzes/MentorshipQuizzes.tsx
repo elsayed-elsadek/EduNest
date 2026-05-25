@@ -181,7 +181,7 @@ const MentorshipQuizzes: FC = () => {
                             <p className="text-sm font-medium text-gray-500 mb-1">Total Quizzes</p>
                             <h3 className="text-2xl font-bold text-gray-900">{stats?.totalQuizzes || 0}</h3>
                         </div>
-                        <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-xl bg-blue-50 text-[var(--primary-500)] flex items-center justify-center">
                             <FileText size={24} />
                         </div>
                     </div>
@@ -209,7 +209,7 @@ const MentorshipQuizzes: FC = () => {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Avg Score</p>
-                            <h3 className="text-2xl font-bold text-gray-900"> {Number(stats?.averageScore || 0).toFixed(2)} %</h3>
+                            <h3 className="text-2xl font-bold text-gray-900"> {Number(stats?.averageScore || 0).toFixed(2)}1 %</h3>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
                             <BarChart2 size={24} />
@@ -219,7 +219,7 @@ const MentorshipQuizzes: FC = () => {
 
                 {/* Search Bar */}
                 <div className="bg-white px-4 py-3 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">
-                    <Search className="text-blue-500" size={20} />
+                    <Search className="text-[var(--primary-500)]" size={20} />
                     <input
                         type="text"
                         placeholder="Search quiz..."
@@ -270,10 +270,13 @@ const MentorshipQuizzes: FC = () => {
                                     </tr>
                                 ) : (
                                     quizzes.map((quiz: QuizOverviewContent) => (
-                                        <tr key={quiz.id} className="hover:bg-gray-50/50 transition-colors">
-                                            <td className="px-6 py-4">
+                                        <tr key={quiz.id} className="hover:bg-gray-50/50 transition-colors ">
+                                            <td className="px-6 py-4 cursor-pointer"
+                                      onClick={() => navigate(`/mentor/mentorships/${mentorshipId}/quizzes/${quiz.id}`)}
+                                            
+                                            >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                                    <div className="p-2 bg-blue-50 text-[var(--primary-500)] rounded-lg">
                                                         <FileText size={18} />
                                                     </div>
                                                     <span className="font-semibold text-gray-900">{quiz.title}</span>
@@ -289,13 +292,13 @@ const MentorshipQuizzes: FC = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <span className={`font-medium ${quiz.submissions !== 0 ? 'text-blue-600' : 'text-gray-400'}`}>
+                                                <span className={`font-medium ${quiz.submissions !== 0 ? 'text-[var(--primary-500)]' : 'text-gray-400'}`}>
                                                     {quiz.submissions || '0'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 {quiz.averageScore ? (
-                                                    <span className="font-bold text-green-500">{quiz.averageScore} %</span>
+                                                    <span className="font-bold text-[var(--primary-500)]">{quiz.averageScore} %</span>
                                                 ) : (
                                                     <span className="text-gray-400">—</span>
                                                 )}
