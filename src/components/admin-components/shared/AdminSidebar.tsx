@@ -75,7 +75,7 @@ const AdminSidebar: FC<AdminSidebarProps> = ({ isOpen, onClose }) => {
           className="w-full flex items-center gap-2.5 px-3 py-[9px] rounded-lg text-[13.5px]
                      font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
         >
-          <LogOut size={16} className="text-red-500" strokeWidth={1.7} />
+          <LogOut size={16} className="text-red-500 -scale-x-100" strokeWidth={1.7} />
           Logout
         </button>
       </div>

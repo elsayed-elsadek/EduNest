@@ -134,7 +134,7 @@ const AdminHeader: FC<AdminHeaderProps> = ({ onMenuToggle }) => {
                 className="w-full text-left px-4 py-2.5 text-xs text-red-600
                            hover:bg-red-50 flex items-center gap-2 font-medium"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3.5 h-3.5 -scale-x-100"  />
                 Logout
               </button>
             </div>
