@@ -18,7 +18,6 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
-import Footer from '../../../components/student-components/common/Footer/Footer';
 import { useNotificationsContext } from '../../../context/NotificationsContext';
 import type { Notification, NotificationType } from '../../../types/mentornotification.types';
 import RelativeTime from '../../../components/common/RelativeTime';
@@ -294,7 +293,6 @@ const Notifications: FC = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

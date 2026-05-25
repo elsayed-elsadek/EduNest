@@ -11,7 +11,7 @@ const StatsCards: FC<StatsCardsProps> = ({ data }) => {
       {/* Completed */}
       <StatCard label="Completed">
         <span>{completedCount}</span>
-        <span className="text-base font-semibold text-blue-600">Mentorships</span>
+        <span className="text-base font-semibold text-[#0f5e8b]">Mentorships</span>
       </StatCard>
 
       {/* Average Progress */}

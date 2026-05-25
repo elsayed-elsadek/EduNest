@@ -2,7 +2,6 @@
 import { type FC, useState, useMemo } from 'react';
 import { Mail } from 'lucide-react';
 import Navbar               from '../../../components/student-components/common/Navbar/Navbar';
-import Footer               from '../../../components/student-components/common/Footer/Footer';
 import ProfileHeader        from '../../../components/student-components/studentProfile-com/ProfileHeader/ProfileHeader';
 import ScholarlyBio         from '../../../components/student-components/studentProfile-com/ScholarlyBio/ScholarlyBio';
 import DomainExpertise      from '../../../components/student-components/studentProfile-com/DomainExpertise/DomainExpertise';
@@ -138,7 +137,6 @@ const StudentProfile: FC = () => {
         </div>
       </main>
 
-      <Footer />
 
       {/* Edit Profile Modal */}
       {profile && (

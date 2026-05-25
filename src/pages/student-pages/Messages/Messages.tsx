@@ -198,8 +198,8 @@ const Messages: FC = () => {
     <div className="h-screen bg-[#F7F7F8] flex flex-col overflow-hidden">
       <Navbar />
 
-      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 overflow-hidden">
-       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm h-full flex flex-col">
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm h-full flex flex-col">
 
           {/* ── Frame Header ── */}
           <div className="bg-[#0c2d48] px-6 py-3 flex-shrink-0">

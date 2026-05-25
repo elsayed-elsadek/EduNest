@@ -69,7 +69,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const visibleMessages = messages.filter(m => !m.deleted && m.content !== '');
 
   return (
-    <div className="flex flex-col  overflow-hidden bg-white relative min-h-[60vh]">
+    <div className="flex-1 flex flex-col overflow-hidden bg-white relative min-h-0">
       <div className="flex-shrink-0">
         <ChatHeader
           chat={chat}
@@ -83,7 +83,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
       <div
         ref={scrollAreaRef}
         className="flex-1 min-h-0 overflow-y-auto px-5 py-4 bg-[#FAFAFA] space-y-1"
-        style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent', maxHeight: 'calc(100vh - 200px)' }}
+        style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}
       >
         {visibleMessages.length === 0 ? (
           <div className="flex items-center justify-center h-full gap-2 text-center">

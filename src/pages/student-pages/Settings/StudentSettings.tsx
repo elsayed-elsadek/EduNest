@@ -3,7 +3,6 @@ import { type FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Pause, Trash, AlertTriangle } from 'lucide-react';
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
-import Footer from '../../../components/student-components/common/Footer/Footer';
 import SectionHeading from '../../../components/student-components/studentSettings-com/SectionHeading/SectionHeading';
 import CredentialCard from '../../../components/student-components/studentSettings-com/CredentialCard/CredentialCard';
 import SensitiveActionCard from '../../../components/student-components/studentSettings-com/SensitiveActionCard/SensitiveActionCard';
@@ -180,7 +179,6 @@ const StudentSettings: FC = () => {
         </div>
       </main>
 
-      <Footer />
 
       {/* ════ MODALS ════ */}
 
