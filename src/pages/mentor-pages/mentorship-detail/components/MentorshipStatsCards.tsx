@@ -52,29 +52,32 @@ const MentorshipStatsCards: FC<MentorshipStatsCardsProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 mt-6 w-full">
       {cards.map((card, index) => {
         const Icon = card.icon;
 
         const content = (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-50 rounded-lg shrink-0">
-                <Icon className="text-blue-500 w-5 h-5" />
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">{card.title}</p>
-                <p className="text-lg font-bold text-gray-900">{String(card.value)}</p>
-              </div>
-            </div>
-
-            {/* الأيقونة الجديدة مع الـ Hover States */}
+          <div className="flex flex-col items-center text-center w-full relative pt-1 sm:pt-2">
             {card.link && (
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-all duration-300 shrink-0">
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+              <div className="absolute top-0 right-0 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-50/80 text-slate-400 border border-slate-100/50 shadow-sm transition-all duration-300 shrink-0">
+                <div className="w-full h-full rounded-full flex items-center justify-center transition-all duration-300 group-hover:bg-[var(--primary-500)] group-hover:text-white">
+                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
+                </div>
               </div>
             )}
+
+            <div className="p-2 sm:p-3 bg-slate-50 border border-slate-100 rounded-lg sm:rounded-xl shrink-0 transition-colors duration-300 group-hover:bg-primary/5 group-hover:border-primary/10 mb-2 sm:mb-4">
+              <Icon className="text-[var(--primary-500)] w-4 h-4 sm:w-5 sm:h-5 transition-colors duration-300 group-hover:text-primary" />
+            </div>
+
+            <div className="flex flex-col min-w-0 w-full">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider block truncate">
+                {card.title}
+              </span>
+              <span className="text-base sm:text-2xl font-bold text-slate-800 mt-0.5 sm:mt-1 block truncate">
+                {String(card.value)}
+              </span>
+            </div>
           </div>
         );
 
@@ -83,8 +86,7 @@ const MentorshipStatsCards: FC<MentorshipStatsCardsProps> = ({
             <Link
               key={index}
               to={card.link}
-              // ضفنا group هنا عشان نتحكم في الـ hover بتاع العناصر اللي جواها
-              className="group bg-white rounded-xl p-4 shadow-sm hover:shadow-md border border-transparent hover:border-blue-100 transition-all"
+              className="group bg-white rounded-[16px] sm:rounded-[24px] p-3.5 sm:p-5 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] hover:border-primary/20 transition-all duration-300 flex w-full justify-center items-center"
             >
               {content}
             </Link>
@@ -94,7 +96,7 @@ const MentorshipStatsCards: FC<MentorshipStatsCardsProps> = ({
         return (
           <div
             key={index}
-            className="bg-white rounded-xl p-4 shadow-sm"
+            className="group bg-white rounded-[16px] sm:rounded-[24px] p-3.5 sm:p-5 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] flex w-full justify-center items-center"
           >
             {content}
           </div>

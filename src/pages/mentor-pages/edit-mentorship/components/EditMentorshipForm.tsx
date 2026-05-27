@@ -1,4 +1,4 @@
-import type { FC, ChangeEvent, FormEvent } from 'react';
+import type { FC, ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { useState, useRef } from 'react';
 import {
     Upload,
@@ -7,10 +7,14 @@ import {
     X,
     Plus,
     Sparkles,
-    MousePointer2,
     ChevronDown,
     Image as ImageIcon,
     Trash2,
+    Tag,
+    Layers,
+    DollarSign,
+    Clock,
+    Check
 } from 'lucide-react';
 import { API_BASE_URL } from '../../../../services/api';
 import type { MentorshipFormData } from '../types';
@@ -38,6 +42,7 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
     submitting,
     deletingCover,
     onDeleteCoverImage,
+    onCancel,
 }) => {
     // Local UI states
     const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -52,9 +57,14 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
 
     const imageInputRef = useRef<HTMLInputElement>(null);
 
-    const handleLearnSubmit = (e: React.KeyboardEvent | React.FocusEvent) => {
-        if ('key' in e && e.key !== 'Enter') return;
-        e.preventDefault();
+    const handleLearnSubmit = (
+        e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>
+    ) => {
+        if (e && 'key' in e && e.key !== 'Enter') return;
+        if (e && 'relatedTarget' in e && e.relatedTarget instanceof HTMLElement) {
+            if (e.relatedTarget.dataset.addButton === 'learn') return;
+        }
+        if (e) e.preventDefault();
         if (newLearn.trim()) {
             handleAddArrayItem('whatWillLearn', newLearn);
             setNewLearn('');
@@ -62,9 +72,14 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
         setIsAddingLearn(false);
     };
 
-    const handleTagSubmit = (e: React.KeyboardEvent | React.FocusEvent) => {
-        if ('key' in e && e.key !== 'Enter') return;
-        e.preventDefault();
+    const handleTagSubmit = (
+        e?: React.KeyboardEvent<HTMLInputElement> | React.FocusEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>
+    ) => {
+        if (e && 'key' in e && e.key !== 'Enter') return;
+        if (e && 'relatedTarget' in e && e.relatedTarget instanceof HTMLElement) {
+            if (e.relatedTarget.dataset.addButton === 'tag') return;
+        }
+        if (e) e.preventDefault();
         if (newTag.trim()) {
             handleAddArrayItem('tags', newTag);
             setNewTag('');
@@ -72,11 +87,18 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
         setIsAddingTag(false);
     };
 
-    return (
-        <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto flex flex-col gap-8 pb-12">
+    const handleMaxDigits = (e: React.FormEvent<HTMLInputElement>, maxLength: number) => {
+        const target = e.target as HTMLInputElement;
+        if (target.value.length > maxLength) {
+            target.value = target.value.slice(0, maxLength);
+        }
+    };
 
+    return (
+        <form onSubmit={handleSubmit} className="w-full max-w-6xl mx-auto flex flex-col gap-8 pb-16 px-4">
+            
             {/* Header / Cover Image Area */}
-            <div className="relative w-full h-[320px] rounded-3xl bg-gray-100 mb-8 mt-2 shadow-sm border border-gray-200 flex items-center justify-center overflow-visible">
+            <div className="relative w-full h-[280px] sm:h-[340px] rounded-[32px] bg-slate-50 border border-slate-200/60 shadow-sm flex items-center justify-center overflow-hidden group/cover">
                 {formData.coverImageUrl ? (
                     <div className="relative w-full h-full">
                         <img
@@ -84,29 +106,33 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                                 ? formData.coverImageUrl
                                 : `${API_BASE_URL}${formData.coverImageUrl}`}
                             alt="Cover"
-                            className="w-full h-full object-cover rounded-3xl"
+                            className="w-full h-full object-cover"
                         />
+                        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-300" />
                         <button
                             type="button"
                             onClick={onDeleteCoverImage}
                             disabled={deletingCover || submitting}
-                            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 border border-gray-200 text-red-600 shadow-sm flex items-center justify-center hover:bg-red-50 transition-colors"
+                            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white text-red-500 shadow-md flex items-center justify-center hover:bg-red-50 transition-all duration-200"
                             title="Delete cover image"
                         >
                             {deletingCover ? (
-                                <span className="animate-spin">⏳</span>
+                                <span className="animate-spin text-sm">⏳</span>
                             ) : (
                                 <Trash2 className="w-4 h-4" />
                             )}
                         </button>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center text-gray-400 cursor-pointer"
-                      onClick={() => imageInputRef.current?.click()}
+                    <div 
+                        className="flex flex-col items-center p-6 text-center text-slate-400 cursor-pointer hover:text-slate-500 transition-colors"
+                        onClick={() => imageInputRef.current?.click()}
                     >
-                        <ImageIcon className="w-16 h-16 mb-2 opacity-50" />
-                        <span className="font-medium text-lg">No cover image uploaded</span>
-                        
+                        <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-slate-100 mb-3">
+                            <ImageIcon className="w-8 h-8 text-slate-400" />
+                        </div>
+                        <span className="font-semibold text-slate-700">No cover image uploaded</span>
+                        <span className="text-xs text-slate-400 mt-1">Recommended size: 1200x400px</span>
                     </div>
                 )}
 
@@ -114,10 +140,10 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                 <button
                     type="button"
                     onClick={() => imageInputRef.current?.click()}
-                    className="absolute -right-6 -bottom-6 w-12 h-12 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center hover:scale-105 transition-transform border border-gray-100 group z-10"
-                    title="Change Cover Image"
+                    className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 text-sm font-bold rounded-xl shadow-md hover:bg-slate-50 active:scale-95 transition-all border border-slate-100"
                 >
-                    <Upload className="w-5 h-5 text-gray-700 group-hover:text-primary transition-colors" />
+                    <Upload className="w-4 h-4 text-[var(--primary-500)]" />
+                    <span>Upload Cover</span>
                 </button>
                 <input
                     type="file"
@@ -133,55 +159,49 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
             </div>
 
             {/* Main Content: 2 Column Layout */}
-            <div className="flex flex-col lg:flex-row gap-10">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
 
                 {/* Left Column: Title, Description, What to learn, Tags */}
-                <div className="flex-1 flex flex-col gap-8">
+                <div className="flex-1 w-full space-y-8">
 
                     {/* Title Section */}
-                    <div>
-                        <div className="flex items-center gap-3">
-                            {isEditingTitle ? (
-                                <input
-                                    type="text"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleInputChange}
-                                    onBlur={() => setIsEditingTitle(false)}
-                                    autoFocus
-                                    className="text-3xl font-bold text-gray-900 border-b-2 border-primary focus:outline-none bg-transparent w-full"
-                                    placeholder="Mentorship Title"
-                                    maxLength={30}
-                                />
-                            ) : (
-                                <h1 className="text-3xl font-bold text-gray-900">
-                                    {formData.title || "Untitled Mentorship"}
-                                </h1>
-                            )}
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="w-full">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Mentorship Title</label>
+                                {isEditingTitle ? (
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        onBlur={() => setIsEditingTitle(false)}
+                                        autoFocus
+                                        className="text-2xl font-bold text-slate-900 border border-[var(--primary-500)] bg-slate-50/50 rounded-xl px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[var(--primary-500)]/20"
+                                        placeholder="Mentorship Title"
+                                        maxLength={30}
+                                    />
+                                ) : (
+                                    <h1 className="text-2xl font-bold text-slate-900 leading-tight">
+                                        {formData.title || "Untitled Mentorship"}
+                                    </h1>
+                                )}
+                            </div>
                             <button
                                 type="button"
                                 onClick={() => setIsEditingTitle(!isEditingTitle)}
-                                className="text-gray-500 hover:text-primary transition-colors"
+                                className="p-2 text-slate-400 hover:text-[var(--primary-500)] bg-slate-50 rounded-xl transition-colors mt-6 shrink-0"
                             >
-                                <Edit3 className="w-5 h-5" />
+                                <Edit3 className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
 
                     {/* Description Section */}
-                    <div>
-                        <div className="flex items-start gap-3">
-                            <div className="flex flex-col gap-2 w-full">
-                                <span className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                    Description
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsEditingDesc(!isEditingDesc)}
-                                        className="text-gray-500 hover:text-primary transition-colors"
-                                    >
-                                        <Edit3 className="w-4 h-4" />
-                                    </button>
-                                </span>
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="w-full">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Description</label>
                                 {isEditingDesc ? (
                                     <textarea
                                         name="description"
@@ -189,59 +209,78 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                                         onChange={handleInputChange}
                                         onBlur={() => setIsEditingDesc(false)}
                                         autoFocus
+                                        maxLength={150}
                                         rows={4}
-                                        className="text-gray-700 border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                                        placeholder="Mentorship Description"
+                                        className="text-sm font-medium text-slate-700 border border-slate-200 bg-slate-50/50 rounded-xl p-3 w-full focus:outline-none focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 resize-none"
+                                        placeholder="Tell students about this mentorship session..."
                                     />
                                 ) : (
-                                    <p className="text-gray-700 leading-relaxed max-w-3xl">
+                                    <p className="text-sm font-medium text-slate-600 leading-relaxed max-w-2xl break-words">
                                         {formData.description || "No description provided."}
                                     </p>
                                 )}
                             </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsEditingDesc(!isEditingDesc)}
+                                className="p-2 text-slate-400 hover:text-[var(--primary-500)] bg-slate-50 rounded-xl transition-colors mt-6 shrink-0"
+                            >
+                                <Edit3 className="w-4 h-4" />
+                            </button>
                         </div>
                     </div>
 
                     {/* What Student Will Learn Section */}
-                    <div>
-                        <h2 className="text-xl font-bold text-primary mb-4">What Student Will Learn</h2>
-                        <div className="flex flex-wrap gap-4">
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm">
+                        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">What Student Will Learn</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {formData.whatWillLearn.map((item, idx) => (
-                                <div key={idx} className="relative bg-white border border-[#e2e8f0] rounded-xl pl-12 pr-6 py-4 min-w-[200px] shadow-sm flex items-center">
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-primary rounded-full flex items-center justify-center">
-                                        <CheckCircle2 className="w-4 h-4 text-white" />
+                                <div key={idx} className="relative bg-slate-50/60 border border-slate-100 rounded-2xl p-4 pr-10 flex items-center gap-3 group">
+                                    <div className="w-6 h-6 bg-[var(--primary-500)] rounded-full flex items-center justify-center shrink-0 shadow-sm">
+                                        <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
                                     </div>
-                                    <span className="text-gray-800 text-sm font-medium pr-4">{item}</span>
+                                    <span className="text-slate-700 text-sm font-semibold truncate">{item}</span>
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveArrayItem('whatWillLearn', idx)}
-                                        className="absolute top-2 right-2 text-red-400 hover:text-red-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-150"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
                                 </div>
                             ))}
 
-                            {/* Add New Button / Input */}
-                            <div className="flex items-center">
+                            {/* Add New Input / Button */}
+                            <div className="flex items-center w-full">
                                 {isAddingLearn ? (
-                                    <input
-                                        type="text"
-                                        value={newLearn}
-                                        onChange={(e) => setNewLearn(e.target.value)}
-                                        onBlur={handleLearnSubmit}
-                                        onKeyDown={handleLearnSubmit}
-                                        autoFocus
-                                        className="border-2 border-primary rounded-full px-4 py-2 text-sm focus:outline-none w-[200px]"
-                                        placeholder="Type and press Enter..."
-                                    />
+                                    <div className="flex items-center gap-2 w-full">
+                                        <input
+                                            type="text"
+                                            value={newLearn}
+                                            onChange={(e) => setNewLearn(e.target.value)}
+                                            onBlur={handleLearnSubmit}
+                                            onKeyDown={handleLearnSubmit}
+                                            maxLength={20}
+                                            autoFocus
+                                            className="border border-[var(--primary-500)] rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none w-full bg-white shadow-inner"
+                                            placeholder="Type skill name..."
+                                        />
+                                        <button
+                                            type="button"
+                                            data-add-button="learn"
+                                            onClick={handleLearnSubmit}
+                                            className="bg-[var(--primary-500)] text-white rounded-xl px-4 py-2.5 text-sm font-bold hover:opacity-95 active:scale-95 transition-all"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
                                 ) : (
                                     <button
                                         type="button"
                                         onClick={() => setIsAddingLearn(true)}
-                                        className="border border-gray-300 bg-gray-50 text-primary hover:bg-[var(--primary-500)] hover:bg-opacity-10 hover:text-white transition-colors rounded-full px-4 py-2 flex items-center gap-1 font-medium text-sm h-10"
+                                        className="w-full border-2 border-dashed border-slate-200 text-[var(--primary-500)] hover:border-[var(--primary-500)] hover:bg-[var(--primary-500)]/5 transition-all rounded-2xl p-4 flex items-center justify-center gap-1.5 font-bold text-sm"
                                     >
-                                        <Plus className="w-4 h-4" /> Add new
+                                        <Plus className="w-4 h-4" /> Add objective
                                     </button>
                                 )}
                             </div>
@@ -249,42 +288,53 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                     </div>
 
                     {/* Tags Section */}
-                    <div>
-                        <h2 className="text-xl font-bold text-primary mb-4 mt-4">Tags</h2>
-                        <div className="flex flex-wrap gap-3">
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm">
+                        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Tags</h2>
+                        <div className="flex flex-wrap gap-2.5">
                             {formData.tags.map((tag, idx) => (
-                                <div key={idx} className="border border-[#cbd5e1] rounded-full px-4 py-1.5 flex items-center justify-between gap-2 shadow-sm bg-white">
-                                    <span className="text-gray-700 text-sm font-medium">{tag}</span>
+                                <div key={idx} className="bg-slate-50 border border-slate-200/60 rounded-full px-3.5 py-1.5 flex items-center gap-2 group shadow-sm">
+                                    <span className="text-slate-600 text-xs font-bold">#{tag}</span>
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveArrayItem('tags', idx)}
-                                        className="text-red-400 hover:text-red-600 transition-colors"
+                                        className="text-slate-400 hover:text-red-500 transition-colors"
                                     >
                                         <X className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             ))}
 
-                            {/* Add New Button / Input */}
+                            {/* Add New Tag Input / Button */}
                             <div className="flex items-center">
                                 {isAddingTag ? (
-                                    <input
-                                        type="text"
-                                        value={newTag}
-                                        onChange={(e) => setNewTag(e.target.value)}
-                                        onBlur={handleTagSubmit}
-                                        onKeyDown={handleTagSubmit}
-                                        autoFocus
-                                        className="border-2 border-primary rounded-full px-4 py-1.5 text-sm focus:outline-none w-[150px]"
-                                        placeholder="Add tag..."
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={newTag}
+                                            onChange={(e) => setNewTag(e.target.value)}
+                                            onBlur={handleTagSubmit}
+                                            onKeyDown={handleTagSubmit}
+                                            maxLength={20}
+                                            autoFocus
+                                            className="border border-[var(--primary-500)] rounded-full px-4 py-1.5 text-xs font-bold focus:outline-none w-[130px]"
+                                            placeholder="tag name..."
+                                        />
+                                        <button
+                                            type="button"
+                                            data-add-button="tag"
+                                            onClick={handleTagSubmit}
+                                            className="bg-[var(--primary-500)] text-white rounded-full px-3 py-1.5 text-xs font-bold hover:opacity-95 transition-all"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
                                 ) : (
                                     <button
                                         type="button"
                                         onClick={() => setIsAddingTag(true)}
-                                        className="border border-gray-300 bg-gray-50 text-primary hover:bg-[var(--primary-500)] hover:bg-opacity-10 hover:text-white transition-colors rounded-full px-4 py-1.5 flex items-center gap-1 font-medium text-sm shadow-sm"
+                                        className="border-2 border-dashed border-slate-200 text-slate-500 hover:text-[var(--primary-500)] hover:border-[var(--primary-500)] transition-all rounded-full px-4 py-1.5 flex items-center gap-1 font-bold text-xs"
                                     >
-                                        <Plus className="w-3.5 h-3.5" /> Add new
+                                        <Plus className="w-3.5 h-3.5" /> New Tag
                                     </button>
                                 )}
                             </div>
@@ -294,119 +344,128 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                 </div>
 
                 {/* Right Column: Details Card */}
-                <div className="w-full lg:w-[350px] shrink-0">
-                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sticky top-6">
+                <div className="w-full lg:w-[360px] shrink-0 lg:sticky lg:top-6">
+                    <div className="bg-white border border-slate-100 rounded-[28px] shadow-sm p-6 space-y-6">
 
-                        <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-primary font-bold flex items-center gap-1.5 text-lg">
-                                Details
-                                <span className="bg-yellow-100 p-1 rounded-md inline-flex">
-                                    <Sparkles className="w-4 h-4 text-yellow-500" />
-                                </span>
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-50">
+                            <h3 className="text-slate-900 font-bold flex items-center gap-2 text-base">
+                                <Layers className="w-4 h-4 text-[var(--primary-500)]" />
+                                Meta Details
                             </h3>
                             <button
                                 type="button"
                                 onClick={() => setIsEditingDetails(!isEditingDetails)}
-                                className="text-gray-600 font-medium text-sm flex items-center gap-1.5 hover:text-primary transition-colors"
+                                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
+                                    isEditingDetails 
+                                    ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" 
+                                    : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                                }`}
                             >
-                                <Edit3 className="w-3.5 h-3.5" />
-                                {isEditingDetails ? "Done" : "Edit Details"}
+                                <Edit3 className="w-3 h-3" />
+                                {isEditingDetails ? "Done" : "Edit"}
                             </button>
                         </div>
 
-                        <div className="flex flex-col gap-6">
+                        <div className="space-y-4">
 
                             {/* Category */}
-                            <div className="flex items-center border-b border-gray-100 pb-4">
-                                <div className="flex items-center gap-3 w-1/3 text-gray-800 font-semibold text-sm">
-                                    <MousePointer2 className="w-4 h-4 text-gray-500" />
-                                    Category
-                                </div>
-                                <div className="w-2/3 flex items-center justify-between pl-4">
-                                    {isEditingDetails ? (
-                                        <input
-                                            type="text"
-                                            name="category"
-                                            value={formData.category}
-                                            onChange={handleInputChange}
-                                            className="w-full border-b border-primary focus:outline-none text-sm text-gray-600 bg-gray-50 py-1"
-                                        />
-                                    ) : (
-                                        <span className="text-sm text-gray-600 truncate">: {formData.category || "Uncategorized"}</span>
-                                    )}
-                                    {!isEditingDetails && <ChevronDown className="w-4 h-4 text-gray-800" />}
-                                </div>
+                            <div className="space-y-1.5">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                    <Tag className="w-3 h-3" /> Category
+                                </span>
+                                {isEditingDetails ? (
+                                    <input
+                                        type="text"
+                                        name="category"
+                                        value={formData.category}
+                                        maxLength={20}
+                                        onChange={handleInputChange}
+                                        className="w-full border border-slate-200 focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 rounded-xl px-3 py-2 text-sm font-semibold bg-slate-50/50 focus:outline-none"
+                                    />
+                                ) : (
+                                    <div className="text-sm font-semibold text-slate-700 bg-slate-50/60 p-3 rounded-xl border border-slate-50">
+                                        {formData.category || "Uncategorized"}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Price */}
-                            <div className="flex items-center border-b border-gray-100 pb-4">
-                                <div className="flex items-center gap-3 w-1/3 text-gray-800 font-semibold text-sm">
-                                    <MousePointer2 className="w-4 h-4 text-gray-500" />
-                                    Price
-                                </div>
-                                <div className="w-2/3 flex items-center justify-between pl-4">
-                                    {isEditingDetails ? (
+                            <div className="space-y-1.5">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                    <DollarSign className="w-3 h-3" /> Pricing Structure
+                                </span>
+                                {isEditingDetails ? (
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">$</span>
                                         <input
                                             type="number"
                                             name="price"
                                             value={formData.price}
+                                            onInput={(e) => handleMaxDigits(e, 10)}
                                             onChange={handleInputChange}
-                                            className="w-full border-b border-primary focus:outline-none text-sm text-gray-600 bg-gray-50 py-1"
+                                            className="w-full border border-slate-200 focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 rounded-xl pl-7 pr-3 py-2 text-sm font-semibold bg-slate-50/50 focus:outline-none"
                                         />
-                                    ) : (
-                                        <span className="text-sm text-gray-600 truncate">: {formData.price ? `$${formData.price}` : "Free"}</span>
-                                    )}
-                                    {!isEditingDetails && <ChevronDown className="w-4 h-4 text-gray-800" />}
-                                </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm font-semibold text-slate-900 bg-slate-50/60 p-3 rounded-xl border border-slate-50 flex justify-between items-center">
+                                        <span>Investment</span>
+                                        <span className="text-base font-black text-[var(--primary-500)]">
+                                            {formData.price ? `$${formData.price}` : "Free"}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Level */}
-                            <div className="flex items-center border-b border-gray-100 pb-4">
-                                <div className="flex items-center gap-3 w-1/3 text-gray-800 font-semibold text-sm">
-                                    <MousePointer2 className="w-4 h-4 text-gray-500" />
-                                    Level
-                                </div>
-                                <div className="w-2/3 flex items-center justify-between pl-4">
-                                    {isEditingDetails ? (
+                            <div className="space-y-1.5">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3" /> Target Audience Level
+                                </span>
+                                {isEditingDetails ? (
+                                    <div className="relative">
                                         <select
                                             name="difficultyLevel"
                                             value={formData.difficultyLevel}
                                             onChange={handleInputChange}
-                                            className="w-full border-b border-primary focus:outline-none text-sm text-gray-600 bg-gray-50 py-1"
+                                            className="w-full border border-slate-200 focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 rounded-xl px-3 py-2 text-sm font-semibold bg-slate-50/50 focus:outline-none appearance-none"
                                         >
                                             <option value="ALL_LEVEL">All Levels</option>
                                             <option value="BEGINNER">Beginner</option>
                                             <option value="INTERMEDIATE">Intermediate</option>
                                             <option value="EXPERT">Expert</option>
                                         </select>
-                                    ) : (
-                                        <span className="text-sm text-gray-600 truncate">: {formData.difficultyLevel === 'ALL_LEVEL' ? 'All Levels' : formData.difficultyLevel.charAt(0) + formData.difficultyLevel.slice(1).toLowerCase()}</span>
-                                    )}
-                                    {!isEditingDetails && <ChevronDown className="w-4 h-4 text-gray-800" />}
-                                </div>
+                                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                    </div>
+                                ) : (
+                                    <div className="text-sm font-semibold text-slate-700 bg-slate-50/60 p-3 rounded-xl border border-slate-50">
+                                        {formData.difficultyLevel === 'ALL_LEVEL' ? 'All Levels' : formData.difficultyLevel.charAt(0) + formData.difficultyLevel.slice(1).toLowerCase()}
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Duration / Expiry Period */}
-                            <div className="flex items-center">
-                                <div className="flex items-center gap-3 w-[45%] text-gray-800 font-semibold text-sm">
-                                    <MousePointer2 className="w-4 h-4 text-gray-500" />
-                                    Expiry Period
-                                </div>
-                                <div className="w-[55%] flex items-center justify-between pl-2">
-                                    {isEditingDetails ? (
+                            {/* Duration */}
+                            <div className="space-y-1.5">
+                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                    <Clock className="w-3 h-3" /> Expiry / Access Period
+                                </span>
+                                {isEditingDetails ? (
+                                    <div className="relative">
                                         <input
                                             type="number"
                                             name="duration"
                                             value={formData.duration}
                                             onChange={handleInputChange}
+                                            onInput={(e) => handleMaxDigits(e, 3)}
                                             placeholder="Months"
-                                            className="w-full border-b border-primary focus:outline-none text-sm text-gray-600 bg-gray-50 py-1"
+                                            className="w-full border border-slate-200 focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 rounded-xl px-3 py-2 text-sm font-semibold bg-slate-50/50 focus:outline-none"
                                         />
-                                    ) : (
-                                        <span className="text-sm text-gray-600 truncate">: {formData.duration ? `${formData.duration} Months` : "--"}</span>
-                                    )}
-                                    {!isEditingDetails && <ChevronDown className="w-4 h-4 text-gray-800" />}
-                                </div>
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Months</span>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm font-semibold text-slate-700 bg-slate-50/60 p-3 rounded-xl border border-slate-50">
+                                        {formData.duration ? `${formData.duration} Months` : "--"}
+                                    </div>
+                                )}
                             </div>
 
                         </div>
@@ -415,17 +474,17 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
 
             </div>
 
-            {/* Save Changes Button */}
-            <div className="flex justify-end mt-4 lg:-mt-12">
+            {/* Save Changes Button Area */}
+            <div className="flex justify-end pt-4 border-t border-slate-100">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-md hover:bg-[var(--primary-dark)] transition-colors disabled:opacity-50 flex items-center gap-2 z-10"
+                    className="px-8 py-3.5 bg-[var(--primary-500)] text-white font-bold rounded-2xl shadow-lg shadow-blue-500/10 hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                     {submitting ? (
                         <>
-                            <span className="animate-spin inline-block">⏳</span>
-                            Saving...
+                            <span className="animate-spin inline-block text-sm">⏳</span>
+                            Saving Changes...
                         </>
                     ) : (
                         "Save Changes"

@@ -17,63 +17,73 @@ const MentorshipReviews: FC<MentorshipReviewsProps> = ({
   onPageChange,
 }) => {
   return (
-    <div className="lg:col-span-2 bg-white rounded-lg shadow p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900">Reviews on this Mentorship</h3>
+    <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 w-full h-full flex flex-col">
+      
+      {/* Header Controls */}
+      <div className="flex items-center justify-between mb-4 gap-2 shrink-0">
+        <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate">
+          Reviews on this Mentorship
+        </h3>
         
+        {/* Pagination Controls */}
         {reviewsTotalPages > 1 && (
-          <div className="flex items-center gap-2">
-            {/* زر السابق */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Previous Button */}
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white bg-[var(--primary-500)] hover:opacity-90 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+              className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-white bg-[var(--primary-500)] hover:opacity-90 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
               onClick={() => onPageChange(Math.max(reviewsPage - 1, 0))}
               disabled={reviewsPage <= 0}
               aria-label="Previous reviews page"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
 
-            {/* عداد الصفحات */}
-            <span className="text-sm font-semibold text-gray-700 tabular-nums px-1">
+            {/* Page Counter */}
+            <span className="text-xs sm:text-sm font-semibold text-gray-700 tabular-nums px-1">
               {reviewsPage + 1} <span className="text-gray-400 font-normal">/ {reviewsTotalPages}</span>
             </span>
 
-            {/* زر التالي */}
+            {/* Next Button */}
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-white bg-[var(--primary-500)] hover:opacity-90 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
+              className="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full text-white bg-[var(--primary-500)] hover:opacity-90 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200"
               onClick={() => onPageChange(Math.min(reviewsPage + 1, reviewsTotalPages - 1))}
               disabled={reviewsPage >= reviewsTotalPages - 1}
               aria-label="Next reviews page"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         )}
       </div>
 
-      <div className="divide-y divide-gray-100 max-h-44 md:max-h-56 overflow-y-auto pr-2">
+      {/* Reviews List Container */}
+      <div className="flex-1 min-h-0 overflow-y-auto pr-2 divide-y divide-gray-100 custom-scrollbar">
         {reviews.length === 0 ? (
-          <p className="text-sm text-gray-500">No reviews yet</p>
+          <p className="text-xs sm:text-sm text-gray-500 py-4 text-center">No reviews yet</p>
         ) : (
           reviews.map((r, idx) => (
-            <div key={idx} className="py-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
+            // Each review takes full width (w-full) and renders stacked below the previous one
+            <div key={idx} className="py-4 first:pt-0 last:pb-0 w-full">
+              <div className="flex items-start gap-3 w-full">
+                {/* Compact Student Avatar */}
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs sm:text-sm font-medium text-gray-600 shrink-0">
                   {(r.studentName || 'S').charAt(0)}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">
+
+                {/* Review Details - Spans full remaining width */}
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2 w-full">
+                    <p className="font-semibold text-xs sm:text-sm text-gray-900 truncate">
                       {r.studentName ?? r.name ?? 'Anonymous'}
                     </p>
-                    <div className="text-xs text-yellow-500 flex items-center gap-1">
-                      <Star className="w-3 h-3" />
+                    <div className="text-[10px] sm:text-xs text-yellow-500 flex items-center gap-0.5 font-bold shrink-0 bg-yellow-50/60 px-2 py-0.5 rounded-full">
+                      <Star className="w-3 h-3 fill-current" />
                       {r.rating ?? 5}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-[11px] sm:text-xs text-gray-500 mt-1 break-words leading-relaxed w-full text-center">
                     "{r.feedBack ?? r.message ?? ''}"
                   </p>
                 </div>
