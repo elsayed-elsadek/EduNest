@@ -60,15 +60,25 @@ const ScheduledSessionCard: FC<ScheduledSessionCardProps> = ({ session }) => {
     `}>
       <FontAwesomeIcon icon={icon} className="w-5 h-5 text-gray-500 shrink-0 mt-1" />
       
-      <div className="flex-1">
+      <div className="flex-1 ">
         {/* activity title */}
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex justify-between items-start  flex-wrap">
           <h4 className={`font-semibold text-sm ${TEXT_COLORS[currentType]}`}>
-            {session.title} 
+            {session.title.slice(0,12)}
+            {session.title.length>15 ? "..." : ""}
           </h4>
+
+          <div className="flex flex-wrap gap-2 text-center justify-center ">
+
+          <span className="text-xs text-gray-600 whitespace-nowrap mt-0.5">
+            {session.date}
+
+         </span>
           <span className="text-xs text-gray-600 whitespace-nowrap mt-0.5">
             {formatSessionDate(session)}
           </span>
+          </div>
+
         </div>
 
           {/* mentorship title  */}

@@ -61,6 +61,7 @@ export const TagsInput: FC<Props> = ({ tags, onChange, error }) => {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
                     type="text"
+                    maxLength={15}
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={(e) => {

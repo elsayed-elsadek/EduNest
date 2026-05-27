@@ -98,6 +98,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter assignment name....."
+            maxLength={50}
             required
           />
         </div>
@@ -108,6 +109,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
+           maxLength={50}
             placeholder="Enter assignment description......."
           />
         </div>

@@ -138,7 +138,7 @@ const MentorDash: React.FC = () => {
           ) : (
             <>
               {/* ── Stat Cards ─────────────────────────────────────────────── */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 stateMentorCard">
                 {stats.map((stat) => (
                   <DashboardStatCard
                     key={stat.title}
@@ -151,7 +151,8 @@ const MentorDash: React.FC = () => {
               </div>
 
               {/* ── Main Grid ─────────────────────────────────────────────── */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mainDashDiv">
+           
                 {/* Left column (2/3) */}
                 <div className="lg:col-span-2 space-y-6">
                   <SalesChart
@@ -170,7 +171,7 @@ const MentorDash: React.FC = () => {
                 </div>
 
                 {/* Right column (1/3) */}
-                <div className="space-y-6">
+                <div className="space-y-6 mentorDashRighColumn">
                   <CalendarWidget
                     sessions={sessions.map((s) => ({
                       id: s.id,

@@ -222,7 +222,9 @@ const MentorshipSessions: FC = () => {
                                             <FontAwesomeIcon icon={faVideo} className='text-white ' />
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{session.title}</h3>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{session.title.slice(0,25)}
+                                                   {session.title.length>10 ? "..." : ""}
+                                            </h3>
                                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                                                 <div className="flex items-center gap-1.5">
                                                     <BookOpen size={16} className="text-gray-400" />

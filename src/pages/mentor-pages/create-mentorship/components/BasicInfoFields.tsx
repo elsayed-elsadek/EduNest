@@ -51,6 +51,7 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
             onChange={onChange}
             className={`w-full h-12 px-4 rounded-xl border text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#154d71] ${fieldErrors.title ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
             placeholder="Enter title here..."
+            maxLength={30}
           />
           {fieldErrors.title && <p className="mt-1 text-xs text-red-600">{fieldErrors.title}</p>}
         </div>
@@ -65,6 +66,7 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
             onChange={onChange}
             className={`w-full h-12 px-4 rounded-xl border text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#154d71] ${fieldErrors.subtitle ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
             placeholder="Enter subtitle here..."
+            maxLength={50}
           />
         </div>
 
@@ -78,6 +80,7 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
             rows={4}
             className={`w-full px-4 py-3 rounded-xl border text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#154d71] resize-none ${fieldErrors.description ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
             placeholder="Enter description here..."
+            maxLength={250}
           />
         </div>
       </div>
@@ -126,6 +129,7 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
               value={otherValue}
               onChange={handleOtherInput}
               placeholder="Write your category..."
+              maxLength={25}
               className="w-full h-12 px-4 mt-3 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#154d71]"
             />
           )}
@@ -137,12 +141,14 @@ export const BasicInfoFields: FC<Props> = ({ formData, onChange, setFieldValue, 
         <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1.5">MENTORSHIP PRICE ($)</p>
         <div className="relative max-w-xs">
           <input
-            type="number"
+            type="string"
             name="price"
             value={formData.price}
             onChange={onChange}
             className="w-full h-12 px-4 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-[#154d71]"
             placeholder="0.00"
+            maxLength={10}
+            
           />
           <span className="absolute inset-y-0 right-4 flex items-center text-gray-400 text-sm">USD</span>
         </div>

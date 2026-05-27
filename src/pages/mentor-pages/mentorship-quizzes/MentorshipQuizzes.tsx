@@ -22,11 +22,12 @@ const MentorshipQuizzes: FC = () => {
 
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    // default to "All" so Published/Draft shows without extra filtering UX
+    const [statusFilter, setStatusFilter] = useState<string>('');
 
     // Pagination
     const [page, setPage] = useState(0); // 0-indexed API
-    const size = 6;
+    const size = 10;
 
     // Actions state
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -57,7 +58,10 @@ const MentorshipQuizzes: FC = () => {
                 setLoading(true);
                 setError(null);
 
-                if (searchQuery || statusFilter) {
+                // Always load quizzes for pagination.
+                // Use filterQuizzes ONLY when user is actively searching or selecting a status.
+                const shouldUseFilter = Boolean(searchQuery) || Boolean(statusFilter);
+                if (shouldUseFilter) {
                     const responseData = await filterQuizzes(Number(mentorshipId), searchQuery, statusFilter, page, size);
                     if (active) setQuizPage(responseData);
 
@@ -65,7 +69,8 @@ const MentorshipQuizzes: FC = () => {
                         const overviewData = await getMentorshipQuizzesOverview(Number(mentorshipId), 0, 1);
                         if (active) setStats(overviewData.quizDashboardDTO);
                     }
-                } else {
+                } else { 
+                    // No filter: fetch paginated data so pagination always appears.
                     const responseData = await getMentorshipQuizzesOverview(Number(mentorshipId), page, size);
                     if (active) {
                         setStats(responseData.quizDashboardDTO);
@@ -374,8 +379,8 @@ const MentorshipQuizzes: FC = () => {
                                         key={i}
                                         onClick={() => setPage(i)}
                                         className={`w-8 h-8 flex items-center justify-center text-sm font-medium rounded-lg transition-colors ${page === i
-                                            ? ' text-gray-500 bg-gray-100'
-                                            : 'text-gray-600 hover:bg-gray-100'
+                                            ? ' text-white bg-[var(--primary-500)]'
+                                            : 'text-gray-600 hover:bg-gray-100 '
                                             }`}
                                     >
                                         {i + 1}

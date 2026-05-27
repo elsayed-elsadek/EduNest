@@ -423,6 +423,7 @@ const MentorshipContent: FC = () => {
                             onClick={(e) => e.stopPropagation()}
                             className="flex-1 px-2 py-1 rounded border border-[var(--primary-from)] focus:ring-2 focus:ring-[var(--primary-from)] font-semibold text-gray-900 dark:text-white dark:bg-zinc-800"
                             autoFocus
+                            maxLength={25}
                           />
                         ) : (
                           <span className="font-semibold text-gray-900 dark:text-white">

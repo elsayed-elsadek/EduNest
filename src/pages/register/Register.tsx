@@ -164,19 +164,21 @@ const Register: React.FC = () => {
         {form.joinAs === "student" && (
           <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Educational Level
+                Level
             </label>
             <select
               value={form.formData.educationalLevel || ""}
               onChange={(e) => form.handleInputChange("educationalLevel", e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             >
+
+              {/* there is a change here from back end */}
               <option value="">Select your educational level</option>
-              <option value="1">High School</option>
-              <option value="2">Bachelor's Degree</option>
-              <option value="3">Master's Degree</option>
-              <option value="4">Ph.D</option>
-              <option value="5">Professional Certification</option>
+              <option value="FRESH">FRESH</option>
+              <option value="JUNIOR">JUNIOR</option>
+              <option value="SENIOR">SENIOR</option>
+              {/* <option value="4">Ph.D</option> */}
+              {/* <option value="5">Professional Certification</option> */}
             </select>
             {form.errors.educationalLevel && (
               <p className="text-red-500 text-xs mt-1">{form.errors.educationalLevel}</p>

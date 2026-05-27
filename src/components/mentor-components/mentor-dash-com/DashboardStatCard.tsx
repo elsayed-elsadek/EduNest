@@ -21,9 +21,9 @@ const DashboardStatCard: FC<DashboardStatCardProps> = ({ title, value, icon: Ico
         to={to!}
         className="group block outline-none ring-offset-2 focus-visible:ring-2 ring-[var(--primary-from)] rounded-2xl"
       >
-        <div className="flex items-center justify-between p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-[var(--primary-500)] dark:border-zinc-800 shadow-sm h-[8rem] transition-colors">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl flex-shrink-0 bg-blue-50 text-[var(--primary-500)] group-hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 ">
+        <div className="flex items-center justify-between p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-[var(--primary-500)] dark:border-zinc-800 shadow-sm h-[8rem] transition-colors ">
+          <div className="flex items-center gap-4 md:flex-wrap ">
+            <div className="p-3 rounded-xl flex-shrink-0 bg-blue-50 text-[var(--primary-500)]  group-hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 ">
               <Icon className="w-6 h-6 " />
             </div>
             <div>
@@ -41,8 +41,8 @@ const DashboardStatCard: FC<DashboardStatCardProps> = ({ title, value, icon: Ico
   }
 
   return (
-    <div className="flex items-center justify-between p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-[var(--primary-500)] dark:border-zinc-800 shadow-sm h-[8rem] transition-colors">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center justify-between p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-[var(--primary-500)] dark:border-zinc-800 shadow-sm h-[8rem] transition-colors ">
+      <div className="flex items-center gap-4 md:flex-wrap">
         <div className="p-3 rounded-xl flex-shrink-0 bg-gray-50 text-gray-500 dark:bg-zinc-800 dark:text-gray-400">
           <Icon className="w-6 h-6" />
         </div>

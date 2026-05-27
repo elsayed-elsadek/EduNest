@@ -29,6 +29,8 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({ students })
                                     <td className="py-3 font-semibold">{s.studentName ?? 'Student'}</td>
                                     <td className="py-3 text-gray-500">{s.studentEmail ?? '—'}</td>
                                     <td className="py-3 text-center text-yellow-600 font-bold">{s.totalPoints ?? 0}</td>
+                                   
+                                   {/* i will add this section if the backend handel it */}
                                     {/* <td className="py-3">
                                         <span
                                             className={`px-3 py-1 rounded-full text-xs ${s.status === 'completed'

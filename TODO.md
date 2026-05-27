@@ -1,8 +1,8 @@
-# TODO (SalesChart filter API)
+# TODO (progress)
 
-- [x] فهم كود SalesChart الحالي ومصدر بياناته
-- [ ] تعديل SalesChart.tsx ليعمل API call عند تغيير الفلتر
-- [ ] ربط PeriodKey مع months integer (1/3/6/12)
-- [ ] إضافة loading/error داخل المكوّن وتفادي race conditions
-- [x] التأكد أن Chart/Tooltip تعمل مع كل عدد نقاط
-- [x] تشغيل typecheck / lint إن لزم
+- [x] فهم API: `POST /api/v1/mentorship/{mentorshipId}/rate` body `{ rating, feedback }`
+- [x] إضافة service/وظيفة للـ POST
+- [x] تحديث `ReviewsSection.tsx`: زر Give Feedback -> Modal + حقول (rating, feedback)
+- [ ] إرسال الطلب وعرض response message في toast
+- [ ] عند النجاح: invalidate للـ reviews refetch
+- [ ] تشغيل build/lint للتأكد من عدم وجود أخطاء

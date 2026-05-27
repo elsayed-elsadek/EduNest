@@ -64,7 +64,7 @@ const ReviewCard: FC<ReviewCardProps> = ({ review }) => {
         </div>
 
         {/* نص التعليق */}
-        <p className="text-[11px] text-gray-600 leading-relaxed mt-2 line-clamp-2">
+        <p className="text-[11px] text-gray-600 leading-relaxed mt-2 line-clamp-2 text-center">
           "{review.comment}"
         </p>
       </div>

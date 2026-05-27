@@ -15,7 +15,8 @@ export const EntryPeriodFields: FC<Props> = ({ formData, onChange, fieldErrors }
                 ACCESS DURATION (MONTHS)
             </p>
             <input
-                type="number"
+                type="string"
+                maxLength={3}
                 name="duration"
                 value={formData.duration}
                 onChange={onChange}

@@ -92,6 +92,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter session title..."
+            maxLength={50}
             required
           />
         </div>

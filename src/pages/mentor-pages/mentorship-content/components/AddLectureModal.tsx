@@ -69,6 +69,7 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)] focus:border-transparent"
             placeholder="Enter lecture name..."
+            maxLength={50}
             required
           />
         </div>

@@ -49,6 +49,7 @@ const QuestionModal: FC<QuestionModalProps> = ({
                             placeholder="Enter your question..."
                             required
                             rows={3}
+                           maxLength={150}
                             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]/20 focus:border-[#0f5e8b] transition-all resize-none"
                         />
                     </div>
@@ -83,6 +84,7 @@ const QuestionModal: FC<QuestionModalProps> = ({
                                         value={(formData as any)[`option${opt}`]}
                                         onChange={(e) => setFormData({ ...formData, [`option${opt}`]: e.target.value })}
                                         placeholder={`Option ${opt}`}
+                                     maxLength={100}
                                         required
                                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]/20 focus:border-[#0f5e8b] transition-all"
                                     />

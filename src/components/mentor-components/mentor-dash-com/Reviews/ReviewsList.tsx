@@ -12,7 +12,6 @@ interface ReviewsListWithPaginationProps extends ReviewsListProps {
 
 const ReviewsList: FC<ReviewsListWithPaginationProps> = ({
   reviews = [],
-  onViewAll,
   currentPage = 0,
   totalPages = 1,
   onPageChange,
@@ -36,12 +35,12 @@ const ReviewsList: FC<ReviewsListWithPaginationProps> = ({
         <h2 className="text-base font-bold text-[var(--primary-500)] dark:text-[var(--primary-400)]">
           Reviews from Students
         </h2>
-        <button
+        {/* <button
           onClick={onViewAll}
           className="text-[11px] text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors font-medium"
         >
           View All
-        </button>
+        </button> */}
       </div>
 
       {/* Reviews List */}

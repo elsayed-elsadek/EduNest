@@ -79,6 +79,7 @@ export const DynamicListInput: FC<Props> = ({
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
                     type="text"
+                    maxLength={15}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={(e) => {

@@ -107,15 +107,22 @@ export const useDashboardData = () => {
   }, [isHydrated, token, navigate]);
 
   // ── Reviews fetch ────────────────────────────────────────────────────────────
+  const reviewsRequestIdRef = useRef(0);
+
   const fetchReviews = useCallback(
     (page: number) => {
       if (!isHydrated || !token) return;
+
+      const requestId = ++reviewsRequestIdRef.current;
 
       setReviewsLoading(true);
       setReviewsError(null);
 
       getDashboardReviews(page)
         .then((res) => {
+          // Ignore stale responses if user paged again quickly
+          if (requestId !== reviewsRequestIdRef.current) return;
+
           const reviewsObj = (res as { apiResponse?: { reviews?: Record<string, unknown> } })
             ?.apiResponse?.reviews as Record<string, unknown> | undefined;
 
@@ -126,9 +133,11 @@ export const useDashboardData = () => {
           setReviewPagination(parsePaginationMeta(reviewsObj, page));
         })
         .catch((err) => {
+          if (requestId !== reviewsRequestIdRef.current) return;
           setReviewsError(getErrorMessage(err));
         })
         .finally(() => {
+          if (requestId !== reviewsRequestIdRef.current) return;
           setReviewsLoading(false);
         });
     },

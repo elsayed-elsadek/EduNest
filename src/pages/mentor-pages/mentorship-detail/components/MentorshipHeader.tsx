@@ -56,7 +56,8 @@ const MentorshipHeader: FC<MentorshipHeaderProps> = ({
             {/* Left Side: Title & Status */}
             <div className="w-full">
                 <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words leading-snug">
-                    {mentorship.title}
+                    {mentorship.title.slice(0,15)}
+                    {mentorship.title.length > 15 ? "..." : ""}
                 </h1>
                 <div className="flex items-center gap-3 mt-3 flex-wrap">
                     <button 

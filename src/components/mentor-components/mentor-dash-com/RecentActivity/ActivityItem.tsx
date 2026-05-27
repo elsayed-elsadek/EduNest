@@ -9,19 +9,26 @@ const AVATAR_COLORS: Record<string, string> = {
 };
 
 // دالة لحساب الوقت النسبي (Relative Time)
-const getRelativeTime = (timestamp: string | Date) => {
-  const date = new Date(timestamp);
+const getRelativeTime = (timestamp: string) => {
+  // 1. تأكد من إضافة Z إذا لم تكن موجودة ليتم التعامل مع الوقت كـ UTC
+  const dateString = timestamp.endsWith('Z') ? timestamp : timestamp + 'Z';
+  const date = new Date(dateString);
   const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  // 2. حساب الفرق بالملي ثانية
+  const diffInMs = now.getTime() - date.getTime();
+  const seconds = Math.floor(diffInMs / 1000);
 
   if (seconds < 60) return 'Just now';
+  
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
+  
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
   
-  // إذا مر أكثر من يوم، نعود لتنسيق التاريخ العادي
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 };
 
 interface ActivityItemProps {

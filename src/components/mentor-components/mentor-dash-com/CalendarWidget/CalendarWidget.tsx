@@ -68,7 +68,7 @@ const CalendarWidget: FC<CalendarWidgetProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm w-full max-w-md mx-auto">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm w-full m-auto">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">

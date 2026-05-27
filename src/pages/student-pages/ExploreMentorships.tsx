@@ -77,8 +77,8 @@ const ExploreMentorships: FC = () => {
 
   // scroll to top on filters change
 useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}, [filters]);
+    window.scrollTo({ top: 0, behavior: 'smooth' ,   });
+}, []);
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

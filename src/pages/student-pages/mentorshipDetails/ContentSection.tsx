@@ -32,11 +32,7 @@ const ContentSection: FC = () => {
   );
 
   const renderError = () => (
-<<<<<<< Updated upstream
     <div className="text-center py-6 text-gray-500">{'No content found.'}</div>
-=======
-    <div className="text-center py-6 text-gray-500">{ 'No content found.'}</div>
->>>>>>> Stashed changes
   );
 
   const renderNotEnrolled = (message: string) => (

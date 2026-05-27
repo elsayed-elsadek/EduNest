@@ -86,11 +86,11 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
               )}
             </div>
 
-            <div className="space-y-3 lg:space-y-4">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tight lg:tracking-[0.04em] leading-tight">
-                {mentorship?.title}
+            <div className="space-y-3 lg:space-y-4 ">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tight lg:tracking-[0.04em] leading-tight break-words">
+                {mentorship?.title.slice(0,20)}
               </h1>
-              <p className="text-lg lg:text-2xl font-medium text-blue-100/80 leading-relaxed max-w-2xl">
+              <p className="text-lg lg:text-2xl font-medium text-blue-100/80 leading-relaxed max-w-2xl break-words">
                 {mentorship?.subtitle}
               </p>
             </div>
@@ -172,13 +172,13 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
 
           {/* RIGHT COLUMN: ACTION CARD */}
           {!isEnrolled && (
-            <div className="bg-white rounded-[1.5rem] lg:rounded-[2.5rem] p-6 lg:p-8 shadow-2xl text-slate-900 lg:max-w-md w-full transform hover:scale-[1.01] transition-transform duration-500">
+            <div className="bg-white rounded-[1.5rem] lg:rounded-[2.5rem] p-6 lg:p-8 shadow-2xl text-slate-900 lg:max-w-md w-full transform hover:scale-[1.01] transition-transform duration-500 ">
               <div className="flex flex-col gap-5 lg:gap-6">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
+                <div className="flex justify-between items-start ">
+                  <div className="space-y-1 ">
                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Tuition Fee</p>
-                    <span className="text-xl lg:text-2xl text-slate-300 line-through font-bold">
-                      {formatCurrency(mentorship?.price || 0)}
+                    <span className="text-xl lg:text-2xl text-slate-300 line-through font-bold ">
+                      {formatCurrency(mentorship?.price || 0).slice(0,10)}
                     </span>
                   </div>
                   <div className="text-right">
@@ -188,7 +188,7 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
                       </span>
                     )}
                     <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--primary-500)] mt-1">
-                      {formatCurrency(mentorship?.finalPrice || 0)}
+                      {formatCurrency(mentorship?.finalPrice || 0).slice(0,10)}
                     </p>
                   </div>
                 </div>

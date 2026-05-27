@@ -289,3 +289,16 @@ img {
     transform: scale(1.1);
   }
 }
+
+/* media  */
+@media ((max-width: 1280px) and (min-width : 1000px)){
+  .mainDashDiv{
+  grid-template-columns: repeat(1 , minmax(0,2fr)) !important;
+  }
+  .stateMentorCard{
+  grid-template-columns: repeat(2 , minmax(0,2fr)) !important;
+  }
+  .mentorDashRighColumn{
+    padding: 0 0 0 25px ;
+  }
+}

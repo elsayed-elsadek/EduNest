@@ -75,6 +75,7 @@ const AddQuizModal: FC<AddQuizModalProps> = ({ weekId, editingItem, onClose, onS
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[var(--primary-from)]"
             placeholder="Enter quiz name ......"
+            maxLength={50}
             required
           />
         </div>

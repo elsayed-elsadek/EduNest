@@ -47,7 +47,8 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
           <div className="min-w-0 flex-1">
             <h3 className="text-[12px] cursor-pointer md:text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1 leading-tight"
               onClick={() => onDetails(mentorship.id)}>
-              {mentorship.title} </h3>
+              {mentorship.title.slice(0,20)}
+              {mentorship.title.length>20 ? "..." : ""} </h3>
             <p className="hidden md:block text-[11px] text-gray-400 font-medium mt-0.5">
               {mentorship.level}
             </p>

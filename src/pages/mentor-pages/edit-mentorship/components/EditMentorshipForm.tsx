@@ -128,6 +128,7 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                                     autoFocus
                                     className="text-3xl font-bold text-gray-900 border-b-2 border-primary focus:outline-none bg-transparent w-full"
                                     placeholder="Mentorship Title"
+                                    maxLength={30}
                                 />
                             ) : (
                                 <h1 className="text-3xl font-bold text-gray-900">

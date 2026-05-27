@@ -7,6 +7,8 @@ import { extractMentorshipsData } from './extractors';
 
 /** GET /api/v1/mentorship with pagination (page 0-based, size = page size) */
 export function getMentorships(page = 0, size = 5, statusParam: string | undefined): Promise<MentorshipsPageResponse> {
+  void statusParam;
+
   return handleRequest(api.get<unknown>('api/v1/dashboard/mentorships', { params: { page, size } })).then((raw) => {
     if (!raw || typeof raw !== 'object') {
       return { content: [], page: 0, size, totalElements: 0, totalPages: 0 };
