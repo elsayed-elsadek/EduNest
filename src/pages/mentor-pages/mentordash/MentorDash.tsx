@@ -176,6 +176,8 @@ const MentorDash: React.FC = () => {
                       selectedDate={new Date()}
                       sessions={sessions.map((s) => ({
                         id: s.id,
+                        mentorshipId: s.mentorshipId,
+                        mentorshipTitle: s.mentorshipTitle,
                         title: s.title,
                         startTime: s.startTime,
                         endTime: s.endTime,

@@ -75,7 +75,7 @@ const FooterSection: React.FC = memo(() => {
               <div className="flex items-center gap-2 text-gray-300">
                 <Phone className="w-4 h-4 text-gray-300" />
                 <a href="tel:+4588435849" className="hover:text-blue-400 transition">
-                  +458 843 5849
+01061965771
                 </a>
               </div>
             </div>

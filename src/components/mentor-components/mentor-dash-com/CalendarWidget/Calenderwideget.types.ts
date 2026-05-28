@@ -1,4 +1,6 @@
 export interface CalendarSession {
+  mentorshipId?: string;
+  mentorshipTitle?: string;
   id: string;
   title: string;
   startTime?: string;

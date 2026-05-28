@@ -10,6 +10,7 @@ import { useAuthStore } from '../../../store/authStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faVideo } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
+import Pagination from '../../../components/mentor-components/mentor-dash-com/Pagination/Pagination';
 
 const MentorshipSessions: FC = () => {
     const { id: mentorshipId } = useParams<{ id: string }>();
@@ -40,9 +41,16 @@ const MentorshipSessions: FC = () => {
 
                 const data = await getAllLiveSessionsForMentorship(Number(mentorshipId), page, size);
                 setSessionsData(data);
-
-            } catch (err) {
-                const message = err instanceof Error ? err.message : 'Failed to load sessions';
+            } catch (err: unknown) {
+                let message = 'Failed to load sessions';
+                
+                if (err instanceof Error) {
+                    message = err.message;
+                } else if (typeof err === 'object' && err !== null) {
+                    const error = err as Record<string, unknown>;
+                    message = error.message as string || message;
+                }
+                
                 setError(message);
                 console.error('Error loading sessions:', err);
             } finally {
@@ -53,16 +61,8 @@ const MentorshipSessions: FC = () => {
         loadSessions();
     }, [mentorshipId, token, page, size]);
 
-    const handleNextPage = () => {
-        if (sessionsData && page < sessionsData.totalPages - 1) {
-            setPage((prev) => prev + 1);
-        }
-    };
-
-    const handlePrevPage = () => {
-        if (page > 0) {
-            setPage((prev) => prev - 1);
-        }
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
     };
 
     const handleStartSession = async (sessionId: number) => {
@@ -71,11 +71,25 @@ const MentorshipSessions: FC = () => {
             const info = await startLiveSession(sessionId);
             setActiveSession(info);
             setIsPrejoining(true);
-        } catch (err: any) {
-            const message = err?.errorMessages?.error || err?.message || 'Failed to start session';
-            toast.error(message);
-            setError(message);
-        } finally {
+        }  catch (err: unknown) {
+    let message = 'Failed to start session';
+    
+    if (err instanceof Error) {
+        message = err.message;
+    } else if (typeof err === 'object' && err !== null) {
+            const error = err as {
+            message?: string;
+            errorMessages?: {
+                error?: string;
+            };
+        };
+        
+        message = error.errorMessages?.error || error.message || message;
+    }
+    
+    toast.error(message);
+    setError(message);
+}finally {
             setActionLoading(false);
         }
     };
@@ -96,15 +110,21 @@ const MentorshipSessions: FC = () => {
             await endLiveSession(activeSession.sessionId);
             setActiveSession(null);
 
-            // Reload sessions list
             if (mentorshipId) {
                 const data = await getAllLiveSessionsForMentorship(Number(mentorshipId), page, size);
                 setSessionsData(data);
             }
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Failed to end session';
+        } catch (err: unknown) {
+            let message = 'Failed to end session';
+            
+            if (err instanceof Error) {
+                message = err.message;
+            } else if (typeof err === 'object' && err !== null) {
+                const error = err as Record<string, unknown>;
+                message = error.message as string || message;
+            }
+            
             console.error(message);
-            // Handle force close locally even if error thrown depending on API resilience
             setActiveSession(null);
         } finally {
             setActionLoading(false);
@@ -122,8 +142,8 @@ const MentorshipSessions: FC = () => {
     if (loading && !sessionsData) {
         return (
             <DashLayout pageTitle="Mentorship Sessions">
-                <div className="flex items-center justify-center h-screen">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="flex items-center justify-center h-[60vh]">
+                    <div className="animate-spin rounded-full h-10 w-10 border-2 border-t-transparent border-[var(--primary-500)]"></div>
                 </div>
             </DashLayout>
         );
@@ -133,12 +153,12 @@ const MentorshipSessions: FC = () => {
         return (
             <DashLayout pageTitle="Mentorship Sessions">
                 <div className="flex flex-col items-center justify-center h-[50vh] px-4">
-                    <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center gap-3">
-                        <Video size={24} />
+                    <div className="bg-red-50/60 text-red-600 p-4 rounded-xl border border-red-100 flex items-center gap-3 text-sm">
+                        <Video size={20} />
                         <p>{error || 'Failed to find sessions'}</p>
                     </div>
-                    <Link to={`/mentor/mentorships/${mentorshipId}`} className="mt-6 flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
-                        <ArrowLeft size={16} />
+                    <Link to={`/mentor/mentorships/${mentorshipId}`} className="mt-5 flex items-center gap-2 text-xs font-bold text-[var(--primary-500)] hover:opacity-80 transition-all">
+                        <ArrowLeft size={14} />
                         Back to Mentorship
                     </Link>
                 </div>
@@ -151,11 +171,11 @@ const MentorshipSessions: FC = () => {
     if (activeSession) {
         return (
             <DashLayout pageTitle={`Session: ${activeSession.sessionTitle}`}>
-                <div className="px-6 py-6 max-w-5xl mx-auto">
+                <div className="px-4 sm:px-6 py-6 max-w-5xl mx-auto w-full">
                     {actionLoading && (
-                        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center">
-                            <div className="bg-white p-4 rounded-xl shadow-lg flex items-center gap-3">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        <div className="fixed inset-0 bg-black/5 z-50 flex items-center justify-center backdrop-blur-xs">
+                            <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex items-center gap-3 text-sm font-semibold text-gray-700">
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent border-[var(--primary-500)]"></div>
                                 <span>Processing...</span>
                             </div>
                         </div>
@@ -180,33 +200,32 @@ const MentorshipSessions: FC = () => {
 
     return (
         <DashLayout pageTitle="Total Sessions">
-            <div className="px-6 py-6 max-w-5xl mx-auto">
+            <div className="px-4 sm:px-6 py-6 max-w-5xl mx-auto w-full">
                 {actionLoading && (
-                    <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center">
-                        <div className="bg-white p-4 rounded-xl shadow-lg flex items-center gap-3">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <div className="fixed inset-0 bg-black/5 z-50 flex items-center justify-center backdrop-blur-xs">
+                        <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex items-center gap-3 text-sm font-semibold text-gray-700">
+                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent border-[var(--primary-500)]"></div>
                             <span>Please wait...</span>
                         </div>
                     </div>
                 )}
+                
                 {/* Header Section */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                  <div>
-                    <div className="flex items-baseline gap-2 cursor-pointer text-gray-600 hover:text-gray-900" onClick={() => window.history.back()}>
-                      <ArrowLeft size={20} />
-                      <h1 className="text-3xl font-bold text-gray-900">Live Sessions</h1>
+                <div className="flex flex-col gap-1 mb-6">
+                    <div className="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-gray-900 transition-colors" onClick={() => window.history.back()}>
+                        <ArrowLeft size={20} className="shrink-0" />
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Live Sessions</h1>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">Manage and review all live sessions</p>
-                  </div>
+                    <p className="text-xs sm:text-sm text-gray-400 font-medium pl-7">Manage and review all scheduled live sessions</p>
                 </div>
 
-                {/* Sessions List */}
+                {/* Sessions List Container */}
                 <div className="space-y-4">
                     {sessions.length === 0 ? (
-                        <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
-                            <Video className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900">No sessions found</h3>
-                            <p className="mt-1 text-gray-500">There are no live sessions scheduled for this mentorship yet.</p>
+                        <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200 p-6">
+                            <Video className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                            <h3 className="text-base font-bold text-gray-900">No sessions found</h3>
+                            <p className="mt-1 text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">There are no live sessions scheduled for this mentorship yet.</p>
                         </div>
                     ) : (
                         sessions.map((session) => {
@@ -215,79 +234,66 @@ const MentorshipSessions: FC = () => {
                             return (
                                 <div
                                     key={session.id}
-                                    className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6"
+                                    className="bg-white rounded-2xl p-5 shadow-xs border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 transition-all duration-200 hover:border-gray-200/80"
                                 >
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-3   rounded-xl bg-[#0A6C17] group-hover:text-white transition-colors">
-                                            <FontAwesomeIcon icon={faVideo} className='text-white ' />
+                                    {/* Left side: Video Badge & Titles */}
+                                    <div className="flex items-start gap-3.5 min-w-0">
+                                        <div className="p-3 rounded-xl bg-[var(--primary-500)] text-white shrink-0 shadow-xs">
+                                            <FontAwesomeIcon icon={faVideo} className="text-sm" />
                                         </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{session.title.slice(0,25)}
-                                                   {session.title.length>10 ? "..." : ""}
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-base font-bold text-gray-900 truncate pr-2" title={session.title}>
+                                                {session.title.length > 25 ? `${session.title.slice(0, 25)}...` : session.title}
                                             </h3>
-                                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                                                <div className="flex items-center gap-1.5">
-                                                    <BookOpen size={16} className="text-gray-400" />
-                                                    {session.mentorshipTitle}
+                                            <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-xs text-gray-400 font-medium mt-1">
+                                                <div className="flex items-center gap-1 min-w-0">
+                                                    <BookOpen size={14} className="text-gray-300 shrink-0" />
+                                                    <span className="truncate">{session.mentorshipTitle}</span>
                                                 </div>
-                                                <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-gray-200"></div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <Layers size={16} className="text-gray-400" />
-                                                    {session.weekTitle}
+                                                <div className="hidden md:block w-1 h-1 rounded-full bg-gray-200"></div>
+                                                <div className="flex items-center gap-1 min-w-0">
+                                                    <Layers size={14} className="text-gray-300 shrink-0" />
+                                                    <span className="truncate">{session.weekTitle}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-
-
-                                    <div className="flex flex-row items-center md:items-end  gap-4 md:gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100 flex-wrap m-auto">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg w-full md:w-auto justify-center">
-                                            <Calendar size={16} className="text-blue-500" />
-                                            {date}
+                                    {/* Right side: Meta Info & Actions grouped cleanly */}
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-50">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-gray-50/80 px-2.5 py-1.5 rounded-lg border border-gray-100 flex-1 sm:flex-initial justify-center">
+                                                <Calendar size={13} className="text-[var(--primary-500)]" />
+                                                <span>{date}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-gray-50/80 px-2.5 py-1.5 rounded-lg border border-gray-100 flex-1 sm:flex-initial justify-center">
+                                                <Clock size={13} className="text-amber-500" />
+                                                <span>{time}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg w-full md:w-auto justify-center">
-                                            <Clock size={16} className="text-amber-500" />
-                                            {time}
-                                        </div>
+                                        
+                                        <button
+                                            onClick={() => handleStartSession(session.id)}
+                                            disabled={actionLoading}
+                                            className="px-4 py-2 text-xs font-bold text-white bg-[var(--primary-500)] hover:opacity-90 active:scale-[0.98] rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed sm:w-auto w-full text-center"
+                                        >
+                                            Start Session
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleStartSession(session.id)}
-                                        disabled={actionLoading}
-                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg bg-primary transition-colors disabled:opacity-50"
-                                    >
-                                        Start Session
-                                    </button>
-
                                 </div>
                             );
                         })
                     )}
                 </div>
 
-                {/* Pagination */}
+                {/* Pagination Controls wrapper */}
                 {sessionsData && sessionsData.totalPages > 1 && (
-                    <div className="mt-8 flex items-center justify-end px-6 py-4 ">
-                        {/* <span className="text-sm text-gray-500 font-medium">
-                           Showing {sessions.length} items in this page 
-                        </span> */}
-
-                        <div className="flex gap-2">
-                            <button
-                                onClick={handlePrevPage}
-                                disabled={page === 0}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 shadow-sm border border-gray-500 rounded-lg hover:bg-[var(--primary-500)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Previous
-                            </button>
-                            <button
-                                onClick={handleNextPage}
-                                disabled={page >= sessionsData.totalPages - 1}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border shadow-sm border-gray-500 rounded-lg hover:bg-[var(--primary-500)] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Next
-                            </button>
-                        </div>
+                    <div className="mt-6 flex justify-center sm:justify-end">
+                        <Pagination
+                            currentPage={page}
+                            totalPages={sessionsData.totalPages}
+                            onPageChange={handlePageChange}
+                        />
                     </div>
                 )}
             </div>

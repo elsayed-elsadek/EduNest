@@ -45,6 +45,7 @@ export const deleteLiveSession = async (sessionId: number): Promise<void> => {
 };
 
 export interface MentorshipPaginatedItems<T = unknown> {
+    currentPage: number;
     content: T[];
     page: number;
     size: number;

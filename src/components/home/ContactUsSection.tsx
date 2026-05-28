@@ -92,22 +92,21 @@ const ContactUsSection: React.FC = memo(() => {
               <div className="flex items-center space-x-4">
                 <Mail className="w-5 h-5 text-gray-600" />
                 <a href="mailto:example@teamwebflow.com" className="text-base text-gray-800 hover:text-[#0f5e8b] transition-colors">
-                  example@teamwebflow.com
+                  EduNest123@gmail.com
                 </a>
               </div>
 
               <div className="flex items-start space-x-4">
                 <MapPin className="w-5 h-5 text-gray-600 mt-1" />
                 <address className="text-base text-gray-800 not-italic leading-relaxed">
-                  4074 Ebert Summit Suite 375<br />
-                  Lake Leonardchester
+                 Faculty of Computers & Information
                 </address>
               </div>
 
               <div className="flex items-center space-x-4">
                 <Phone className="w-5 h-5 text-gray-600" />
                 <a href="tel:+441236547890" className="text-base text-gray-800 hover:text-[#0f5e8b] transition-colors">
-                  +44 123 654 7890
+                  01061965771
                 </a>
               </div>
             </div>

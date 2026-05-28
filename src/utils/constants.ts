@@ -1,15 +1,19 @@
 import mentorImgUiUx from '../assets/homePage/explore1.webp';
-import mentorImgReact from '../assets/homePage/ask.webp';
+import mentorImgReact from '../assets/homePage/Questions-pana.svg';
 import mentorImgMl from '../assets/homePage/aboutus3.webp';
 import mentorImgFullstack from '../assets/homePage/aboutus2.webp';
 import avatarDavid from '../assets/homePage/person1.webp';
 import avatarSarah from '../assets/homePage/person2.webp';
 import avatarKumar from '../assets/homePage/person3.webp';
 import avatarJohn from '../assets/homePage/person4.webp';
-import aboutUs1 from '../assets/homePage/aboutus1.webp';
-import aboutUs2 from '../assets/homePage/aboutus2.webp';
-import aboutUs3 from '../assets/homePage/aboutus3.webp';
-import blog1 from '../assets/homePage/blog1.webp';
+import aboutUs1 from '../assets/homePage/about/Seminar-amico.svg';
+import aboutUs2 from '../assets/homePage/about/Studying-amico.svg';
+import aboutUs3 from '../assets/homePage/about/Remote meeting-rafiki.svg';
+import blog1 from '../assets/homePage/blog/Blog post-bro.svg';
+import blog2 from '../assets/homePage/blog/Education-rafiki.svg';
+import blog3 from '../assets/homePage/blog/Programming-amico.svg';
+import blog4 from '../assets/homePage/blog/UI-UX differences-rafiki.svg';
+
 
 export const TEXTS = {
   heroTitle: 'Learn.Mentor. Grow',
@@ -97,26 +101,26 @@ export const WHY_CHOOSE_US_FEATURES = [
     title: 'How Mentorship Can Fast-Track',
     description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
   },
-  {
-    imageSrc: blog1,
-    date: 'May 01, 2026',
-    comments: 10,
-    title: 'How Mentorship Can Fast-Track',
-    description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
+{
+    imageSrc: blog2,
+    date: 'May 12, 2026',
+    comments: 7,
+    title: 'Bridging the Gap Between College and Code',
+    description: 'Explore why standard university curricula often leave IT students scrambling and how working on practical, hands-on projects makes you job-ready.',
   },
   {
-    imageSrc: blog1,
-    date: 'May 01, 2026',
-    comments: 10,
-    title: 'How Mentorship Can Fast-Track',
-    description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
+    imageSrc: blog3,
+    date: 'May 18, 2026',
+    comments: 14,
+    title: 'The Art of Code Review in Team Projects',
+    description: "Discover how collaborating effectively on shared repositories and reviewing your peers' code accelerates your growth as a developer.",
   },
   {
-    imageSrc: blog1,
-    date: 'May 01, 2026',
-    comments: 10,
-    title: 'How Mentorship Can Fast-Track',
-    description: 'Discover how learning from real mentors helps students build practical skills and enter the tech industry with confidence.',
+    imageSrc: blog4,
+    date: 'May 24, 2026',
+    comments: 5,
+    title: 'Why UI/UX Matters for Modern Web Apps',
+    description: 'Learn how adopting a minimalist, clean design approach can significantly elevate the user experience and value of your digital products.',
   },
 ];
 

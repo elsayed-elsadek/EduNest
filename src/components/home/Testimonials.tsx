@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 import { TESTIMONIALS_DATA, FAQ_ITEMS } from '../../utils/constants'; 
-import askedImg from '../../assets/homePage/ask.webp'; 
+import askedImg from '../../assets/homePage/Questions-pana.svg'; 
 
 const CombinedClientAndFAQSections: React.FC = () => {
   const [openId, setOpenId] = useState<number | null>(null);

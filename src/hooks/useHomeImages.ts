@@ -10,11 +10,11 @@ import aboutus1Img from '../assets/homePage/aboutus1.webp';
 import aboutus2Img from '../assets/homePage/aboutus2.webp';
 import aboutus3Img from '../assets/homePage/aboutus3.webp';
 import blog1Img from '../assets/homePage/blog1.webp';
-import img1Img from '../assets/homePage/img1.webp';
+import img1Img from '../assets/homePage/Remote meeting-rafiki.svg';
 import bookImg from '../assets/homePage/book.webp';
 import starsImg from '../assets/homePage/stars.webp';
 import explore1Img from '../assets/homePage/explore1.webp';
-import askImg from '../assets/homePage/ask.webp';
+import askImg from '../assets/homePage/Questions-pana.svg';
 
 // Image map using direct imports
 const imageMap: Record<string, string> = {

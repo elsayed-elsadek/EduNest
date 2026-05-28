@@ -102,10 +102,10 @@ const Pagination: FC<PaginationProps> = ({
       </button>
 
       {/* Page Info */}
-      <span className="ml-4 text-sm text-gray-600 font-medium">
+      {/* <span className="ml-4 text-sm text-gray-600 font-medium">
         Page <span className="font-bold">{currentPage}</span> of{' '}
         <span className="font-bold">{totalPages}</span>
-      </span>
+      </span> */}
     </div>
   );
 };

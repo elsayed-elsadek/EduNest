@@ -8,6 +8,7 @@ interface MentorshipGridProps {
   isLoading?: boolean;
   onItemClick?: (mentorship: MentorshipData) => void;
   onItemHover?: (mentorship: MentorshipData) => void;
+  className?: string;
 }
 
 /**
