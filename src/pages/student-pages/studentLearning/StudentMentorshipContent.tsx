@@ -11,6 +11,7 @@ import ContentHero from './components/JoinLiveSession';
 import AssignmentSubmission from './assimentSubmission/AssignmentSubmission';
 import ProjectSubmission from './projectSubmission/ProjectSubmission';
 import LectureSection from './components/LectureSection';
+import ContentTypeBadge from '../../../components/common/ContentTypeBadge';
 import QuizSubmission from './components/QuizSubmission';
 import type { Week, WeekContent } from '../../../types/student-role-types/studentMentorshipTypes';
 
@@ -31,6 +32,17 @@ const StudentMentorshipContent = () => {
   const [showIframe, setShowIframe] = useState(false);
   const [meetingUrl, setMeetingUrl] = useState<string>('');
   const [isJoining, setIsJoining] = useState(false);
+
+  const buildItemKey = (weekId: number, type: string, id: number | string) => `${weekId}-${type}-${id}`;
+
+  const parseItemKey = (itemKey: string) => {
+    const [weekIdStr, type, ...idParts] = itemKey.split('-');
+    if (!weekIdStr || !type || idParts.length === 0) return null;
+    const weekId = Number(weekIdStr);
+    const id = Number(idParts.join('-'));
+    if (Number.isNaN(weekId) || Number.isNaN(id)) return null;
+    return { weekId, type, id };
+  };
 
   const handleJoinSession = async (sessionId: number) => {
     setIsJoining(true);
@@ -85,58 +97,95 @@ const StudentMentorshipContent = () => {
   useEffect(() => {
     if (weeks.length === 0) return;
 
-    if (locationState?.itemKey) {
-      const foundWeek = weeks.find(week => week.items.some(item => `${item.type}-${item.id}` === locationState.itemKey));
-      if (foundWeek) {
-        setSelectedWeekId(foundWeek.weekId);
-        setSelectedItemKey(locationState.itemKey);
-        return;
-      }
-    }
+    const initializeFromLocationState = () => {
+      if (locationState?.itemKey) {
+        const parsedKey = parseItemKey(locationState.itemKey);
+        if (parsedKey) {
+          const week = weeks.find(
+            (week) => week.weekId === parsedKey.weekId && week.items.some((item) => item.type === parsedKey.type && item.id === parsedKey.id)
+          );
+          if (week) {
+            setSelectedWeekId(week.weekId);
+            setSelectedItemKey(buildItemKey(week.weekId, parsedKey.type, parsedKey.id));
+            return true;
+          }
+        }
 
-    if (locationState?.itemId != null) {
-      const parsedItemId = typeof locationState.itemId === 'string'
-        ? Number(locationState.itemId)
-        : locationState.itemId;
-
-      const parsedWeekId = typeof locationState.weekId === 'string'
-        ? Number(locationState.weekId)
-        : locationState.weekId ?? null;
-
-      if (!Number.isNaN(parsedItemId)) {
-        const foundWeek = weeks.find(week => week.items.some(item => item.id === parsedItemId));
-
-        if (foundWeek) {
-          setSelectedWeekId(foundWeek.weekId);
-          setSelectedItemKey(`${foundWeek.items.find(item => item.id === parsedItemId)?.type ?? ''}-${parsedItemId}`);
-          return;
+        const legacyFoundWeek = weeks.find(week => week.items.some(item => `${item.type}-${item.id}` === locationState.itemKey));
+        if (legacyFoundWeek) {
+          const legacyItem = legacyFoundWeek.items.find(item => `${item.type}-${item.id}` === locationState.itemKey);
+          if (legacyItem) {
+            setSelectedWeekId(legacyFoundWeek.weekId);
+            setSelectedItemKey(buildItemKey(legacyFoundWeek.weekId, legacyItem.type, legacyItem.id));
+            return true;
+          }
         }
       }
 
-      if (parsedWeekId != null && !Number.isNaN(parsedWeekId) && !Number.isNaN(parsedItemId)) {
-        const week = weeks.find(w => w.weekId === parsedWeekId);
-        if (week?.items.some(item => item.id === parsedItemId)) {
-          const foundItem = week.items.find(item => item.id === parsedItemId);
-          setSelectedWeekId(parsedWeekId);
-          setSelectedItemKey(foundItem ? `${foundItem.type}-${foundItem.id}` : null);
-          return;
+      if (locationState?.itemId != null) {
+        const parsedItemId = typeof locationState.itemId === 'string'
+          ? Number(locationState.itemId)
+          : locationState.itemId;
+
+        const parsedWeekId = typeof locationState.weekId === 'string'
+          ? Number(locationState.weekId)
+          : locationState.weekId ?? null;
+
+        if (!Number.isNaN(parsedItemId)) {
+          if (parsedWeekId != null && !Number.isNaN(parsedWeekId)) {
+            const week = weeks.find(w => w.weekId === parsedWeekId);
+            const foundItem = week?.items.find(item => item.id === parsedItemId);
+            if (week && foundItem) {
+              setSelectedWeekId(parsedWeekId);
+              setSelectedItemKey(buildItemKey(parsedWeekId, foundItem.type, foundItem.id));
+              return true;
+            }
+          }
+
+          const matchingItems = weeks.flatMap(week =>
+            week.items
+              .filter(item => item.id === parsedItemId)
+              .map(item => ({ weekId: week.weekId, item }))
+          );
+
+          if (matchingItems.length === 1) {
+            setSelectedWeekId(matchingItems[0].weekId);
+            setSelectedItemKey(buildItemKey(matchingItems[0].weekId, matchingItems[0].item.type, matchingItems[0].item.id));
+            return true;
+          }
         }
       }
-    }
 
-    if (selectedWeekId === null) {
+      return false;
+    };
+
+    if (!initializeFromLocationState()) {
       setSelectedWeekId(weeks[0].weekId);
-      setSelectedItemKey(weeks[0].items[0] ? `${weeks[0].items[0].type}-${weeks[0].items[0].id}` : null);
+      setSelectedItemKey(weeks[0].items[0] ? buildItemKey(weeks[0].weekId, weeks[0].items[0].type, weeks[0].items[0].id) : null);
     }
-  }, [weeks, selectedWeekId, locationState?.weekId, locationState?.itemId, locationState?.itemKey]);
+  }, [weeks, locationState?.itemKey, locationState?.weekId, locationState?.itemId]);
+
+  useEffect(() => {
+    if (!selectedItemKey) return;
+    const parsedKey = parseItemKey(selectedItemKey);
+    if (parsedKey && parsedKey.weekId !== selectedWeekId) {
+      setSelectedWeekId(parsedKey.weekId);
+    }
+  }, [selectedItemKey, selectedWeekId]);
 
   const selectedWeek = useMemo(
-    () => weeks.find(w => w.items.some(item => `${item.type}-${item.id}` === selectedItemKey)),
-    [weeks, selectedItemKey]
+    () => weeks.find(w => w.weekId === selectedWeekId) ?? weeks.find(w => w.items.some(item => buildItemKey(w.weekId, item.type, item.id) === selectedItemKey)),
+    [weeks, selectedWeekId, selectedItemKey]
   );
 
   const selectedItem = useMemo(() => {
     if (!selectedItemKey) return null;
+    const parsedKey = parseItemKey(selectedItemKey);
+    if (parsedKey) {
+      const week = weeks.find((w) => w.weekId === parsedKey.weekId);
+      return week?.items.find((item) => item.type === parsedKey.type && item.id === parsedKey.id) ?? null;
+    }
+
     for (const week of weeks) {
       const item = week.items.find(i => `${i.type}-${i.id}` === selectedItemKey);
       if (item) return item;
@@ -144,7 +193,45 @@ const StudentMentorshipContent = () => {
     return null;
   }, [weeks, selectedItemKey]);
 
-  if (isLoading) return <div className="p-20 text-center">Loading...</div>;
+  const [contentVisible, setContentVisible] = useState(true);
+
+  useEffect(() => {
+    setContentVisible(false);
+    const timer = window.setTimeout(() => setContentVisible(true), 120);
+    return () => window.clearTimeout(timer);
+  }, [selectedItemKey]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F7F7F8]">
+        <Navbar />
+        <main className="mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="w-full lg:w-[350px] space-y-4">
+              <div className="h-20 rounded-3xl bg-white shadow-sm border border-gray-200 animate-pulse" />
+              <div className="space-y-3 rounded-3xl bg-white p-5 shadow-sm border border-gray-200">
+                <div className="h-4 rounded-full bg-gray-200 w-2/3 animate-pulse" />
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <div key={idx} className="h-12 rounded-2xl bg-gray-200 animate-pulse" />
+                ))}
+              </div>
+              <div className="h-12 rounded-3xl bg-white shadow-sm border border-gray-200 animate-pulse" />
+            </div>
+            <div className="flex-1 space-y-4">
+              <div className="h-5 rounded-full bg-gray-200 w-32 animate-pulse" />
+              <div className="h-10 rounded-2xl bg-gray-200 w-3/4 animate-pulse" />
+              <div className="space-y-4 rounded-3xl bg-white p-6 shadow-sm border border-gray-200">
+                <div className="h-6 rounded-full bg-gray-200 animate-pulse" />
+                <div className="h-4 rounded-full bg-gray-200 w-5/6 animate-pulse" />
+                <div className="h-72 rounded-[28px] bg-gray-200 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F7F8]">
@@ -162,13 +249,13 @@ const StudentMentorshipContent = () => {
             selectedItemKey={selectedItemKey} 
             onSelect={(w, i, type) => {
               setSelectedWeekId(w);
-              setSelectedItemKey(`${type}-${i}`);
+              setSelectedItemKey(buildItemKey(w, type, i));
             }} 
           />
           {/* Right Content */}
           <section className="flex-1 min-w-0">
             {selectedItem && selectedWeek ? (
-              <div className="space-y-6">
+              <div className={`space-y-6 transition-all duration-200 ease-out ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-60 translate-y-1'}`}>
                 {/* Breadcrumbs */}
                 <div className="flex items-center gap-2 text-sm text-slate-500">
                   <span>{selectedWeek.weekTitle}</span>
@@ -178,7 +265,10 @@ const StudentMentorshipContent = () => {
 
                 {/* Title Section */}
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">{selectedItem.title}</h1>
+                  <div className="flex items-center gap-3">
+                    <ContentTypeBadge type={selectedItem.type} size="sm" />
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">{selectedItem.title}</h1>
+                  </div>
                   <p className="mt-3 sm:mt-4 text-slate-600 text-sm sm:text-base max-w-3xl">
                     {(() => {
                       const itemType = selectedItem.type.toUpperCase();

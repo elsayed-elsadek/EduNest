@@ -1,5 +1,12 @@
+
 import api from '../api';
-import type { Quiz, Question, Answer, QuizSubmissionResponse, StudentQuizScore } from '../../types/student-role-types/quiz.types';
+import type {
+  Quiz,
+  Question,
+  Answer,
+  QuizSubmissionResponse,
+  MyAnswersResponse,
+} from '../../types/student-role-types/quiz.types';
 import axios from 'axios';
 
 export const getQuizDetails = async (id: number): Promise<Quiz> => {
@@ -8,7 +15,7 @@ export const getQuizDetails = async (id: number): Promise<Quiz> => {
 };
 
 export const getQuizQuestions = async (quizId: number): Promise<Question[]> => {
-  const response = await api.get(`/api/v1/question/fetch/${quizId}`);
+  const response = await api.get(`/api/v1/question/student/fetch/${quizId}`);
   return response.data.apiResponse['Quiz Questions'];
 };
 
@@ -16,24 +23,19 @@ export const submitQuizAnswers = async (
   quizId: number,
   answers: Answer[]
 ): Promise<QuizSubmissionResponse> => {
-  const response = await api.post(`/api/v1/submit-quiz-answer/${quizId}`, {
-    answers,
-  });
+  const response = await api.post(`/api/v1/submit-quiz-answer/${quizId}`, { answers });
   return response.data.apiResponse;
 };
 
-export const getStudentQuizScore = async (
-  quizId: number
-): Promise<StudentQuizScore | null> => {
+export const getMyAnswers = async (quizId: number): Promise<MyAnswersResponse | null> => {
   try {
-    const response = await api.get(`/api/v1/quiz/${quizId}`);
-    return response.data.apiResponse?.studentScore || null;
+    const response = await api.get(`/api/v1/my-answers/${quizId}`);
+    return response.data.apiResponse ?? null;
   } catch (err: unknown) {
-    // If 404 or not found, student hasn't submitted yet
-    if (axios.isAxiosError(err) && err.response?.status === 404) {
-      return null;
+    if (axios.isAxiosError(err)) {
+      const status = err.response?.status;
+      if (status === 400 || status === 404) return null;
     }
-
     throw err;
   }
 };

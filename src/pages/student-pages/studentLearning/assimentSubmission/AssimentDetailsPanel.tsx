@@ -1,6 +1,7 @@
 import { FileText, Calendar, Clock, Award, Download, Eye } from 'lucide-react';
 import { API_BASE_URL } from '../../../../services/api';
 import type { StudentTaskDetails } from '../../../../services/student-roleService/submitTask';
+import FileViewer from '../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
 
 interface AssimentDetailsPanelProps {
@@ -138,12 +139,8 @@ const AssimentDetailsPanel = ({ taskDetails }: AssimentDetailsPanelProps) => {
               </div>
             </div>
 
-            <div className="w-full bg-white border border-slate-200 rounded-lg overflow-hidden h-[400px]">
-              <iframe
-                src={getAttachmentUrl()}
-                className="w-full h-full"
-                title="Assignment Attachment Preview"
-              />
+            <div className="w-full">
+              <FileViewer url={getAttachmentUrl()} height="h-[420px]" />
             </div>
           </div>
         )}

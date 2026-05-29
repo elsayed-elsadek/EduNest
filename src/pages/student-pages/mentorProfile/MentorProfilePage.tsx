@@ -23,6 +23,8 @@ const MentorProfilePage = () => {
   const mentorProfile = useMemo(() => data?.mentorProfile ?? null, [data]);
   const mentorships = useMemo(() => data?.mentorships ?? [], [data]);
   const reviews = useMemo(() => data?.reviews ?? [], [data]);
+  const totalReviews = mentorProfile?.totalReviews ?? reviews.length;
+  const avgReviewRate = mentorProfile?.avgReviewRate ?? null;
 
   const fullName = `${mentorProfile?.mentorFirstName ?? ''} ${mentorProfile?.mentorLastName ?? ''}`.trim() || 'Mentor';
 
@@ -44,7 +46,11 @@ const MentorProfilePage = () => {
 
             <MentorshipsSection mentorships={mentorships} />
 
-            <ReviewsSection reviews={reviews} />
+            <ReviewsSection
+              reviews={reviews}
+              totalReviews={totalReviews}
+              avgReviewRate={avgReviewRate}
+            />
           </div>
 
           {/* Right Column: Sidebar */}

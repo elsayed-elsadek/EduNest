@@ -1,6 +1,7 @@
 import { FileText, Calendar, Award, Download, Eye, Target } from 'lucide-react';
-import { API_BASE_URL } from '../../../../../services/api';
+import { resolveFirstFileUrl } from '../../../../../utils/fileUrl';
 import type { StudentProjectDetails } from '../../../../../services/student-roleService/submitProject';
+import FileViewer from '../../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
 
 interface ProjectDetailsPanelProps {
@@ -8,19 +9,7 @@ interface ProjectDetailsPanelProps {
 }
 
 const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
-  const getAttachmentUrl = () => {
-    const url = projectDetails?.descriptionUrl;
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    
-    let cleanPath = url.startsWith('/') ? url.substring(1) : url;
-    if (cleanPath.startsWith('app/')) {
-        cleanPath = cleanPath.substring(4);
-    }
-    
-    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`;
-    return `${baseUrl}${cleanPath}`;
-  };
+  const getAttachmentUrl = () => resolveFirstFileUrl(projectDetails?.attachmentPath, projectDetails?.descriptionUrl);
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-lg">
@@ -101,15 +90,15 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
           )}
         </div>
         
-        {/* Description URL (Attachment) */}
-        {projectDetails.descriptionUrl && (
+        {/* Mentor Attachment */}
+        {getAttachmentUrl() ? (
           <div className="flex flex-col p-4 bg-slate-50 rounded-xl gap-4 mt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-slate-600" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">Attachment</p>
-                  <p className="text-xs text-slate-500">Resource file</p>
+                  <p className="text-sm font-semibold text-slate-800">Mentor Attachment</p>
+                  <p className="text-xs text-slate-500">Provided by your mentor</p>
                 </div>
               </div>
 
@@ -127,7 +116,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                       const objectUrl = URL.createObjectURL(blob);
                       const a = document.createElement('a');
                       a.href = objectUrl;
-                      const filename = url.split('/').pop() || 'project-file';
+                      const filename = url.split('/').pop() || 'mentor-attachment';
                       a.download = filename;
                       document.body.appendChild(a);
                       a.click();
@@ -157,13 +146,17 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
               </div>
             </div>
 
-            <div className="w-full bg-white border border-slate-200 rounded-lg overflow-hidden h-[400px]">
-              <iframe
-                src={getAttachmentUrl()}
-                className="w-full h-full"
-                title="Project Attachment Preview"
-              />
+            <div className="w-full">
+              <FileViewer url={getAttachmentUrl()} height="h-[420px]" />
             </div>
+          </div>
+        ) : (
+          <div className="flex flex-col p-4 bg-slate-50 rounded-xl gap-2 mt-4 text-sm text-slate-600">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-slate-400" />
+              <span className="font-semibold text-slate-800">Mentor Attachment</span>
+            </div>
+            <p>No mentor attachment provided.</p>
           </div>
         )}
       </div>

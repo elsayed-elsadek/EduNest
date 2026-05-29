@@ -1,4 +1,4 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import api from '../api';
 import type { MentorshipResponse, MentorshipFiltersType } from '../../types/mentorship';
 
@@ -78,9 +78,9 @@ export const useMentorships = (filters: MentorshipFiltersType = {}) => {
   return useQuery({
     queryKey: mentorshipKeys.list(filters),
     queryFn: ({ signal }) => fetchMentorships(filters, signal),
-    staleTime: 5 * 60 * 1000, 
-    gcTime: 30 * 60 * 1000, 
-    placeholderData: keepPreviousData, 
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
     retry: 2,
   });
 };

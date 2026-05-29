@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { getBackendErrorMessage } from '../../../../services/student-roleService/apiResponseHelpers';
 import { getStudentTaskDetails, type StudentTaskDetails, submitTask } from '../../../../services/student-roleService/submitTask';
 import { AxiosError } from 'axios';
 import AssimentDetailsPanel from './AssimentDetailsPanel';
@@ -32,6 +33,7 @@ const AssignmentSubmission = ({ taskId }: AssignmentSubmissionProps) => {
 
   useEffect(() => {
     loadTaskDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,13 +62,15 @@ const AssignmentSubmission = ({ taskId }: AssignmentSubmissionProps) => {
         fileUrl: fileUrl.trim() || undefined,
       };
 
-      await submitTask(taskId, payload);
+      const result = await submitTask(taskId, payload);
       await loadTaskDetails(); // Refresh all details naturally
-      toast.success('Task submitted successfully!');
+      setFile(null);
+      setFileUrl('');
+      toast.success(result.message ?? 'Task submitted successfully!');
     } catch (error) {
       console.error('Submission error:', error);
       const err = error as AxiosError<{ errorMessages?: { error?: string } }>;
-      const errorMessage = err?.response?.data?.errorMessages?.error || 'Failed to submit task';
+      const errorMessage = getBackendErrorMessage(err, 'Failed to submit task');
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

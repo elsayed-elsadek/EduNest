@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { getBackendErrorMessage } from '../../../../services/student-roleService/apiResponseHelpers';
 import { getStudentProjectDetails, type StudentProjectDetails, submitProject } from '../../../../services/student-roleService/submitProject';
 import { AxiosError } from 'axios';
 import ProjectDetailsPanel from './components/ProjectDetailsPanel';
@@ -60,9 +61,9 @@ const ProjectSubmission = ({ projectId }: ProjectSubmissionProps) => {
         fileUrl: fileUrl.trim() || undefined,
       };
 
-      await submitProject(projectId, payload);
+      const result = await submitProject(projectId, payload);
       await loadProjectDetails(); // Refresh all details naturally
-      toast.success('Project submitted successfully!');
+      toast.success(result.message ?? 'Project submitted successfully!');
       
       // Clear form after successful submit
       setFile(null);
@@ -70,7 +71,7 @@ const ProjectSubmission = ({ projectId }: ProjectSubmissionProps) => {
     } catch (error) {
       console.error('Submission error:', error);
       const err = error as AxiosError<{ errorMessages?: { error?: string } }>;
-      const errorMessage = err?.response?.data?.errorMessages?.error || 'Failed to submit project';
+      const errorMessage = getBackendErrorMessage(err, 'Failed to submit project');
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

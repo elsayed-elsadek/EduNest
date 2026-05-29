@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "../api";
 import { handleRequest, type TaskSubmissionItem } from "../mentorshipsContent";
 
@@ -6,10 +7,15 @@ export interface SubmitTaskPayload {
   fileUrl?: string;
 }
 
+export interface SubmitTaskResult {
+  submission: TaskSubmissionItem;
+  message?: string;
+}
+
 export const submitTask = async (
   taskId: number,
   payload: SubmitTaskPayload
-): Promise<TaskSubmissionItem> => {
+): Promise<SubmitTaskResult> => {
   try {
     const formData = new FormData();
 
@@ -33,11 +39,18 @@ export const submitTask = async (
     );
 
     const data = raw as Record<string, unknown>;
+    let submission = raw as TaskSubmissionItem;
+    let message: string | undefined;
+
     if (data?.apiResponse && typeof data.apiResponse === 'object') {
-      const res = (data.apiResponse as Record<string, unknown>)['submission'] || data.apiResponse;
-      return res as TaskSubmissionItem;
+      const apiResponse = data.apiResponse as Record<string, unknown>;
+      if (typeof apiResponse.message === 'string' && apiResponse.message.trim()) {
+        message = apiResponse.message;
+      }
+      submission = (apiResponse['submission'] || data.apiResponse) as TaskSubmissionItem;
     }
-    return raw as TaskSubmissionItem;
+
+    return { submission, message };
   } catch (error: any) {
     console.error("Submit Task Error:", error?.response?.data || error);
     throw error;
@@ -52,6 +65,8 @@ export interface StudentTaskDetails {
   description: string | null;
   attachmentUrl: string | null;
   uploadedAttachmentPath: string | null;
+  // Path for student's uploaded submission (server field)
+  uploadedSubmissionPath: string | null;
   estimatedMinutes: number | null;
   submissionUrl: string | null;
   score: number | null;

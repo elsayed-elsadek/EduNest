@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import api from '../api';
 import { queryClient } from '../../lib/queryClient';
@@ -10,6 +11,11 @@ const normalizeImageUrl = (value?: string | null): string | null => {
   if (value.startsWith('http')) return value;
   return `${baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
 };
+
+export interface SocialMediaLink {
+  media: 'GITHUB' | 'LINKEDIN' | 'TWITTER' | 'YOUTUBE' | string;
+  link: string;
+}
 
 export interface MentorProfileMentorship {
   id: number;
@@ -33,6 +39,7 @@ export interface MentorProfileReview {
   comment: string;
   mentorshipId: number;
   mentorshipTitle: string;
+  createdAt: string | null; 
 }
 
 export interface MentorProfile {
@@ -44,6 +51,8 @@ export interface MentorProfile {
   avgReviewRate: number | null;
   bio: string;
   mentorEmail: string;
+  yearsOfExperience: number | null;      
+  socialMediaLinks: SocialMediaLink[];   
 }
 
 export interface MentorProfileApiResponse {
@@ -89,11 +98,23 @@ const mapReview = (item: Record<string, unknown>): MentorProfileReview => ({
   comment: String(item.feedBack ?? ''),
   mentorshipId: Number(item.mentorshipId ?? 0),
   mentorshipTitle: String(item.mentorshipTitle ?? ''),
-  reviewerTitle: undefined
+  createdAt: item.createdAt ? String(item.createdAt) : null, 
+  reviewerTitle: undefined,
 });
 
 const mapMentorProfile = (payload: Record<string, unknown>) => {
   const mentor = (payload.mentorProfile ?? {}) as Record<string, unknown>;
+
+  // : Map social media links
+  const rawLinks = Array.isArray(mentor.socialMediaLinks) ? mentor.socialMediaLinks : [];
+  const socialMediaLinks: SocialMediaLink[] = rawLinks.map((s: unknown) => {
+    const obj = s as Record<string, unknown>;
+    return {
+      media: String(obj.media ?? ''),
+      link: String(obj.link ?? ''),
+    };
+  });
+
   return {
     mentorProfileImageUrl: normalizeImageUrl(String(mentor.profileImageUrl ?? '')),
     mentorFirstName: String(mentor.mentorFirstName ?? ''),
@@ -103,6 +124,8 @@ const mapMentorProfile = (payload: Record<string, unknown>) => {
     avgReviewRate: mentor.avgReviewRate == null ? null : Number(mentor.avgReviewRate),
     bio: String(mentor.bio ?? ''),
     mentorEmail: String(mentor.mentorEmail ?? ''),
+    yearsOfExperience: mentor.mentorYearsOfExperience == null ? null : Number(mentor.mentorYearsOfExperience), 
+    socialMediaLinks, 
   };
 };
 
@@ -117,12 +140,7 @@ export const fetchMentorProfile = async (
   const { data } = await api.get<MentorProfileApiResponse>(
     `/api/v1/profile/mentor/${encodeURIComponent(mentorEmail)}/full`,
     {
-      params: {
-        msSize,
-        msPage,
-        reviewsSize,
-        reviewsPage,
-      },
+      params: { msSize, msPage, reviewsSize, reviewsPage },
       signal,
     }
   );

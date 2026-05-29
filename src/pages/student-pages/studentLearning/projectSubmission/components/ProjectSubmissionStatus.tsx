@@ -1,6 +1,9 @@
 import { CheckCircle, Award, AlertCircle, Download, MessageSquare } from 'lucide-react';
 import { API_BASE_URL } from '../../../../../services/api';
+import ContentTypeBadge from '../../../../../components/common/ContentTypeBadge';
+import { resolveFirstFileUrl } from '../../../../../utils/fileUrl';
 import type { StudentProjectDetails } from '../../../../../services/student-roleService/submitProject';
+import FileViewer from '../../../../../components/common/FileViewer';
 
 interface ProjectSubmissionStatusProps {
   projectDetails: StudentProjectDetails;
@@ -25,10 +28,13 @@ const ProjectSubmissionStatus = ({ projectDetails }: ProjectSubmissionStatusProp
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-lg">
-      <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <CheckCircle className="w-5 h-5" />
-        Your Submission
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <CheckCircle className="w-5 h-5" />
+          Your Submission
+        </h3>
+        <ContentTypeBadge type="PROJECT" size="sm" />
+      </div>
 
       <div className="space-y-4">
         {/* Submission Status */}
@@ -56,28 +62,28 @@ const ProjectSubmissionStatus = ({ projectDetails }: ProjectSubmissionStatusProp
         {/* Submission Details Grid */}
         <div className="grid grid-cols-1 gap-4">
           {/* File/URL */}
-          {(projectDetails.fileUrl || projectDetails.uploadedFilePath) && (
-            <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-              <Download className="w-4 h-4 text-slate-600" />
-              <div className="flex-1">
-                <p className="text-sm text-slate-500">Submitted File / Link</p>
-                <a
-                    href={(() => {
-                      const url = projectDetails.fileUrl || projectDetails.uploadedFilePath || '';
-                      if (url.startsWith('http')) return url;
-                      let clean = url.startsWith('/') ? url.substring(1) : url;
-                      if(clean.startsWith('app/')) clean = clean.substring(4);
-                      return `${API_BASE_URL.endsWith('/') ? API_BASE_URL : API_BASE_URL+'/'}${clean}`;
-                    })()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline"
-                >
-                  View Your submission
-                </a>
+          {resolveFirstFileUrl(projectDetails.fileUrl, projectDetails.uploadedFilePath) ? (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
+                <Download className="w-4 h-4 text-slate-600" />
+                <div className="flex-1">
+                  <p className="text-sm text-slate-500">Submitted File / Link</p>
+                  <a
+                      href={resolveFirstFileUrl(projectDetails.fileUrl, projectDetails.uploadedFilePath)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline"
+                  >
+                    View Your submission
+                  </a>
+                </div>
+              </div>
+
+              <div>
+                <FileViewer url={resolveFirstFileUrl(projectDetails.fileUrl, projectDetails.uploadedFilePath)} height="h-[300px]" />
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Scores */}
           {projectDetails.score !== null && (

@@ -1,18 +1,8 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, CalendarDays, ChevronDown, FileText, PlayCircle } from 'lucide-react';
+import { ChevronDown, FileText } from 'lucide-react';
+import ContentTypeBadge from '../../../../components/common/ContentTypeBadge';
 import type { Week } from '../../../../types/student-role-types/studentMentorshipTypes';
 import { Link } from 'react-router-dom';
-
-// --- Helpers ---
-const getItemIcon = (type?: string) => {
-  if (!type) return FileText;
-  const normalized = type.toUpperCase();
-  if (normalized.includes('SESSION') || normalized.includes('LIVE')) return CalendarDays;
-  if (normalized.includes('TASK') || normalized.includes('ASSIGNMENT')) return FileText;
-  if (normalized.includes('QUIZ')) return BookOpen;
-  if (normalized.includes('LECTURE') || normalized.includes('VIDEO')) return PlayCircle;
-  return FileText;
-};
 
 interface ContentSidebarProps {
   weeks: Week[];
@@ -21,6 +11,8 @@ interface ContentSidebarProps {
   selectedItemKey: string | null;
   onSelect: (wId: number, iId: number, type: string) => void;
 }
+
+const buildItemKey = (weekId: number, type: string, id: number | string) => `${weekId}-${type}-${id}`;
 
 const ContentSidebar = ({ 
   weeks, 
@@ -79,8 +71,20 @@ const ContentSidebar = ({
                     {week.weekTitle}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs bg-slate-200 px-2 py-1 rounded-full">
-                      {completedCount}/{week.items.length}
+                    <span
+                      className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap ${
+                        completedCount === week.items.length
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : completedCount === 0
+                            ? 'bg-slate-100 text-slate-600'
+                            : 'bg-sky-100 text-sky-700'
+                      }`}
+                      title={`${completedCount} of ${week.items.length} items completed`}
+                      aria-label={`${completedCount} of ${week.items.length} items completed`}
+                    >
+                      {completedCount === week.items.length
+                        ? 'Completed'
+                        : `${completedCount} of ${week.items.length} completed`}
                     </span>
                     <ChevronDown 
                       className={`w-4 h-4 transition-transform duration-200 ${
@@ -95,8 +99,7 @@ const ContentSidebar = ({
                 }`}>
                   <div className="space-y-1 mt-3 pl-6 lg:pl-2">
                     {week.items.map((item, itemIndex) => {
-                      const Icon = getItemIcon(item.type);
-                      const itemKey = `${item.type}-${item.id}`;
+                      const itemKey = buildItemKey(week.weekId, item.type, item.id);
                       const isSelected = itemKey === selectedItemKey;
                       return (
                         <button
@@ -108,7 +111,7 @@ const ContentSidebar = ({
                               : 'text-slate-600 hover:bg-gray-50 hover:text-slate-900'
                           }`}
                         >
-                          <Icon className="w-4 h-4 flex-shrink-0" />
+                          <ContentTypeBadge type={item.type} size="sm" />
                           <span className="truncate">{item.title}</span>
                         </button>
                       );

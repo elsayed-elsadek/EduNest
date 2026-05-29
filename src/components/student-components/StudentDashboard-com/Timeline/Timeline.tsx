@@ -80,11 +80,14 @@ const TimelineItem: FC<{ event: TimelineEvent }> = ({ event }) => {
     const mentorshipId = (event as { mentorshipId?: number }).mentorshipId ?? Number(event.id);
     const weekId = (event as { weekId?: number }).weekId;
     const itemId = (event as { itemId?: number }).itemId ?? Number(event.id);
+    const itemType = event.type;
+    const itemKey = `${weekId ?? ''}-${itemType}-${itemId}`;
 
     navigate(`/student/learning/${mentorshipId}`, {
       state: {
         weekId,
         itemId,
+        itemKey,
       },
     });
   };

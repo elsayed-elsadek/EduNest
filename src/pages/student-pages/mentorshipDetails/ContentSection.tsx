@@ -28,11 +28,23 @@ const ContentSection: FC = () => {
   );
 
   const renderLoading = () => (
-    <div className="text-center py-6 text-gray-500">Loading content...</div>
+    <div className="space-y-4 animate-pulse">
+      <div className="h-8 rounded-xl bg-gray-200 w-1/3 mx-auto" />
+      <div className="grid gap-4 sm:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, idx) => (
+          <div key={idx} className="rounded-3xl border border-gray-200 bg-white p-5 space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-2/3" />
+            <div className="h-3 bg-gray-200 rounded" />
+            <div className="h-3 bg-gray-200 rounded w-5/6" />
+            <div className="h-10 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
   const renderError = () => (
-    <div className="text-center py-6 text-gray-500">{ 'No content found.'}</div>
+    <div className="text-center py-6 text-gray-500">{'No content found.'}</div>
   );
 
   const renderNotEnrolled = (message: string) => (

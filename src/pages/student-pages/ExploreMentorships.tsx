@@ -1,4 +1,4 @@
-import { type FC, useState, useCallback, useEffect } from 'react';
+import { type FC, useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, SlidersHorizontal, X } from 'lucide-react';
 import MentorshipGrid from "../../components/student-components/mentorships/MentorshipGrid";
@@ -6,14 +6,23 @@ import Pagination from "../../components/student-components/mentorships/Paginati
 import MentorshipFilters from "../../components/student-components/mentorships/MentorshipFilters";
 import { useMentorships } from '../../services/student-roleService/ExploreMentorships';
 import { prefetchMentorshipDetails } from '../../services/student-roleService/mentorshipDetails.api';
-import type { MentorshipFiltersType } from '../../types/mentorship';
+import type { MentorshipFiltersType, MentorshipData } from '../../types/mentorship';
 import Navbar from '../../components/student-components/common/Navbar/Navbar';
 import Footer from '../../components/student-components/common/Footer/Footer';
 
-/**
- * ExploreMentorships Page Component
- * Displays all available mentorship programs with sidebar filters and grid layout
- */
+const MAIN_CATEGORIES = ['Programming', 'Marketing', 'Business', 'Design', 'Data & AI', 'Personal Development'];
+
+const normalizeCategory = (category: string | undefined): string => {
+  return category?.trim().toLowerCase() || '';
+};
+
+const isMainCategory = (category: string | undefined): boolean => {
+  if (!category) return false;
+  const normalized = normalizeCategory(category);
+  return MAIN_CATEGORIES.some(cat => normalizeCategory(cat) === normalized);
+};
+
+
 const ExploreMentorships: FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState<MentorshipFiltersType>({
@@ -26,34 +35,78 @@ const ExploreMentorships: FC = () => {
   const navigate = useNavigate();
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Fetch mentorships data
-  const { data, isLoading, isError, error } = useMentorships(filters);
+  useEffect(() => {
+    const nextFilters: MentorshipFiltersType = {
+      page: parseInt(searchParams.get('page') || '0'),
+      size: 6,
+      keyword: searchParams.get('keyword') || undefined,
+      category: searchParams.get('category') || undefined,
+      minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
+      maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
+    };
 
-  const mentorships = data?.apiResponse?.mentorShips?.content || [];
-  const totalPages = data?.apiResponse?.mentorShips?.totalPages || 0;
-  const currentPage = (filters.page || 0) + 1; // Convert to 1-based for display
+    const currentFiltersJson = JSON.stringify(filters);
+    const nextFiltersJson = JSON.stringify(nextFilters);
 
-  /**
-   * Handle filter changes and update URL params
-   */
+    if (currentFiltersJson !== nextFiltersJson) {
+      setFilters(nextFilters);
+    }
+  }, [searchParams, filters]);
+
+  const apiFilters = useMemo(() => {
+    const isOtherCategory = filters.category === 'Other';
+    return {
+      ...filters,
+      
+      size: isOtherCategory ? 100 : (filters.size || 6),
+      page: isOtherCategory ? 0 : filters.page, 
+      category: isOtherCategory ? undefined : filters.category, 
+    };
+  }, [filters]);
+
+  const { data, isLoading, isError, error } = useMentorships(apiFilters);
+
+  let mentorships = data?.apiResponse?.mentorShips?.content || [];
+  let totalPages = data?.apiResponse?.mentorShips?.totalPages || 0;
+  
+  if (filters.category === 'Other') {
+    const filteredMentorships = mentorships.filter((m: MentorshipData) =>
+      !isMainCategory(m.category)
+    );
+    
+    const pageSize = 6;
+    const pageIndex = filters.page || 0;
+    const startIndex = pageIndex * pageSize;
+    const endIndex = startIndex + pageSize;
+    
+    mentorships = filteredMentorships.slice(startIndex, endIndex);
+    totalPages = Math.ceil(filteredMentorships.length / pageSize);
+  }
+  
+  const currentPage = (filters.page || 0) + 1;
+
+ 
   const handleFiltersChange = useCallback((newFilters: MentorshipFiltersType) => {
     const updatedFilters = {
-      ...filters,
-      ...newFilters,
-      page: newFilters.page || 0,
+      page: newFilters.page ?? 0,
+      size: 6,
+      ...(newFilters.keyword && { keyword: newFilters.keyword }),
+      ...(newFilters.category && { category: newFilters.category }),
+      ...(newFilters.minPrice !== undefined && { minPrice: newFilters.minPrice }),
+      ...(newFilters.maxPrice !== undefined && { maxPrice: newFilters.maxPrice }),
     };
     setFilters(updatedFilters);
 
     // Update URL search params
     const params = new URLSearchParams();
-    if (updatedFilters.keyword) params.set('keyword', updatedFilters.keyword);
-    if (updatedFilters.category) params.set('category', updatedFilters.category);
-    if (updatedFilters.minPrice !== undefined) params.set('minPrice', updatedFilters.minPrice.toString());
-    if (updatedFilters.maxPrice !== undefined) params.set('maxPrice', updatedFilters.maxPrice.toString());
-    if (updatedFilters.page) params.set('page', updatedFilters.page.toString());
+    if (newFilters.keyword) params.set('keyword', newFilters.keyword);
+    if (newFilters.category) params.set('category', newFilters.category);
+    if (newFilters.minPrice !== undefined && newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString());
+    if (newFilters.maxPrice !== undefined && newFilters.maxPrice < 2000) params.set('maxPrice', newFilters.maxPrice.toString());
+    if (newFilters.page && newFilters.page > 0) params.set('page', newFilters.page.toString());
     
     setSearchParams(params);
-  }, [filters, setSearchParams]);
+  }, [setSearchParams]);
 
   /**
    * Handle page change
@@ -61,11 +114,10 @@ const ExploreMentorships: FC = () => {
   const handlePageChange = (newPage: number) => {
     const updatedFilters = {
       ...filters,
-      page: newPage - 1, // Convert to 0-based
+      page: newPage - 1, 
     };
     setFilters(updatedFilters);
 
-    // Update URL
     const params = new URLSearchParams();
     if (filters.keyword) params.set('keyword', filters.keyword);
     if (filters.category) params.set('category', filters.category);
@@ -75,7 +127,6 @@ const ExploreMentorships: FC = () => {
 
   };
 
-  // scroll to top on filters change
 useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }, [filters]);
@@ -115,6 +166,7 @@ useEffect(() => {
         {/* Drawer body – reuse the same MentorshipFilters */}
         <div className="overflow-y-auto h-[calc(100%-64px)] px-5 py-2">
           <MentorshipFilters
+            initialFilters={filters}
             onFiltersChange={handleFiltersChange}
           />
         </div>
@@ -137,8 +189,6 @@ useEffect(() => {
       </div>
 
 
-      {/* Main Content Area */}
-{ /* max-w-7xl  i will add this className if backend says no */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
 
@@ -157,7 +207,7 @@ useEffect(() => {
 
           {/* Left Sidebar – visible only on large screens */}
           <div className="hidden lg:block lg:col-span-1">
-            <MentorshipFilters onFiltersChange={handleFiltersChange} />
+            <MentorshipFilters initialFilters={filters} onFiltersChange={handleFiltersChange} />
           </div>
 
           {/* Right Main Area - Grid */}

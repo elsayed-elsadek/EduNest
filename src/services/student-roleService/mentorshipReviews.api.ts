@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api';
 
 const baseUrl = import.meta.env.VITE_BASE_URL?.replace(/\/+$/, '') ?? '';
@@ -35,13 +36,26 @@ export interface MentorshipReviewsApiResponse {
   };
 }
 
+export interface RateMentorshipPayload {
+  rating: number;
+  feedback: string;
+}
+
+export interface RateMentorshipApiResponse {
+  apiResponse: {
+    message: string;
+  };
+}
+
 const mapReview = (item: Record<string, unknown>): MentorshipReview => ({
   reviewId: Number(item.reviewId ?? item.id ?? 0),
   studentEmail: String(item.studentEmail ?? ''),
   rating: Number(item.rating ?? 0),
   feedback: String(item.feedback ?? item.review ?? ''),
   studentFullName: String(item.studentFullName ?? item.studentName ?? 'Student'),
-  studentProfileImageUrl: normalizeImageUrl(String(item.studentProfileImageUrl ?? item.studentProfileImageUrl ?? '') || null),
+  studentProfileImageUrl: normalizeImageUrl(
+    String(item.studentProfileImageUrl ?? '') || null
+  ),
 });
 
 export const fetchMentorshipReviews = async (
@@ -64,7 +78,9 @@ export const fetchMentorshipReviews = async (
   return {
     reviewsPage: {
       content: Array.isArray(reviews?.content)
-        ? reviews.content.map((item) => mapReview(item as unknown as Record<string, unknown>))
+        ? reviews.content.map((item) =>
+            mapReview(item as unknown as Record<string, unknown>)
+          )
         : [],
       page: Number(reviews?.page ?? page),
       size: Number(reviews?.size ?? size),
@@ -75,9 +91,28 @@ export const fetchMentorshipReviews = async (
   };
 };
 
-export const mentorshipReviewsKeys = {
-  list: (mentorshipId: string | number, page: number, size: number) => ['mentorshipReviews', mentorshipId, page, size] as const,
+const rateMentorship = async (
+  mentorshipId: string | number,
+  payload: RateMentorshipPayload
+): Promise<RateMentorshipApiResponse> => {
+  const { data } = await api.post<RateMentorshipApiResponse>(
+    `/api/v1/mentorship/${mentorshipId}/rate`,
+    payload
+  );
+  return data;
 };
+
+// Query Keys
+
+export const mentorshipReviewsKeys = {
+  all: (mentorshipId: string | number) =>
+    ['mentorshipReviews', mentorshipId] as const,
+  // Specific key — used by useQuery per page
+  list: (mentorshipId: string | number, page: number, size: number) =>
+    ['mentorshipReviews', mentorshipId, page, size] as const,
+};
+
+//  Hooks
 
 export const useMentorshipReviews = (
   mentorshipId: number | string,
@@ -87,9 +122,30 @@ export const useMentorshipReviews = (
 ) => {
   return useQuery({
     queryKey: mentorshipReviewsKeys.list(mentorshipId, page, size),
-    queryFn: ({ signal }) => fetchMentorshipReviews(mentorshipId, page, size, signal),
+    queryFn: ({ signal }) =>
+      fetchMentorshipReviews(mentorshipId, page, size, signal),
     enabled: enabled && !!mentorshipId,
     staleTime: 5 * 60 * 1000,
     retry: 1,
+  });
+};
+
+export const useRateMentorship = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      mentorshipId,
+      payload,
+    }: {
+      mentorshipId: string | number;
+      payload: RateMentorshipPayload;
+    }) => rateMentorship(mentorshipId, payload),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: mentorshipReviewsKeys.all(variables.mentorshipId),
+      });
+    },
   });
 };

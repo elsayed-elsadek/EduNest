@@ -6,6 +6,11 @@ export interface SubmitProjectPayload {
   fileUrl?: string;
 }
 
+export interface SubmitProjectResult {
+  submission: unknown;
+  message?: string;
+}
+
 export interface ProjectSubmissionResponse {
   apiResponse: {
     submission?: unknown;
@@ -16,7 +21,7 @@ export interface ProjectSubmissionResponse {
 export const submitProject = async (
   projectId: number,
   payload: SubmitProjectPayload
-): Promise<unknown> => {
+): Promise<SubmitProjectResult> => {
   try {
     const formData = new FormData();
 
@@ -40,10 +45,13 @@ export const submitProject = async (
     );
 
     if (raw?.apiResponse && typeof raw.apiResponse === 'object') {
-      const res = (raw.apiResponse as Record<string, unknown>)['submission'] ?? raw.apiResponse;
-      return res;
+      const apiResponse = raw.apiResponse as Record<string, unknown>;
+      return {
+        submission: apiResponse['submission'] ?? apiResponse,
+        message: typeof apiResponse.message === 'string' ? apiResponse.message : undefined,
+      };
     }
-    return raw;
+    return { submission: raw };
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
     console.error("Submit Project Error:", err?.response?.data ?? err?.message ?? error);
@@ -56,6 +64,7 @@ export interface StudentProjectDetails {
   title: string;
   brief: string;
   descriptionUrl: string | null;
+  attachmentPath: string | null;
   points: number;
   startAt: string | null;
   endAt: string | null;
