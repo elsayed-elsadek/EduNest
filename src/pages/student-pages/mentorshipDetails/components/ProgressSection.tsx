@@ -54,14 +54,14 @@ const ProgressSection: FC<ProgressSectionProps> = ({
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--primary-500)] text-white font-bold">
               {progress.progressPercentage}%
             </div>
-            <div className="text-xs text-slate-500">Overall completion</div>
+            {/* <div className="text-xs text-slate-500">Overall completion</div> */}
           </div>
 
           {/* short explanation tooltip */}
           <div className="text-sm text-slate-500">
-            <span title="Calculated from completed tasks, quizzes and projects relative to totals">
+            {/* <span title="Calculated from completed tasks, quizzes and projects relative to totals">
               Calculated from completed tasks, quizzes and projects
-            </span>
+            </span> */}
           </div>
           {/* <div>
             <p className="text-xs font-medium uppercase tracking-wider text-slate-500">

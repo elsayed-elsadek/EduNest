@@ -94,7 +94,7 @@ const MentorshipsCarousel: React.FC<Props> = memo(() => {
   
 
 
-  const tags = ['All', 'Programming', 'Marketing', 'Business', 'Design', 'Data & AI', 'Personal Development' , 'Other' ];
+  const tags = ['All', 'Programming', 'Marketing', 'Business', 'Design', 'Data & AI', 'Personal Development'  ];
 
   // Memoized Account Validation
   const hasStudentAccount = useMemo(

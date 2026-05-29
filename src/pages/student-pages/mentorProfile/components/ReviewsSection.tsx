@@ -2,11 +2,16 @@
 import { Star, MessageCircleWarning, User, BookOpen } from 'lucide-react';
 import { getImageUrl } from '../../../../utils/imageUtils';
 import type { MentorProfileReview } from '../../../../services/student-roleService/mentorProfile.api';
+import Pagination from '../../../../components/student-components/mentorships/Pagination';
 
 interface ReviewsSectionProps {
   reviews: MentorProfileReview[];
   totalReviews?: number;
   avgReviewRate?: number | null;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  isLoading?: boolean;
 }
 
 // ✅ Helper: format ISO date string → "May 26, 2026"
@@ -23,7 +28,15 @@ const formatDate = (dateStr: string | null): string => {
   }
 };
 
-const ReviewsSection = ({ reviews, totalReviews = 0, avgReviewRate = null }: ReviewsSectionProps) => {
+const ReviewsSection = ({
+  reviews,
+  totalReviews = 0,
+  avgReviewRate = null,
+  currentPage,
+  totalPages,
+  onPageChange,
+  isLoading = false,
+}: ReviewsSectionProps) => {
   const displayAverage = avgReviewRate != null
     ? avgReviewRate.toFixed(1)
     : reviews.length > 0
@@ -132,11 +145,31 @@ const ReviewsSection = ({ reviews, totalReviews = 0, avgReviewRate = null }: Rev
                 <p className="text-slate-600 leading-relaxed font-normal text-left">
                   "{rev.comment}"
                 </p>
+
+
+
+    
+                
               </div>
+              
             );
           })
-        )}
+
+       
+        ) }
+
+   
+
       </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          isLoading={isLoading}
+        />
+      )}
     </section>
   );
 };

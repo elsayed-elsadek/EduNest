@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {  useParams } from 'react-router-dom';
 
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
@@ -14,16 +14,28 @@ import { useMentorProfile } from '../../../services/student-roleService/mentorPr
 const MentorProfilePage = () => {
   const { mentorEmail } = useParams();
   const normalizedEmail = mentorEmail ?? '';
-  const { data, isLoading } = useMentorProfile(normalizedEmail, !!normalizedEmail);
+  const [mentorshipsPage, setMentorshipsPage] = useState(1);
+  const [reviewsPage, setReviewsPage] = useState(1);
+
+  const { data, isLoading } = useMentorProfile(
+    normalizedEmail,
+    !!normalizedEmail,
+    mentorshipsPage - 1,
+    reviewsPage - 1
+  );
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setMentorshipsPage(1);
+    setReviewsPage(1);
   }, [normalizedEmail]);
 
   const mentorProfile = useMemo(() => data?.mentorProfile ?? null, [data]);
   const mentorships = useMemo(() => data?.mentorships ?? [], [data]);
   const reviews = useMemo(() => data?.reviews ?? [], [data]);
-  const totalReviews = mentorProfile?.totalReviews ?? reviews.length;
+  const mentorshipsTotalPages = data?.mentorshipsPage?.totalPages ?? 1;
+  const reviewsTotalPages = data?.reviewsPage?.totalPages ?? 1;
+  const totalReviews = mentorProfile?.totalReviews ?? data?.reviewsPage?.totalElements ?? reviews.length;
   const avgReviewRate = mentorProfile?.avgReviewRate ?? null;
 
   const fullName = `${mentorProfile?.mentorFirstName ?? ''} ${mentorProfile?.mentorLastName ?? ''}`.trim() || 'Mentor';
@@ -44,12 +56,22 @@ const MentorProfilePage = () => {
           <div className="space-y-12">
             <AboutSection mentorProfile={mentorProfile} />
 
-            <MentorshipsSection mentorships={mentorships} />
+            <MentorshipsSection
+              mentorships={mentorships}
+              currentPage={mentorshipsPage}
+              totalPages={mentorshipsTotalPages}
+              onPageChange={setMentorshipsPage}
+              isLoading={isLoading}
+            />
 
             <ReviewsSection
               reviews={reviews}
               totalReviews={totalReviews}
               avgReviewRate={avgReviewRate}
+              currentPage={reviewsPage}
+              totalPages={reviewsTotalPages}
+              onPageChange={setReviewsPage}
+              isLoading={isLoading}
             />
           </div>
 

@@ -133,7 +133,7 @@ const ContentSection: FC = () => {
                         >
                           {/* icon + connector */}
                           <div className="flex flex-col items-center">
-                            <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                            <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-[var(--primary-500)]">
                               {(() => {
                                 const Icon = getIconForType(item.type);
                                 return <Icon className="w-3.5 h-3.5" />;

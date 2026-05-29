@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { ArrowRight, MessageCircle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { theme } from '../../../../theme/colors';
 import { Link } from 'react-router-dom';
 
@@ -36,10 +36,11 @@ const CTASection: FC = () => {
             <ArrowRight className="w-5 h-5" />
           </Link>
           
-          <button className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20">
+          {/* i will add it if back end andle this api */}
+          {/* <button className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/20 transition-colors border border-white/20">
             <MessageCircle className="w-5 h-5" />
             Talk to an Advisor
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

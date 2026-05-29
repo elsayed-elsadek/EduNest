@@ -1,32 +1,50 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { BadgeCheck, Calendar } from 'lucide-react';
 
 import type { MentorProfileMentorship } from '../../../../services/student-roleService/mentorProfile.api';
 import { API_BASE_URL } from '../../../../services/api';
 import NoCover from '../../../../components/student-components/common/Nocover/Nocover';
+import Pagination from '../../../../components/student-components/mentorships/Pagination';
 
 interface MentorshipsSectionProps {
   mentorships: MentorProfileMentorship[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  isLoading?: boolean;
 }
 
-const MentorshipsSection = ({ mentorships }: MentorshipsSectionProps) => {
-  const [showAll, setShowAll] = useState(false);
+const CourseThumb = ({ url, title }: { url?: string; title?: string }) => {
+  const [err, setErr] = useState(false);
 
-  const displayedMentorships = showAll ? mentorships : mentorships.slice(0, 2);
+  if (url && !err) {
+    return (
+      <img
+        src={url}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        alt={title}
+        onError={() => setErr(true)}
+      />
+    );
+  }
+
+  return <NoCover title={title || 'Mentorship'} />;
+};
+
+const MentorshipsSection = ({
+  mentorships,
+  currentPage,
+  totalPages,
+  onPageChange,
+  isLoading = false,
+}: MentorshipsSectionProps) => {
+  const displayPagination = totalPages > 1;
 
   return (
     <>
       <div className="flex justify-between items-end mb-8">
         <h2 className="text-2xl font-bold text-slate-900">My Mentorships</h2>
-        {mentorships.length > 1 && (
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className="text-[var(--primary-600)] font-medium text-sm hover:underline hover:text-[var(--primary-500)]"
-          >
-            {showAll ? 'Show Less' : 'View all'}
-          </button>
-        )}
       </div>
 
       {mentorships.length === 0 ? (
@@ -34,24 +52,10 @@ const MentorshipsSection = ({ mentorships }: MentorshipsSectionProps) => {
           <p className="text-sm text-slate-500 font-medium">No mentorships were found for this mentor yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {displayedMentorships.map((course) => {
-            const CourseThumb = ({ url, title }: { url?: string; title?: string }) => {
-              const [err, setErr] = useState(false);
-              if (url && !err) {
-                return (
-                  <img
-                    src={url}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    alt={title}
-                    onError={() => setErr(true)}
-                  />
-                );
-              }
-              return <NoCover title={title || 'Mentorship'} />;
-            };
-
-            return (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {mentorships.map((course) => {
+              return (
               <Link
                 key={course.id}
                 to={`/mentorships/${course.id}`}
@@ -84,14 +88,24 @@ const MentorshipsSection = ({ mentorships }: MentorshipsSectionProps) => {
                   <div className="flex justify-between items-center pt-5 border-t border-slate-50 mt-2">
                     <span className="text-xl font-bold text-slate-900">${course.price}</span>
                     <button className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-black transition-all">
-                      Enroll Now
+                      Show Details
                     </button>
                   </div>
                 </div>
               </Link>
             );
           })}
-        </div>
+          </div>
+
+          {displayPagination && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+              isLoading={isLoading}
+            />
+          )}
+        </>
       )}
     </>
   );
