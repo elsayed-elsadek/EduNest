@@ -55,10 +55,14 @@ const CreateBadgeModal: React.FC<CreateBadgeModalProps> = ({
             onSuccess();
           }
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
+          const apiError = error as {
+            response?: { data?: { message?: string } };
+            message?: string;
+          };
           const errMsg =
-            error?.response?.data?.message ||
-            error?.message ||
+            apiError?.response?.data?.message ||
+            apiError?.message ||
             'Failed to create admin badge.';
           setErrorMsg(errMsg);
           toast.error(errMsg);
@@ -125,7 +129,7 @@ const CreateBadgeModal: React.FC<CreateBadgeModalProps> = ({
             <div className="relative">
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as any)}
+                onChange={(e) => setType(e.target.value as typeof BADGE_TYPES[number]['value'])}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/10 transition-all appearance-none cursor-pointer"
               >
                 {BADGE_TYPES.map(bt => (
