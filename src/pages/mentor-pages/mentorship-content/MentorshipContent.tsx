@@ -70,7 +70,7 @@ const MentorshipContent: FC = () => {
   } | null>(null);
 
   // دالة ديناميكية ذكية لاستخراج رسالة الخطأ من السيرفر مهما كان شكل الـ Response
-  const parseServerError = (err: unknown): string => {
+  const parseServerError = useCallback((err: unknown): string => {
     const fallback = 'Failed to process request. Please try again.';
     if (!err || typeof err !== 'object') return fallback;
 
@@ -94,11 +94,67 @@ const MentorshipContent: FC = () => {
 
     const msg = asString(data?.message) ?? asString(e.message);
     return msg ?? fallback;
-  };
+  }, []);
 
   useEffect(() => {
     if (!token) navigate('/login');
   }, [token, navigate]);
+
+  const resolveContentType = useCallback((c: WeekContentItem): ContentType => {
+    const raw = (c.type ?? '').toUpperCase().trim();
+    if (['LIVE_SESSION', 'SESSION', 'LIVESESSION', 'LIVE'].includes(raw)) return 'session';
+    if (['QUIZ', 'QUIZZES'].includes(raw)) return 'quiz';
+    if (['PROJECT', 'PROJECTS'].includes(raw)) return 'project';
+    if (['ASSIGNMENT', 'TASK', 'ASSIGNMENTS', 'TASKS'].includes(raw)) return 'assignment';
+    if (['LECTURE', 'LECTURES', 'VIDEO'].includes(raw)) return 'lecture';
+
+    if ('lectureUrl' in c) return 'lecture';
+    if ('durationMinutes' in c) return 'quiz';
+    if ('goal' in c || 'brief' in c) return 'project';
+    if ('date' in c || 'time' in c) return 'session';
+
+    return 'lecture';
+  }, []);
+
+  const resolveItemId = useCallback((c: WeekContentItem, type: ContentType): number | string | undefined => {
+    const get = (k: string) => (c as Record<string, unknown>)[k];
+    const defined = (v: unknown) => v !== undefined && v !== null;
+
+    const typeSpecific: Record<ContentType, string[]> = {
+      session: ['sessionId', 'liveSessionId', 'live_session_id'],
+      quiz: ['quizId', 'quiz_id'],
+      assignment: ['taskId', 'task_id', 'assignmentId'],
+      project: ['projectId', 'project_id'],
+      lecture: ['lectureId', 'lecture_id'],
+    };
+
+    for (const k of typeSpecific[type]) {
+      if (k in c && defined(get(k))) return get(k) as number | string;
+    }
+    for (const k of ['id', '_id', 'contentId']) {
+      if (k in c && defined(get(k))) return get(k) as number | string;
+    }
+    return undefined;
+  }, []);
+
+  const buildItemKey = (weekId: number | null, type: ContentType, id?: number | string, fallbackIdx?: number): string =>
+    `${weekId ?? 'new'}-${type}-${id ?? fallbackIdx ?? 'noid'}`;
+
+  const mapWeekContentsToItems = useCallback(
+    (contents: WeekContentItem[], weekId: number | null): ContentItem[] =>
+      contents.map((c) => {
+        const computedType = resolveContentType(c);
+
+        return {
+          id: resolveItemId(c, computedType),
+          title: (c.title as string | undefined) ?? 'Untitled',
+          type: computedType,
+          weekId: weekId ?? undefined,
+          lectureUrl: 'lectureUrl' in c ? (c as { lectureUrl?: string }).lectureUrl : undefined,
+        };
+      }),
+    [resolveContentType, resolveItemId]
+  );
 
   // Load existing weeks and content
   useEffect(() => {
@@ -136,56 +192,7 @@ const MentorshipContent: FC = () => {
     };
 
     void fetchWeeksAndContent();
-  }, [mentorshipId]);
-
-  const resolveContentType = (c: WeekContentItem): ContentType => {
-    const raw = (c.type ?? '').toUpperCase().trim();
-    if (['LIVE_SESSION', 'SESSION', 'LIVESESSION', 'LIVE'].includes(raw)) return 'session';
-    if (['QUIZ', 'QUIZZES'].includes(raw)) return 'quiz';
-    if (['PROJECT', 'PROJECTS'].includes(raw)) return 'project';
-    if (['ASSIGNMENT', 'TASK', 'ASSIGNMENTS', 'TASKS'].includes(raw)) return 'assignment';
-    if (['LECTURE', 'LECTURES', 'VIDEO'].includes(raw)) return 'lecture';
-
-    if ('lectureUrl' in c) return 'lecture';
-    if ('durationMinutes' in c) return 'quiz';
-    if ('goal' in c || 'brief' in c) return 'project';
-    if ('date' in c || 'time' in c) return 'session';
-
-    return 'lecture';
-  };
-
-  const resolveItemId = (c: WeekContentItem, type: ContentType): number | string | undefined => {
-    const get = (k: string) => (c as Record<string, unknown>)[k];
-    const defined = (v: unknown) => v !== undefined && v !== null;
-
-    const typeSpecific: Record<ContentType, string[]> = {
-      session:    ['sessionId', 'liveSessionId', 'live_session_id'],
-      quiz:       ['quizId', 'quiz_id'],
-      assignment: ['taskId', 'task_id', 'assignmentId'],
-      project:    ['projectId', 'project_id'],
-      lecture:    ['lectureId', 'lecture_id'],
-    };
-    
-    for (const k of typeSpecific[type]) {
-      if (k in c && defined(get(k))) return get(k) as number | string;
-    }
-    for (const k of ['id', '_id', 'contentId']) {
-      if (k in c && defined(get(k))) return get(k) as number | string;
-    }
-    return undefined;
-  };
-
-  const buildItemKey = (weekId: number | null, type: ContentType, id?: number | string, fallbackIdx?: number): string =>
-    `${weekId ?? 'new'}-${type}-${id ?? fallbackIdx ?? 'noid'}`;
-
-  const mapWeekContentsToItems = (contents: WeekContentItem[], weekId: number | null): ContentItem[] =>
-    contents.map((c) => ({
-      id: resolveItemId(c, resolveContentType(c)),
-      title: (c.title as string | undefined) ?? 'Untitled',
-      type: resolveContentType(c),
-      weekId: weekId ?? undefined,
-      lectureUrl: 'lectureUrl' in c ? (c as { lectureUrl?: string }).lectureUrl : undefined,
-    }));
+  }, [mentorshipId, mapWeekContentsToItems, parseServerError]);
 
   const openModal = (type: ContentType, moduleIdx: number) => {
     setEditingItem(null);

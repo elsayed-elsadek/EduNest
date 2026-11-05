@@ -35,10 +35,10 @@ const MentorshipsList: FC = () => {
   const { data, isLoading, error, refetch } = useMentorshipsWithTransform(pageIndex, itemsPerPage);
   const deleteMutation = useDeleteMentorship();
 
-  // Extract variables from data
-  const mentorships: Mentorship[] = data?.content ?? [];
-  const totalElements = data?.totalElements ?? 0;
-  const totalPages = data?.totalPages ?? 0;
+  const mentorshipResponse = data as { content?: Mentorship[]; totalElements?: number; totalPages?: number } | undefined;
+  const mentorships = useMemo<Mentorship[]>(() => mentorshipResponse?.content ?? [], [mentorshipResponse]);
+  const totalElements = mentorshipResponse?.totalElements ?? 0;
+  const totalPages = mentorshipResponse?.totalPages ?? 0;
 
   // الفلترة محلياً (Client-side Filtering)
   const filteredMentorships = useMemo(() => {

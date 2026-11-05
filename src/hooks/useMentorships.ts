@@ -67,16 +67,16 @@ export function mapApiMentorshipToUi(item: unknown): Mentorship {
  */
 export function useMentorshipsWithTransform(page = 0, size = 5) {
   const { data, ...rest } = useMentorships(page, size);
-  
-  // معالجة شكل البيانات المتداخل القادم من الـ API
-  // data.apiResponse.mentorships أو data مباشرة
-  const rawData = (data as any)?.apiResponse?.mentorships ?? data;
-  const transformedData = rawData?.content?.map(mapApiMentorshipToUi) ?? [];
-  
+
+  const rawData = ((data as { apiResponse?: { mentorships?: Record<string, unknown> } } | undefined)?.apiResponse?.mentorships ?? data) as Record<string, unknown> | undefined;
+  const transformedData = Array.isArray(rawData?.content)
+    ? rawData.content.map((entry) => mapApiMentorshipToUi(entry))
+    : [];
+
   return {
     ...rest,
     data: {
-      ...rawData,
+      ...(rawData ?? {}),
       content: transformedData,
     },
   };

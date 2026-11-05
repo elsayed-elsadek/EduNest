@@ -45,8 +45,11 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({
           onClose();
           toast.success('Email sent successfully!');
         },
-        onError: (error: any) => {
-          const errMsg = error?.response?.data?.message || 'Failed to send email. Try again.';
+        onError: (error: unknown) => {
+          const apiError = error as {
+            response?: { data?: { message?: string } };
+          };
+          const errMsg = apiError?.response?.data?.message || 'Failed to send email. Try again.';
           setErrorMsg(errMsg);
           toast.error(errMsg);
         },

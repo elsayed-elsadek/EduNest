@@ -76,20 +76,30 @@ const QuestionModal: FC<QuestionModalProps> = ({
                             Answer Options <span className="text-red-500">*</span>
                         </label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {['A', 'B', 'C', 'D'].map((opt) => (
-                                <div key={opt}>
-                                    <label className="block text-xs font-medium text-gray-500 mb-1">Option {opt}</label>
-                                    <input
-                                        type="text"
-                                        value={(formData as any)[`option${opt}`]}
-                                        onChange={(e) => setFormData({ ...formData, [`option${opt}`]: e.target.value })}
-                                        placeholder={`Option ${opt}`}
-                                     maxLength={100}
-                                        required
-                                        className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]/20 focus:border-[#0f5e8b] transition-all"
-                                    />
-                                </div>
-                            ))}
+                            {(['A', 'B', 'C', 'D'] as const).map((opt) => {
+                                const optionKeys = {
+                                    A: 'optionA',
+                                    B: 'optionB',
+                                    C: 'optionC',
+                                    D: 'optionD',
+                                } as const;
+                                const field = optionKeys[opt];
+
+                                return (
+                                    <div key={opt}>
+                                        <label className="block text-xs font-medium text-gray-500 mb-1">Option {opt}</label>
+                                        <input
+                                            type="text"
+                                            value={formData[field]}
+                                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                                            placeholder={`Option ${opt}`}
+                                            maxLength={100}
+                                            required
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f5e8b]/20 focus:border-[#0f5e8b] transition-all"
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 

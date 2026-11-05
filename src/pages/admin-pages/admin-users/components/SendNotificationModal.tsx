@@ -45,8 +45,11 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({
           onClose();
           toast.success('Notification sent successfully!');
         },
-        onError: (error: any) => {
-          const errMsg = error?.response?.data?.message || 'Failed to send notification. Try again.';
+        onError: (error: unknown) => {
+          const apiError = error as {
+            response?: { data?: { message?: string } };
+          };
+          const errMsg = apiError?.response?.data?.message || 'Failed to send notification. Try again.';
           setErrorMsg(errMsg);
           toast.error(errMsg);
         },

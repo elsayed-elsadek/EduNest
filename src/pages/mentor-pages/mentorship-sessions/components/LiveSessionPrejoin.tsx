@@ -77,7 +77,7 @@ const LiveSessionPrejoin: React.FC<LiveSessionPrejoinProps> = ({
                 activeStream.getTracks().forEach(track => track.stop());
             }
         };
-    }, [videoEnabled, micEnabled]);
+    }, [videoEnabled, micEnabled, stream]);
 
     useEffect(() => {
         return () => {

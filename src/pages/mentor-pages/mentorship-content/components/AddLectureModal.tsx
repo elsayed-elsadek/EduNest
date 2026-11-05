@@ -32,10 +32,9 @@ const AddLectureModal: FC<AddLectureModalProps> = ({ weekId, editingItem, onClos
             const data = await fetchLecture(Number(editingItem.id));
             const url = data?.apiResponse?.lecture?.lectureUrl;
             if (url) setLectureUrl(url);
-          } catch (e) {
-            // don't block editing on fetch failure, but log
-            // eslint-disable-next-line no-console
-            console.warn('Failed to fetch lecture details', e);
+          } catch (error) {
+            // don't block editing on fetch failure
+            void error;
           }
         })();
       } else {

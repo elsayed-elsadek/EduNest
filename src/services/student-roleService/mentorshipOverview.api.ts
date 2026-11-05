@@ -49,9 +49,12 @@ const mapMentorshipOverview = (payload: Record<string, unknown>): MentorshipOver
       content: Array.isArray(upcomingItems.content)
         ? upcomingItems.content.map((item: Record<string, unknown>) => {
             const itemType = String(item.type ?? 'SESSION').toUpperCase();
-            const validTypes: Array<'SESSION' | 'QUIZ' | 'PROJECT' | 'ASSIGNMENT'> = ['SESSION', 'QUIZ', 'PROJECT', 'ASSIGNMENT'];
-            const type = (validTypes.includes(itemType as any) ? itemType : 'SESSION') as 'SESSION' | 'QUIZ' | 'PROJECT' | 'ASSIGNMENT';
-            
+            const validTypes = ['SESSION', 'QUIZ', 'PROJECT', 'ASSIGNMENT'] as const;
+            type UpcomingContentType = (typeof validTypes)[number];
+            const type: UpcomingContentType = validTypes.includes(itemType as UpcomingContentType)
+              ? (itemType as UpcomingContentType)
+              : 'SESSION';
+
             return {
               id: Number(item.id ?? 0),
               title: String(item.title ?? ''),

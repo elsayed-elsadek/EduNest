@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Trash2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,7 +30,10 @@ const DeleteBadgeModal: React.FC<DeleteBadgeModalProps> = ({
   const queryClient = useQueryClient();
 
   const { data: allBadgesData, isLoading: isBadgesLoading } = useAdminAllBadges();
-  const availableBadges = allBadgesData?.apiResponse?.badges || [];
+  const availableBadges = useMemo(
+    () => allBadgesData?.apiResponse?.badges ?? [],
+    [allBadgesData]
+  );
 
   const deleteBadgeMutation = useAdminDeleteBadge();
 
@@ -100,11 +103,20 @@ const DeleteBadgeModal: React.FC<DeleteBadgeModalProps> = ({
           onSuccess();
         }
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
+        const apiError = error as {
+          response?: {
+            data?: {
+              errorMessages?: { error?: string };
+              message?: string;
+            };
+          };
+          message?: string;
+        };
         const errMsg =
-          error?.response?.data?.errorMessages?.error ||
-          error?.response?.data?.message ||
-          error?.message ||
+          apiError?.response?.data?.errorMessages?.error ||
+          apiError?.response?.data?.message ||
+          apiError?.message ||
           'Failed to delete badge. It has already been assigned and cannot be deleted.';
         setErrorMsg(errMsg);
         toast.error(errMsg);
