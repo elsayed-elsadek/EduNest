@@ -157,12 +157,54 @@ src/
 ├── App.tsx           # Global Route Entrypoint and App Configuration
 └── main.tsx          # Application Mounting, Dom Binding, and global provider wrapping
 9. Development Runscripts
-Manage the software lifecycle inside your local machine using standard npm routines:
 
-npm run dev — Spines up the ultra-low-latency Vite development context.
+### Prerequisites
 
-npm run build — Validates TypeScript constraints, compiles styles, and outputs production assets to /dist.
+- Node.js **24** (pinned in `.nvmrc`; Vite 8 requires `^20.19.0 || >=22.12.0`).
+- npm 11+ (ships with Node 24).
 
-npm run preview — Provisions a local HTTP wrapper environment to run production-minified assets.
+Use the pinned toolchain so your machine matches CI:
 
-npm run lint — Validates the code architecture using custom ESLint constraints.
+```bash
+nvm use            # reads .nvmrc
+node --version     # must print v24.x
+```
+
+### Install
+
+```bash
+npm ci             # installs exactly what package-lock.json pins
+```
+
+`npm ci` (not `npm install`) is the supported install path: it is reproducible, it deletes `node_modules` first, and it fails when `package.json` and `package-lock.json` disagree.
+
+### Commands
+
+| Command | What it proves |
+| :--- | :--- |
+| `npm ci` | Dependencies install exactly as pinned in the lockfile |
+| `npm run typecheck` | No TypeScript errors (`tsc -b`, project references included) |
+| `npm run lint` | No ESLint errors |
+| `npm run build` | Production build succeeds and emits `dist/` |
+| `npm run verify` | typecheck → lint → build, stopping at the first failure |
+| `npm run ci` | Install-independent verification used by CI |
+| `npm run dev` | Local dev server |
+| `npm run preview` | Serves the built `dist/` locally |
+
+### Why `tsc -b` and not `tsc --noEmit`
+
+The root `tsconfig.json` is a solution-style file (`"files": []`) that only lists project references. Running `npx tsc --noEmit` from the root therefore checks **zero files** and exits 0 — a false green. `tsc -b` builds the referenced projects (`tsconfig.app.json`, `tsconfig.node.json`) and performs a real type check. Always use `npm run typecheck`.
+
+### Continuous Integration
+
+`.github/workflows/ci.yml` runs on every pull request targeting `master` and on every push to `master`:
+
+1. `actions/checkout`
+2. `actions/setup-node` with the version from `.nvmrc` and npm caching keyed on `package-lock.json`
+3. `npm ci`
+4. `npm run typecheck`
+5. `npm run lint`
+6. `npm run build`
+7. upload `dist/` as artifact `build-<commit-sha>` with 90-day retention
+
+A failing step fails the job, and the job blocks the merge once its check name is required in branch protection on `master`. The workflow never prints environment variables or secrets.

@@ -8,9 +8,14 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+node_modules_broken
+
 dist
 dist-ssr
 *.local
+
+# Temporary local backup of a broken install (safe to delete, never commit)
+node_modules_broken
 
 # Editor directories and files
 .vscode/*

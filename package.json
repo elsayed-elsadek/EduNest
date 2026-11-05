@@ -14,12 +14,18 @@
   "license": "ISC",
   "author": "",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
     "start": "npm run dev",
+    "typecheck": "tsc -b",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "verify": "npm run typecheck && npm run lint && npm run build",
+    "ci": "npm run verify",
     "preview": "vite preview"
   },
   "dependencies": {

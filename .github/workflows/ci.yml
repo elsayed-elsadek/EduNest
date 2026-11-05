@@ -1,0 +1,81 @@
+name: CI
+
+# Every pull request into master and every push to master must prove it is shippable.
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+# Least privilege: the pipeline only reads the repository.
+permissions:
+  contents: read
+
+# A newer push to the same ref cancels the older run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  verify:
+    name: Typecheck, Lint & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (pinned by .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Toolchain versions
+        run: |
+          echo "node: $(node --version)"
+          echo "npm:  $(npm --version)"
+          echo "commit: ${{ github.sha }}"
+
+      # `npm ci` installs exactly what package-lock.json pins and fails if the
+      # lockfile and package.json disagree. Never use `npm install` here.
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+          retention-days: 90
+          if-no-files-found: error
+
+      # A compact, human-readable record of the run (the raw per-step logs are
+      # always available in the Actions run UI).
+      - name: Run summary
+        if: always()
+        run: |
+          {
+            echo "### CI verification summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Ref | \`${{ github.ref }}\` |"
+            echo "| Event | \`${{ github.event_name }}\` |"
+            echo "| Job result | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
