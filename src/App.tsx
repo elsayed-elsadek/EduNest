@@ -1,5 +1,5 @@
 import { useEffect, Suspense, lazy } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import Navbar from './components/Navbar';
 import AdminLayout from './components/admin-components/shared/AdminLayout';
@@ -60,8 +60,6 @@ const ProjectDetail = lazy(() => import('./pages/mentor-pages/mentorship-project
 
 // Student Dashboard
 const StudentDashboard = lazy(() => import('./pages/student-pages/StudentDashboard/StudentDashboard'));
-// const ExploreMentorships = lazy(() => import('./pages/student-pages/ExploreMentorships'));
-
 
 // Explore Mentorships Page - lazy loaded for code splitting
 const ExploreMentorships = lazy(() => import('./pages/student-pages/ExploreMentorships'));
@@ -183,9 +181,7 @@ function App() {
           <Route path="/confirm-restore" element={<ConfirmRestore />} />
           
           {/* Protected Mentor Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR']} />} />
-          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR'
-          ]} />}>
+          <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR']} />}>
             <Route path="/mentor/dashboard" element={<MentorDash />} />
             <Route path="/mentor/mentorships" element={<MyMentorships />} />
             <Route path="/mentor/mentorships/create" element={<CreateMentorship />} />
@@ -225,6 +221,7 @@ function App() {
           {/* Protected Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
             <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="payment" element={<AdminPayment />} />
               <Route path="issues" element={<IssuesPage />} />
@@ -232,7 +229,6 @@ function App() {
               <Route path="users" element={<AdminUsers/>} />  
 
             </Route>
-            <Route path="/admin/dashboard" element={<div>Admin Dashboard - Coming Soon</div>} />
           </Route>
         </Routes>
       </Suspense>
