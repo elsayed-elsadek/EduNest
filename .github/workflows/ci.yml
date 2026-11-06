@@ -21,7 +21,7 @@ env:
 
 jobs:
   verify:
-    name: Typecheck, Lint & Build
+    name: Typecheck, Lint, Test & Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -53,6 +53,20 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Fails the pipeline on any failing assertion AND when coverage drops
+      # below the thresholds declared in vitest.config.ts (70% lines/branches).
+      - name: Test & coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
+
       - name: Build
         run: npm run build
 
@@ -77,5 +91,6 @@ jobs:
             echo "| Commit | \`${{ github.sha }}\` |"
             echo "| Ref | \`${{ github.ref }}\` |"
             echo "| Event | \`${{ github.event_name }}\` |"
+            echo "| Coverage gate | 70% lines / 70% branches |"
             echo "| Job result | ${{ job.status }} |"
           } >> "$GITHUB_STEP_SUMMARY"

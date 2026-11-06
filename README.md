@@ -272,6 +272,49 @@ logger.error('failed to save project', err);
 Errors must still reach the user through UI state (toasts, error panels); the
 logger is for diagnostics only, never the only error channel.
 
+### Testing
+
+Unit and component tests run on **Vitest** with **jsdom** and **React Testing
+Library** (`@testing-library/react`, `@testing-library/user-event`,
+`@testing-library/jest-dom`). Configuration lives in `vitest.config.ts`; shared
+setup lives in `src/test/setup.ts`.
+
+```bash
+npm test            # single run (CI mode)
+npm run test:watch  # re-run affected tests while you edit
+npm run test:coverage  # single run + coverage report + threshold gate
+```
+
+| Path | Covers |
+| :--- | :--- |
+| `src/config/__tests__/env.test.ts` | URL validation, production guards, `getAssetUrl` |
+| `src/utils/__tests__/jwt.test.ts` | JWT decoding, name/role/user extraction, invalid tokens |
+| `src/utils/__tests__/logger.test.ts` | Log sanitisation, recursive redaction, dev forwarding |
+| `src/utils/__tests__/logger.production.test.ts` | Production logger is a no-op |
+| `src/routes/__tests__/ProtectedRoute.test.tsx` | Hydration, login redirect, role-based redirects |
+| `src/hooks/__tests__/useLogin.test.tsx` | Login validation, success/failure/OTP/restore flows |
+| `src/hooks/__tests__/useRegisterForm.test.tsx` | Registration validation rules |
+| `src/components/common/__tests__/` | `Button`, `EmptyState`, `ErrorState` behaviour |
+
+**Coverage policy.** `npm run test:coverage` prints statements, branches,
+functions and lines, writes an HTML report to `coverage/` (git-ignored), and
+**fails the run** when the totals drop below **70% lines / 70% branches**. These
+thresholds are the starting floor proposed for Tech Lead sign-off; raise them,
+never lower them.
+
+Coverage is scoped (`coverage.include` in `vitest.config.ts`) to the modules that
+already have a dedicated suite. Measuring all of `src/` at this stage would
+dilute the number with untested screens and make the gate meaningless. Add every
+newly tested module to that list as suites land.
+
+**Writing a test.** Use explicit imports (`import { describe, it, expect } from 'vitest'`)
+— globals are disabled. Render through React Testing Library and query by role or
+text, not by CSS class. Never assert on the real network: mock the service module
+(`vi.mock`) and keep the test deterministic.
+
+End-to-end flows, browser automation and Playwright are deliberately **out of
+scope** here; they are tracked in FE-013, FE-014 and FE-015.
+
 ### Commands
 
 | Command | What it proves |
@@ -279,8 +322,10 @@ logger is for diagnostics only, never the only error channel.
 | `npm ci` | Dependencies install exactly as pinned in the lockfile |
 | `npm run typecheck` | No TypeScript errors (`tsc -b`, project references included) |
 | `npm run lint` | No ESLint errors |
+| `npm test` | All unit/component tests pass |
+| `npm run test:coverage` | Tests pass **and** coverage meets the 70% lines/branches floor |
 | `npm run build` | Production build succeeds and emits `dist/` |
-| `npm run verify` | typecheck → lint → build, stopping at the first failure |
+| `npm run verify` | typecheck → lint → coverage → build, stopping at the first failure |
 | `npm run ci` | Install-independent verification used by CI |
 | `npm run dev` | Local dev server |
 | `npm run preview` | Serves the built `dist/` locally |
@@ -298,7 +343,9 @@ The root `tsconfig.json` is a solution-style file (`"files": []`) that only list
 3. `npm ci`
 4. `npm run typecheck`
 5. `npm run lint`
-6. `npm run build`
-7. upload `dist/` as artifact `build-<commit-sha>` with 90-day retention
+6. `npm run test:coverage` — a failing assertion or a coverage drop below 70% fails the job
+7. `npm run build`
+8. upload `dist/` as artifact `build-<commit-sha>` with 90-day retention
+9. upload `coverage/` as artifact `coverage-<commit-sha>` with 14-day retention
 
 A failing step fails the job, and the job blocks the merge once its check name is required in branch protection on `master`. The workflow never prints environment variables or secrets.
