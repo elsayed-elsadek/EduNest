@@ -178,6 +178,66 @@ npm ci             # installs exactly what package-lock.json pins
 
 `npm ci` (not `npm install`) is the supported install path: it is reproducible, it deletes `node_modules` first, and it fails when `package.json` and `package-lock.json` disagree.
 
+### Environment configuration
+
+All runtime configuration is read through a single module, `src/config/env.ts`. Application code must import `API_BASE_URL` / `getAssetUrl` from there instead of reading `import.meta.env` directly or hard-coding a host.
+
+| Variable | Required | Example | Purpose |
+| :--- | :--- | :--- | :--- |
+| `VITE_API_BASE_URL` | Production: **yes**<br>Development: no | `https://api.example.com` | Backend origin used by Axios, WebSocket connections and asset URLs |
+
+> Vite only exposes `VITE_*` variables to the browser, and their values are **inlined into the bundle at build time**. Never put a password, private API key or any other secret in a `VITE_*` variable.
+
+#### Local setup
+
+Copy the template and point it at your local backend:
+
+```bash
+cp .env.example .env                 # Linux / macOS
+Copy-Item .env.example .env          # PowerShell
+```
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+`.env` is git-ignored. If the variable is absent in development, `src/config/env.ts` falls back to `http://localhost:8080`, so `npm run dev` works out of the box.
+
+#### Staging and production
+
+The same code is promoted between environments by changing the variable at build time — no source changes:
+
+```bash
+# Staging
+VITE_API_BASE_URL=https://api.staging.example.com npm run build
+
+# Production (PowerShell)
+$env:VITE_API_BASE_URL="https://api.example.com"; npm run build
+```
+
+#### Accepted URL format
+
+| Value | Result |
+| :--- | :--- |
+| `https://api.example.com` | ✅ accepted |
+| `https://api.example.com/` | ✅ accepted, normalised to `https://api.example.com` |
+| `http://localhost:8080` (development) | ✅ accepted |
+| `staging.example.com` (no scheme) | ❌ rejected — must be an absolute URL |
+| `https://user:pass@api.example.com` | ❌ rejected — credentials are not allowed |
+| `https://api.example.com/?x=1` | ❌ rejected — no query string or hash |
+| `http://localhost:8080` (production build) | ❌ rejected — local hosts are not allowed in production |
+
+#### Missing or invalid configuration
+
+`src/config/env.ts` validates the value when the bundle loads:
+
+- **Production:** a missing `VITE_API_BASE_URL`, a non-absolute URL, or a localhost host throws immediately with a message prefixed `[env]`, so the app fails fast instead of silently calling the wrong backend.
+- **Development:** a missing variable falls back to the local backend; an invalid value still throws.
+
+Asset URLs (avatars, uploads, files) use the same origin through `getAssetUrl()`; `src/utils/imageUtils.ts` is a thin wrapper over it.
+
+> `VITE_BASE_URL` is a legacy name that is being removed. Do not use it in new code — import from `src/config/env.ts` instead.
+
 ### Commands
 
 | Command | What it proves |

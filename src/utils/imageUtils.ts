@@ -1,20 +1,13 @@
-import api from '../services/api';
+import { getAssetUrl } from '../config/env';
 
 /**
- * Converts relative image URLs to absolute URLs using API base URL
- * Handles: /uploads/... -> http://localhost:8080/uploads/...
- * @param imageUrl - Relative or absolute image URL
- * @returns Absolute URL or undefined
+ * Converts a relative image URL to an absolute URL on the configured API host.
+ *
+ * Thin wrapper over the central `getAssetUrl` helper so every asset URL in the
+ * app is built from the same environment configuration.
+ *
+ * @param imageUrl - Relative (e.g. `/uploads/avatar.png`) or absolute image URL
+ * @returns Absolute URL, or undefined when the input is empty
  */
-export const getImageUrl = (imageUrl?: string | null): string | undefined => {
-  if (!imageUrl) return undefined;
-
-  // Already absolute
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-    return imageUrl;
-  }
-
-  // Get BASE_URL from api config (VITE_BASE_URL || localhost:8080)
-  const baseURL = (api.defaults.baseURL ?? '').replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-  return baseURL ? `${baseURL}${imageUrl}` : undefined;
-};
+export const getImageUrl = (imageUrl?: string | null): string | undefined =>
+  getAssetUrl(imageUrl);
