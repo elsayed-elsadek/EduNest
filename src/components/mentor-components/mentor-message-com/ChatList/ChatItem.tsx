@@ -1,15 +1,13 @@
 
 import type { FC } from 'react';
 import type { Chat } from '../../../../types/mentor-meaasges.types';
+import { getAssetUrl } from '../../../../config/env';
 
 interface ChatItemProps {
   chat:     Chat;
   isActive: boolean;
   onClick:  () => void;
 }
-
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
 
 // ── Same UTC fix ─────────────────────────────────────────────────────────────
 const toUtcTs = (ts: string): string => {
@@ -36,7 +34,7 @@ const formatTimeAgo = (ts: string): string => {
 
 const Avatar: FC<{ name: string; src?: string }> = ({ name, src }) => {
   const fullSrc = src
-    ? (src.startsWith('http') || src.startsWith('data:') ? src : `${BASE_URL}${src}`)
+    ? (/^(https?:\/\/|data:)/i.test(src) ? src : getAssetUrl(src))
     : null;
   return (
     <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0">

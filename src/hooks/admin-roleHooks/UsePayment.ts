@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
+import { getAssetUrl } from '../../config/env';
 import { getPaymentsFull } from '../../services/admin-role-service/AdminPaymentService';
 import type {
   LedgerRecord,
@@ -7,8 +8,6 @@ import type {
   EnrollmentPaymentApi,
   SalesChartApi,
 } from '../../types/admin-role-types/admin-payment.types';
-
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
 
 //  mappers 
 
@@ -35,9 +34,7 @@ function mapRecord(r: EnrollmentPaymentApi, idx: number): LedgerRecord {
   return {
     id:              idx,
     userName:        r.studentFullName,
-    userAvatar:      r.studentProfileImageUrl
-      ? `${BASE_URL}${r.studentProfileImageUrl}`
-      : undefined,
+    userAvatar:      getAssetUrl(r.studentProfileImageUrl),
     email:           r.studentEmail,
     mentorName:      r.mentorName,
     mentorshipTitle: r.mentorshipTitle,

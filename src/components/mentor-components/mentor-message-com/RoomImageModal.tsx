@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { X, Camera, Check } from 'lucide-react';
 import { updateRoomImage } from '../../../services/Roomchatservice';
+import { getAssetUrl } from '../../../config/env';
 
 interface Props {
   roomId:        number;
@@ -18,9 +19,6 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
   const [error,   setError  ] = useState<string | null>(null);
   const inputRef    = useRef<HTMLInputElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
-
-  const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-    .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -44,7 +42,7 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
       // Build full URL from relative path returned by backend
       const relativePath = res?.apiResponse?.imageUrl ?? '';
       const newUrl = relativePath
-        ? `${BASE_URL}${relativePath}`
+        ? getAssetUrl(relativePath) ?? ''
         : (preview ?? '');
       onUpdated(newUrl);  // ← passes full URL to parent
     } catch {
@@ -55,7 +53,7 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
   };
 
   const displaySrc = preview
-    ? (preview.startsWith('data:') ? preview : `${BASE_URL}${preview}`)
+    ? (/^(https?:\/\/|data:)/i.test(preview) ? preview : getAssetUrl(preview))
     : null;
 
   return (

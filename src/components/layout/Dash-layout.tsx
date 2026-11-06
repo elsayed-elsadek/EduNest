@@ -5,13 +5,8 @@ import { MentorNavbar } from "../common/common-dash";
 import { useNotificationsContext } from "../../context/NotificationsContext";
 import { useAuthStore } from "../../store/authStore";
 import { getMentorProfile, extractMentorProfile } from "../../services/Mentorprofileservice";
-import api from "../../services/api";
+import { getAssetUrl } from "../../config/env";
 import { getFirstNameFromToken } from "../../utils/jwt";
-
-const BASE_URL = (() => {
-  const url = (api.defaults.baseURL ?? "").replace(/\/api\/v1\/?$/, "").replace(/\/$/, "");
-  return url;
-})();
 
 interface DashLayoutProps {
   children: React.ReactNode;
@@ -50,11 +45,7 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
         const res = await getMentorProfile();
         const data = extractMentorProfile(res);
         if (data) {
-          const avatar = data.profileImageUrl
-            ? (data.profileImageUrl.startsWith('http')
-                ? data.profileImageUrl
-                : `${BASE_URL}${data.profileImageUrl}`)
-            : undefined;
+          const avatar = getAssetUrl(data.profileImageUrl);
 
           const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
           
@@ -114,6 +105,5 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
     </div>
   );
 }
-
 
 

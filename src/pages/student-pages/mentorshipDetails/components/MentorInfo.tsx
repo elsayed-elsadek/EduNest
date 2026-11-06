@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { Briefcase, Mail,  ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { MentorshipDetails } from '../../../../types/student-role-types/studentMentorshipTypes';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 
 interface MentorInfoProps {
   mentorship?: MentorshipDetails;
@@ -18,7 +18,7 @@ const MentorInfo: FC<MentorInfoProps> = ({ mentorship, isLoading = false }) => {
             <div className="h-full w-full animate-pulse bg-gray-200 rounded-full" />
           ) : mentorship?.mentorProfileImageUrl ? (
             <img
-              src={API_BASE_URL+mentorship.mentorProfileImageUrl}
+              src={getAssetUrl(mentorship.mentorProfileImageUrl)}
               alt={mentorship.mentorName}
               className="h-full w-full object-cover"
             />

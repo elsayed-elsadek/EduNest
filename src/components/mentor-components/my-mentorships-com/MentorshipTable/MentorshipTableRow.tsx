@@ -5,7 +5,7 @@ import { Eye, MoreVertical, Star, Edit2, Trash2 } from 'lucide-react';
 import NoCover from '../../../../components/student-components/common/Nocover/Nocover';
 import { Menu, Transition } from '@headlessui/react';
 import type { Mentorship } from '../../../../types/mentorship.types';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 
 interface MentorshipTableRowProps {
   mentorship: Mentorship;
@@ -27,7 +27,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
           <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white dark:group-hover:bg-gray-700 transition-colors overflow-hidden">
             {mentorship.coverImageUrl ? (
               <img
-                src={`${API_BASE_URL}${mentorship.coverImageUrl}`}
+                src={getAssetUrl(mentorship.coverImageUrl)}
                 alt=""
                 title={mentorship.coverImageUrl}
                 className="w-full h-full object-cover rounded-lg cursor-pointer"
@@ -167,5 +167,4 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
 };
 
 export default MentorshipTableRow;
-
 

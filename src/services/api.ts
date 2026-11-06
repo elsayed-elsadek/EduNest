@@ -1,11 +1,9 @@
 import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
-
-export const API_BASE_URL =  'http://localhost:8080';
-
+import { API_BASE_URL, IS_PRODUCTION } from '../config/env';
 
 // Production mode check - only log in development
-const isDev = import.meta.env.DEV;
+const isDev = !IS_PRODUCTION;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -88,4 +86,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-

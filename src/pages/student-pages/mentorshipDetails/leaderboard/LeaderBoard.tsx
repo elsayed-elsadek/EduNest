@@ -5,7 +5,7 @@ import { Filter, User, Medal } from 'lucide-react';
 import { useMentorshipLeaderboard } from '../../../../services/student-roleService/mentorshipLeaderboard.api';
 // import { getImageUrl } from '../../../../utils/imageUtils';
 import LeaderboardRow from './components/LeaderboardRow';
-import api from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 
 const LeaderBoard: FC = () => {
   const { mentorshipId } = useParams();
@@ -52,10 +52,7 @@ const LeaderBoard: FC = () => {
           isWinner ? 'ring-[var(--primary-500)]/50 bg-gradient-to-br from-slate-800 to-slate-900' : 'ring-slate-100 bg-slate-100'
         }`}>
           {student.studentProfileImageUrl ? (
-            <img src={student.studentProfileImageUrl!.startsWith('http') ?
-               student.studentProfileImageUrl 
-               : `${api.defaults.baseURL?.replace(/\/api\/v1\/?$/, '')?.replace(/\/$/, '')
-                 || 'http://localhost:8080'}${student.studentProfileImageUrl}`}
+            <img src={getAssetUrl(student.studentProfileImageUrl)}
                   alt={student.studentFullName}
                    className="h-full w-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />

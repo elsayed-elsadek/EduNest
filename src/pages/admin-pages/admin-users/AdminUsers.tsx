@@ -9,7 +9,7 @@ import type { UserSummaryData } from '../../../types/admin-role-types/admin-dash
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import {  Bell, ChevronDown, Loader2, X, Github, Linkedin, Globe, Award, Trash2 } from 'lucide-react';
 import UserList from './components/UserList';
-import { API_BASE_URL } from '../../../services/api';
+import { getAssetUrl } from '../../../config/env';
 import SendNotificationModal from './components/SendNotificationModal';
 import SendEmailModal from './components/SendEmailModal';
 import AssignBadgeModal from './components/AssignBadgeModal';
@@ -129,7 +129,7 @@ const Users: React.FC = () => {
         <div className="absolute top-16 left-1/2 -translate-x-1/2">
           <div className="w-24 h-24 rounded-full border-4 border-white bg-white overflow-hidden shadow-sm">
             {selectedUser.profileImageUrl ? (
-              <img src={`${API_BASE_URL}${selectedUser.profileImageUrl}`} alt={selectedUser.firstName} className="w-full h-full object-cover" />
+              <img src={getAssetUrl(selectedUser.profileImageUrl)} alt={selectedUser.firstName} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary-100 text-primary-600 font-bold text-3xl">
                 {selectedUser.firstName ? selectedUser.firstName[0].toUpperCase() : 'U'}

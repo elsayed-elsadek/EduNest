@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getFullHomepage, extractHomepageData } from '../../services/student-roleService/Homepageservice';
+import { getAssetUrl } from '../../config/env';
 import { useAuthStore } from '../../store/authStore';
 import type {
   ContinueLearningDto,
@@ -11,11 +12,8 @@ import type {
 import type { Course, TimelineEvent } from '../../types/student-role-types/course.types';
 
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-
 const resolveImg = (url: string | null | undefined): string =>
-  url ? (url.startsWith('http') ? url : `${BASE_URL}${url}`) : '';
+  url ? (getAssetUrl(url) ?? '') : '';
 
 // mappers 
 const mapContinueLearning = (dto: ContinueLearningDto): Course => ({

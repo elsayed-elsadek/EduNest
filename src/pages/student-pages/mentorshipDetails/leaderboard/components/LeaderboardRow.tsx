@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { User } from 'lucide-react';
 // import { getImageUrl } from '../../../../../../../utils/imageUtils';
 import type { LeaderboardStudent } from '../../../../../types/student-role-types/mentorshipLeaderboardTypes';
-import { API_BASE_URL } from '../../../../../services/api';
+import { getAssetUrl } from '../../../../../config/env';
 
 type LeaderboardRowProps = {
   student: LeaderboardStudent;
@@ -20,7 +20,7 @@ const LeaderboardRow: FC<LeaderboardRowProps> = ({ student, highlight = false })
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-slate-100 shrink-0">
           {student.studentProfileImageUrl ? (
-            <img src={student.studentProfileImageUrl!.startsWith('http') ? student.studentProfileImageUrl : `${API_BASE_URL}${student.studentProfileImageUrl}`} alt={student.studentFullName} className="h-full w-full object-cover"
+            <img src={getAssetUrl(student.studentProfileImageUrl)} alt={student.studentFullName} className="h-full w-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-400">
@@ -67,4 +67,3 @@ const LeaderboardRow: FC<LeaderboardRowProps> = ({ student, highlight = false })
 );
 
 export default LeaderboardRow;
-

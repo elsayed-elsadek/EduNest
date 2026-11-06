@@ -7,7 +7,7 @@ import type { MentorshipDetails } from '../../../types/student-role-types/studen
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
 import Footer from '../../../components/student-components/common/Footer/Footer';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
-import { API_BASE_URL } from '../../../services/api';
+import { getAssetUrl } from '../../../config/env';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-US', {
@@ -216,7 +216,7 @@ const EnrollMentorship = () => {
           <div
             className="h-48 sm:h-64 w-full bg-slate-900 bg-cover bg-center"
             style={{
-              backgroundImage: details?.coverImageUrl ? `url(${API_BASE_URL}${details.coverImageUrl})`
+              backgroundImage: details?.coverImageUrl ? `url(${getAssetUrl(details.coverImageUrl)})`
                 : 'none',
             }}
           />
@@ -302,4 +302,3 @@ const EnrollMentorship = () => {
 };
 
 export default EnrollMentorship;
-

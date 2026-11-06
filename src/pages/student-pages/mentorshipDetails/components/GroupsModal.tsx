@@ -15,7 +15,7 @@ import {
   useJoinRoom,
 } from '../../../../services/student-roleService/mentorshipDetails.api';
 
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 
 interface GroupsModalProps {
   mentorshipId: number;
@@ -55,7 +55,7 @@ const GroupsModal: FC<GroupsModalProps> = ({ mentorshipId, onClose }) => {
           roomId,
           roomName,
           coverImage: coverImage
-            ? `${API_BASE_URL}${coverImage}`
+            ? getAssetUrl(coverImage)
             : undefined,
         },
       },
@@ -167,7 +167,7 @@ const GroupsModal: FC<GroupsModalProps> = ({ mentorshipId, onClose }) => {
               !isError &&
               filteredRooms.map((room) => {
                 const coverSrc = room.roomCoverImage
-                  ? `${API_BASE_URL}${room.roomCoverImage}`
+                  ? getAssetUrl(room.roomCoverImage)
                   : null;
 
                 return (

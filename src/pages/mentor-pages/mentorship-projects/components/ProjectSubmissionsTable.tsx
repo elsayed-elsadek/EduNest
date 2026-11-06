@@ -3,6 +3,7 @@
 import React from 'react';
 import { Award, CheckCircle, Clock, AlertCircle, Download, Link } from 'lucide-react';
 import type { TaskSubmission, ProjectStatistics } from '../../../../services/projectService';
+import { getAssetUrl } from '../../../../config/env';
 
 type Props = {
   submissionsList: TaskSubmission[];
@@ -29,7 +30,7 @@ export const ProjectSubmissionsTable: React.FC<Props> = ({
   const getFileUrl = (sub: TaskSubmission): string | null => {
     if (sub.uploadedFilePath && sub.uploadedFilePath.trim() !== '') {
       const filename = sub.uploadedFilePath.split('/').pop();
-      return `http://localhost:8080/uploads/submissions/${filename}`;
+      return getAssetUrl(`/uploads/submissions/${filename}`) ?? null;
     }
     return null;
   };

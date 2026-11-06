@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import DashLayout from '../../../components/layout/Dash-layout';
-import { API_BASE_URL } from '../../../services/api';
+import { getAssetUrl } from '../../../config/env';
 import {
   getMentorshipDetail,
   updateMentorship,
@@ -72,7 +72,7 @@ const EditMentorship: FC = () => {
           if (cleanValue.startsWith('http') || cleanValue.startsWith('blob:')) {
             return cleanValue;
           }
-          return cleanValue.startsWith('/') ? `${API_BASE_URL}${cleanValue}` : `${API_BASE_URL}/${cleanValue}`;
+          return getAssetUrl(cleanValue);
         };
 
         const rawCoverUrl =
@@ -283,6 +283,5 @@ const EditMentorship: FC = () => {
 };
 
 export default EditMentorship;
-
 
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CheckCircle, Award, AlertCircle, Download, MessageSquare, Link as LinkIcon } from 'lucide-react';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 import ContentTypeBadge from '../../../../components/common/ContentTypeBadge';
 import type { StudentTaskDetails } from '../../../../services/student-roleService/submitTask';
 import FileViewer from '../../../../components/common/FileViewer';
@@ -46,9 +46,7 @@ const StudentSubmissionStatus = ({ taskDetails }: StudentSubmissionStatusProps) 
 
   const getMentorPhotoUrl = (photo?: string | null) => {
     if (!photo) return '';
-    if (photo.startsWith('http')) return photo;
-    const cleanPhoto = photo.startsWith('/') ? photo.substring(1) : photo;
-    return `${API_BASE_URL.endsWith('/') ? API_BASE_URL : API_BASE_URL + '/'}${cleanPhoto}`;
+    return getAssetUrl(photo) ?? '';
   };
 
   return (

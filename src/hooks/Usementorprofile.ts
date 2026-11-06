@@ -9,11 +9,7 @@ import {
   updateMentorProfile,
   updateMentorProfileImage,
 } from '../services/Mentorprofileservice';
-import api from '../services/api';
-const BASE_URL = (() => {
-  const url = (api.defaults.baseURL ?? '').replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-  return url;
-})();
+import { getAssetUrl } from '../config/env';
 
 const toUiProfile = (raw: ReturnType<typeof extractMentorProfile>): UserProfile | null => {
   if (!raw) return null;
@@ -26,11 +22,7 @@ const toUiProfile = (raw: ReturnType<typeof extractMentorProfile>): UserProfile 
     experience: raw.yearsOfExperience
       ? `${raw.yearsOfExperience}+ Years Experience`
       : '',
-    avatar:     raw.profileImageUrl
-      ? (raw.profileImageUrl.startsWith('http')
-          ? raw.profileImageUrl
-          : `${BASE_URL}${raw.profileImageUrl}`)
-      : undefined,
+    avatar:     getAssetUrl(raw.profileImageUrl),
     bio:   raw.bio   ?? '',
     links: {
       linkedin: raw.linkedInLink ?? '',
@@ -102,7 +94,7 @@ export const useMentorProfile = () => {
     try {
       const url = await updateMentorProfileImage(file);
       if (url) {
-        const finalUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+        const finalUrl = getAssetUrl(url) ?? url;
         if (profile) {
           setProfile({
             ...profile,

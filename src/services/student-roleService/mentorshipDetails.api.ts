@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api';
 import { queryClient } from '../../lib/queryClient';
+import { getAssetUrl } from '../../config/env';
 import type { MentorshipDetails, MentorshipDetailsApiResponse, MentorshipSummary, MentorshipContentResponse, WeekContent, WeekContentResponse, Week, MentorshipOverviewApiResponse, MentorshipOverviewEnrolled } from '../../types/student-role-types/studentMentorshipTypes';
 
 // ── Chat Room Types ────────────────────────────────────────────────────────
@@ -54,13 +55,10 @@ export const useJoinRoom = (mentorshipId: number | string) => {
   });
 };
 
-const baseUrl = import.meta.env.VITE_BASE_URL ?? '';
-
 // Helper: Ensures URLs are absolute
 const normalizeImageUrl = (value?: string | null): string | null => {
   if (!value || value.trim() === '') return null;
-  if (value.startsWith('http')) return value;
-  return `${baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
+  return getAssetUrl(value) ?? null;
 };
 
 // Map Summary (Used for "Top Mentorships" section)

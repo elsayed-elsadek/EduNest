@@ -1,7 +1,7 @@
 import { type FC, memo, useState } from 'react';
 import { Clock, User } from 'lucide-react';
 import type { MentorshipData } from '../../../types/mentorship';
-import { API_BASE_URL } from '../../../services/api';
+import { getAssetUrl } from '../../../config/env';
 import NoCover from '../../student-components/common/Nocover/Nocover';
 
 interface MentorshipCardProps {
@@ -55,7 +55,7 @@ const MentorshipCard: FC<MentorshipCardProps> = memo(({ mentorship, onClick, onH
       <div className="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
         {mentorship.coverImageUrl && !imgError ? (
           <img
-            src={`${API_BASE_URL}${mentorship.coverImageUrl}`}
+            src={getAssetUrl(mentorship.coverImageUrl)}
             alt={mentorship.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"

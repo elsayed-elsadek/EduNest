@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { getAssetUrl } from '../config/env';
 import { wsService } from '../services/Websocketservice';
 import {
   getAllConversations,
@@ -13,12 +14,10 @@ import type {
   ConversationDto, ConversationMessageDto, ConversationRealtimeEvent,
 } from '../types/mentor-meaasges.types';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-
 const fullUrl = (path: string | null | undefined): string | undefined => {
   if (!path) return undefined;
-  return path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  if (/^(https?:\/\/|data:)/i.test(path)) return path;
+  return getAssetUrl(path);
 };
 
 const toUtcTs = (ts: string | undefined): string => {

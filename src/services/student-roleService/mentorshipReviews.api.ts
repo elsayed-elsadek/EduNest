@@ -1,14 +1,11 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api';
-
-const baseUrl = import.meta.env.VITE_BASE_URL?.replace(/\/+$/, '') ?? '';
+import { getAssetUrl } from '../../config/env';
 
 const normalizeImageUrl = (value?: string | null): string | null => {
   if (!value || String(value).trim() === '') return null;
-  const url = String(value).trim();
-  if (url.startsWith('http')) return url;
-  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  return getAssetUrl(String(value).trim()) ?? null;
 };
 
 export interface MentorshipReview {

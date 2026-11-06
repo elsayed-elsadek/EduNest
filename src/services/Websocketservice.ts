@@ -1,8 +1,9 @@
 
 import SockJS from 'sockjs-client';
 import { Client, type StompSubscription } from '@stomp/stompjs';
+import { API_BASE_URL } from '../config/env';
 
-const WS_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
+const WS_URL = API_BASE_URL
   .replace(/\/api\/v1\/?$/, '')
   .replace(/\/$/, '');
 

@@ -2,6 +2,7 @@
 import { ArrowLeft, Users } from 'lucide-react';
 import type { FC } from 'react';
 import type { Chat } from '../../../../types/mentor-meaasges.types';
+import { getAssetUrl } from '../../../../config/env';
 
 interface ChatHeaderProps {
   chat: Chat;
@@ -11,12 +12,9 @@ interface ChatHeaderProps {
   isMembersOpen?: boolean;
 }
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-
 const Avatar: FC<{ src?: string; name: string; size?: string }> = ({ src, name, size = 'w-10 h-10' }) => {
   const fullSrc = src
-    ? (src.startsWith('http') || src.startsWith('data:') ? src : `${BASE_URL}${src}`)
+    ? (/^(https?:\/\/|data:)/i.test(src) ? src : getAssetUrl(src))
     : null;
   return (
     <div className={`relative ${size} rounded-full overflow-hidden flex-shrink-0`}>

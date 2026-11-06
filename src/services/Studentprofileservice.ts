@@ -1,12 +1,10 @@
 
 import api from './api';
-
-// Prefix relative /uploads/... paths with the backend base URL
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
+import { getAssetUrl } from '../config/env';
 
 export const toAbsolute = (path?: string | null): string | undefined => {
   if (!path) return undefined;
-  return path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  return getAssetUrl(path);
 };
 
 const handleRequest = async <T>(request: Promise<{ data: T }>): Promise<T> => {

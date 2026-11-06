@@ -15,7 +15,7 @@ import {
     Clock,
     Check
 } from 'lucide-react';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 import type { MentorshipFormData } from '../types';
 
 interface EditMentorshipFormProps {
@@ -98,9 +98,9 @@ const EditMentorshipForm: FC<EditMentorshipFormProps> = ({
                 {formData.coverImageUrl ? (
                     <div className="relative w-full h-full">
                         <img
-                            src={formData.coverImageUrl?.startsWith('http') || formData.coverImageUrl?.startsWith('blob:')
+                            src={formData.coverImageUrl?.startsWith('blob:')
                                 ? formData.coverImageUrl
-                                : `${API_BASE_URL}${formData.coverImageUrl}`}
+                                : getAssetUrl(formData.coverImageUrl)}
                             alt="Cover"
                             className="w-full h-full object-cover"
                         />

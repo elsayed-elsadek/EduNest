@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { UserSummaryData } from '../../../../types/admin-role-types/admin-dash.types';
 import { Mail, Award, MoreHorizontal, ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2 } from 'lucide-react';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 
 interface UserListProps {
   users: UserSummaryData[];
@@ -149,7 +149,7 @@ const UserList: React.FC<UserListProps> = ({
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 flex-shrink-0 relative border border-slate-200/60 shadow-sm">
                     {user.profileImageUrl ? (
                       <img 
-                        src={`${API_BASE_URL}${user.profileImageUrl}`} 
+                        src={getAssetUrl(user.profileImageUrl)} 
                         alt={user.firstName} 
                         className="w-full h-full object-cover" 
                       />
@@ -268,7 +268,7 @@ const UserList: React.FC<UserListProps> = ({
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 flex-shrink-0 relative border border-slate-200/60 shadow-xs">
                         {user.profileImageUrl ? (
                           <img 
-                            src={`${API_BASE_URL}${user.profileImageUrl}`} 
+                            src={getAssetUrl(user.profileImageUrl)} 
                             alt={user.firstName} 
                             className="w-full h-full object-cover" 
                           />
