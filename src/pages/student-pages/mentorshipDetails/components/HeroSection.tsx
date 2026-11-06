@@ -2,7 +2,7 @@ import { type FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, ShieldCheck, Clock, MessageCircle, BadgeCheck, Flame, PlayCircle, Users } from 'lucide-react';
 import type { MentorshipDetails } from '../../../../types/student-role-types/studentMentorshipTypes';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 import GroupsModal from './GroupsModal';
 
 interface HeroSectionProps {
@@ -47,9 +47,7 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
         openDirectChatWith: {
           email: mentorship.mentorEmail,
           name: mentorship.mentorName,
-          avatar: mentorship.mentorProfileImageUrl
-            ? `${API_BASE_URL}${mentorship.mentorProfileImageUrl}`
-            : undefined,
+          avatar: getAssetUrl(mentorship.mentorProfileImageUrl),
         },
       },
     });
@@ -62,7 +60,7 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
       className="relative min-h-[500px] lg:min-h-[600px] flex items-center overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-900 shadow-2xl"
       style={{
         backgroundImage: mentorship?.coverImageUrl && !imageError
-          ? `url(${API_BASE_URL}${mentorship.coverImageUrl})`
+          ? `url(${getAssetUrl(mentorship.coverImageUrl)})`
           : 'none', backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'scroll'
@@ -257,4 +255,3 @@ const HeroSection: FC<HeroSectionProps> = ({ mentorship, mentorshipId, isEnrolle
 };
 
 export default HeroSection;
-

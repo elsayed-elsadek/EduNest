@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { BadgeCheck, Calendar } from 'lucide-react';
 
 import type { MentorProfileMentorship } from '../../../../services/student-roleService/mentorProfile.api';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 import NoCover from '../../../../components/student-components/common/Nocover/Nocover';
 import Pagination from '../../../../components/student-components/mentorships/Pagination';
 
@@ -63,7 +63,7 @@ const MentorshipsSection = ({
               >
                 {/* Image Container */}
                 <div className="h-48 bg-slate-100 relative overflow-hidden">
-                  <CourseThumb url={course.coverImageUrl ? `${API_BASE_URL}${course.coverImageUrl}` : undefined} title={course.mentorshipTitle} />
+                  <CourseThumb url={getAssetUrl(course.coverImageUrl)} title={course.mentorshipTitle} />
 
                   {/* Category Badge */}
                   <span className="absolute top-4 left-4 bg-[var(--primary-500)] text-white text-[10px] font-semibold px-3 py-1 rounded-lg uppercase tracking-wider z-10">

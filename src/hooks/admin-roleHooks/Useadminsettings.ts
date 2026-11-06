@@ -13,14 +13,11 @@ import {
   updateCommission,
 } from '../../services/admin-role-service/Adminsettingsservice';
 import type { AdminProfile } from '../../types/admin-role-types/adminConfigrations.types';
-import api from '../../services/api';
-
-const BASE_URL = (api.defaults.baseURL ?? '')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
+import { getAssetUrl } from '../../config/env';
 
 function buildUrl(path: string | null | undefined): string | undefined {
   if (!path) return undefined;
-  return path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  return getAssetUrl(path);
 }
 
 // Helper: Extract error message from Axios error response safely

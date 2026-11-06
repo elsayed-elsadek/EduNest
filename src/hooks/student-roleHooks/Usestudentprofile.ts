@@ -15,16 +15,13 @@ import type {
   CredentialEntry,
   ProfileCertificateApi,
 } from '../../types/student-role-types/profile.types';
-import api from '../../services/api';
+import { getAssetUrl } from '../../config/env';
 
 // ── helpers
 
-const BASE_URL = (api.defaults.baseURL ?? '').replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-
 function buildImgUrl(path: string | null): string | undefined {
   if (!path) return undefined;
-  if (path.startsWith('http')) return path;
-  return `${BASE_URL}${path}`;
+  return getAssetUrl(path);
 }
 
 function mapProfile(raw: StudentProfileApi): ProfileData {

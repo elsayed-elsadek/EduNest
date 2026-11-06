@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../services/api';
+import { getAssetUrl } from '../config/env';
 
 /**
  * Build a full absolute URL from a candidate path or URL returned by backend.
@@ -13,8 +13,7 @@ export function buildFullFileUrl(candidate?: string | null): string {
   let clean = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
   if (clean.startsWith('app/')) clean = clean.substring(4);
 
-  const base = API_BASE_URL.endsWith('/') ? API_BASE_URL : API_BASE_URL + '/';
-  return `${base}${clean}`;
+  return getAssetUrl(`/${clean}`) ?? '';
 }
 
 /**

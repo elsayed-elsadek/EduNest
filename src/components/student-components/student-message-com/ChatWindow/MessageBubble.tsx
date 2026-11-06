@@ -2,6 +2,7 @@
 import { type FC, useState, useRef, useEffect } from 'react';
 import { Edit3, Trash2 } from 'lucide-react';
 import type { Message } from '../../../../types/mentor-meaasges.types';
+import { getAssetUrl } from '../../../../config/env';
 
 interface MessageBubbleProps {
   message:      Message;
@@ -11,12 +12,9 @@ interface MessageBubbleProps {
   onDelete?:    () => void;
 }
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
-
 const buildSrc = (src?: string) => {
   if (!src) return null;
-  return src.startsWith('http') || src.startsWith('data:') ? src : `${BASE_URL}${src}`;
+  return /^(https?:\/\/|data:)/i.test(src) ? src : getAssetUrl(src) ?? null;
 };
 
 const MiniAvatar: FC<{ name?: string; src?: string }> = ({ name, src }) => {
@@ -108,10 +106,9 @@ const MessageBubble: FC<MessageBubbleProps> = ({
               // if backend sends /uploads/... path inside content, use it as-is
               // else assume it's just the filename
               const url = hasAttachmentName
-                ? (cleaned.startsWith('/uploads/')
-                  ? `${BASE_URL}${cleaned}`
-                  : (cleaned.startsWith('http') ? cleaned : `${BASE_URL}/uploads/${cleaned}`)
-                )
+                ? (cleaned.startsWith('http')
+                  ? cleaned
+                  : getAssetUrl(cleaned.startsWith('/uploads/') ? cleaned : `/uploads/${cleaned}`) ?? null)
                 : null;
 
               // Image preview if looks like image by extension

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Camera, X, Check } from 'lucide-react';
 import { updateRoomImage } from '../../../services/Roomchatservice';
+import { getAssetUrl } from '../../../config/env';
 
 interface Props {
   roomId: number;
@@ -17,10 +18,6 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
-
-  const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-    .replace(/\/api\/v1\/?$/, '')
-    .replace(/\/$/, '');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -45,7 +42,7 @@ const RoomImageModal = ({ roomId, roomName, currentImage, onClose, onUpdated }: 
         apiResponse?: { imageUrl?: string };
       };
       const relativePath = res?.apiResponse?.imageUrl ?? '';
-      const newUrl = relativePath ? `${BASE_URL}${relativePath}` : preview ?? '';
+      const newUrl = relativePath ? getAssetUrl(relativePath) ?? '' : preview ?? '';
       onUpdated(newUrl);
     } catch {
       setError('Failed to upload image. Please try again.');

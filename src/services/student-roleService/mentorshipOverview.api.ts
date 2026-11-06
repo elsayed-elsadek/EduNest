@@ -1,17 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../api';
+import { getAssetUrl } from '../../config/env';
 import type {
   MentorshipOverviewApiResponse,
   MentorshipOverviewEnrolled,
 } from '../../types/student-role-types/studentMentorshipTypes';
 
-const baseUrl = import.meta.env.VITE_BASE_URL ?? '';
-
 // Helper: Ensures URLs are absolute
 const normalizeImageUrl = (value?: string | null): string | null => {
   if (!value || value.trim() === '') return null;
-  if (value.startsWith('http')) return value;
-  return `${baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
+  return getAssetUrl(value) ?? null;
 };
 
 // Map Overview Data

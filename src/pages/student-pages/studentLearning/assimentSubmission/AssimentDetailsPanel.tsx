@@ -1,5 +1,5 @@
 import { FileText, Calendar, Clock, Award, Download, Eye, ExternalLink } from 'lucide-react';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 import type { StudentTaskDetails } from '../../../../services/student-roleService/submitTask';
 import FileViewer from '../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
@@ -14,11 +14,8 @@ const AssimentDetailsPanel = ({ taskDetails }: AssimentDetailsPanelProps) => {
     if (!candidate) return '';
     const trimmed = String(candidate).trim();
     if (!trimmed) return '';
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
-    let clean = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
-    if (clean.startsWith('app/')) clean = clean.substring(4);
-    const base = API_BASE_URL.endsWith('/') ? API_BASE_URL : API_BASE_URL + '/';
-    return `${base}${clean}`;
+    const clean = trimmed.replace(/^\/?app\//, '');
+    return getAssetUrl(clean) ?? '';
   };
 
   // Separate functions for file and link

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { User } from 'lucide-react';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 import { StarRating } from './StarRating';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,7 @@ export const ReviewItem = ({ review }: { review: any }) => {
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700">
             {review.studentProfileImageUrl && !imgError ? (
               <img
-                src={API_BASE_URL + review.studentProfileImageUrl}
+                src={getAssetUrl(review.studentProfileImageUrl)}
                 alt={review.studentFullName}
                 className="h-full w-full object-cover"
                 onError={() => setImgError(true)}

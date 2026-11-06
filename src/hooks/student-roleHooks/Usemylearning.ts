@@ -8,17 +8,12 @@ import type {
 import type {
   Badge, ProjectSubmission, BadgeApi, ProjectSubmissionApi, BadgeColor,
 } from '../../types/student-role-types/achievement.types';
-import api from '../../services/api';
+import { getAssetUrl } from '../../config/env';
 
 // ── URL builder 
-const BASE_URL = (api.defaults.baseURL ?? '')
-  .replace(/\/api\/v1\/?$/, '')
-  .replace(/\/$/, '');
-
 function buildImgUrl(path: string | null | undefined): string {
   if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `${BASE_URL}${path}`;
+  return getAssetUrl(path) ?? '';
 }
 
 // ── Mentorship mapper 

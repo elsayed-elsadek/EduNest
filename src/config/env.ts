@@ -81,22 +81,12 @@ export const IS_PRODUCTION = import.meta.env.PROD;
  * Absolute backend origin without a trailing slash, e.g.
  * `https://api.example.com` or `https://api.example.com/api/v1`.
  */
-export const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL, {
-  isProduction: IS_PRODUCTION,
-});
+export const API_BASE_URL = normalizeApiBaseUrl(
+  import.meta.env.VITE_API_BASE_URL,
+  { isProduction: IS_PRODUCTION },
+);
 
-/**
- * Builds an absolute URL for a backend-hosted asset (image, upload, file).
- *
- * Absolute inputs are returned untouched. Relative inputs are resolved against
- * the API host — never the frontend origin — so assets stay on the configured
- * backend regardless of where the SPA is served from.
- *
- * @example
- * // with VITE_API_BASE_URL=https://api.example.com
- * getAssetUrl('/uploads/x.png')  // → 'https://api.example.com/uploads/x.png'
- * getAssetUrl('uploads/x.png')   // → 'https://api.example.com/uploads/x.png'
- */
+
 export function getAssetUrl(path: string | null | undefined): string | undefined {
   if (!path) return undefined;
 

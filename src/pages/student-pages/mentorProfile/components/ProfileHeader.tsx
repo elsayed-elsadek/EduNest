@@ -2,7 +2,7 @@
 import { Mail, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { MentorProfile } from '../../../../services/student-roleService/mentorProfile.api';
-import { API_BASE_URL } from '../../../../services/api';
+import { getAssetUrl } from '../../../../config/env';
 
 interface ProfileHeaderProps {
   mentorProfile: MentorProfile | null;
@@ -20,9 +20,7 @@ const ProfileHeader = ({ mentorProfile, fullName, isLoading }: ProfileHeaderProp
         openDirectChatWith: {
           email: mentorProfile.mentorEmail,
           name: fullName,
-          avatar: mentorProfile?.mentorProfileImageUrl
-            ? `${API_BASE_URL}${mentorProfile.mentorProfileImageUrl}`
-            : undefined,
+          avatar: getAssetUrl(mentorProfile?.mentorProfileImageUrl),
         },
       },
     });
@@ -39,7 +37,7 @@ const ProfileHeader = ({ mentorProfile, fullName, isLoading }: ProfileHeaderProp
               <div className="h-full w-full animate-pulse bg-slate-200" />
             ) : (
               <img
-                src={`${API_BASE_URL}${mentorProfile?.mentorProfileImageUrl}`}
+                src={getAssetUrl(mentorProfile?.mentorProfileImageUrl)}
                 alt={fullName}
                 className="h-full w-full object-cover"
               />

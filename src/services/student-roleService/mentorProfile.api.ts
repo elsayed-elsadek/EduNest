@@ -4,13 +4,11 @@ import api from '../api';
 import { queryClient } from '../../lib/queryClient';
 import { useCallback } from 'react';
 import type { ReactNode } from 'react';
-
-const baseUrl = import.meta.env.VITE_BASE_URL ?? '';
+import { getAssetUrl } from '../../config/env';
 
 const normalizeImageUrl = (value?: string | null): string | null => {
   if (!value || value.trim() === '') return null;
-  if (value.startsWith('http')) return value;
-  return `${baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
+  return getAssetUrl(value) ?? null;
 };
 
 export interface SocialMediaLink {

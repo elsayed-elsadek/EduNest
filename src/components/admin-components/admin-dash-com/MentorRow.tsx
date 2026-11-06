@@ -1,6 +1,7 @@
 
 import type { FC } from 'react';
 import type { MentorRowProps } from '../../../types/admin-role-types/admin-dash.types';
+import { getAssetUrl } from '../../../config/env';
 
 const RANK_COLORS: Record<number, string> = {
   1: 'bg-yellow-400 text-yellow-900',
@@ -8,14 +9,8 @@ const RANK_COLORS: Record<number, string> = {
   3: 'bg-amber-600  text-amber-100',
 };
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '')
-  .replace(/\/$/, '');
-
 const getImageUrl = (url: string | null): string | null => {
-  if (!url) return null;
-  if (url.startsWith('http')) return url;
-  return `${BASE_URL}${url}`;
+  return getAssetUrl(url) ?? null;
 };
 
 const initials = (name: string) =>

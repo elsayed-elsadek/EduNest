@@ -1,6 +1,7 @@
 import { useEffect, useState, type FC } from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
 import { getRoomMembers, type RoomMemberDto } from '../../../services/Roomchatservice';
+import { getAssetUrl } from '../../../config/env';
 
 interface Props {
   roomId: number;
@@ -10,9 +11,6 @@ interface Props {
   onClose: () => void;
   onDeleteRoom?: () => void;
 }
-
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080')
-  .replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
 
 const roleColor = (role: string) =>
   role?.toLowerCase() === 'mentor'
@@ -84,10 +82,10 @@ const MembersPanel: FC<Props> = ({
               (`${m.firstName?.[0] ?? ''}${m.lastName?.[0] ?? ''}`.toUpperCase() ||
                 m.email[0].toUpperCase());
             const src = m.userImageUrl
-              ? m.userImageUrl.startsWith('http')
+              ? (/^(https?:\/\/|data:)/i.test(m.userImageUrl)
                 ? m.userImageUrl
-                : `${BASE_URL}${m.userImageUrl}`
-              : null;
+                : getAssetUrl(m.userImageUrl))
+              : undefined;
 
             return (
               <div

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { LoginFormData, FormErrors } from "../types/auth";
 import { loginUser, sendOtp } from "../services/authService";
 import { getStudentProfile } from "../services/student-roleService/Studentprofileservice";
-import api from "../services/api";
+import { getAssetUrl } from "../config/env";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
@@ -108,8 +108,7 @@ export const useLogin = () => {
             const profileResponse = await getStudentProfile();
             const profileImageUrl = profileResponse.apiResponse.profile.profileImageUrl;
             if (profileImageUrl) {
-              const baseUrl = api.defaults.baseURL?.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '') || '';
-              const fullAvatarUrl = profileImageUrl.startsWith('http') ? profileImageUrl : `${baseUrl}${profileImageUrl}`;
+              const fullAvatarUrl = getAssetUrl(profileImageUrl);
               useAuthStore.getState().updateProfile({ userAvatar: fullAvatarUrl });
             }
           } catch (error) {
@@ -197,4 +196,3 @@ export const useLogin = () => {
     handleSubmit,
   };
 };
-
