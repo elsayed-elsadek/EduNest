@@ -23,7 +23,6 @@ const Login: React.FC = () => {
     const rememberMe = useAuthStore.getState().rememberMe;
     
     if (lastEmail && rememberMe) {
-      console.log('📧 Loading saved email from Remember Me:', lastEmail);
       handleInputChange('email', lastEmail);
       handleInputChange('rememberMe', true);
     }

@@ -14,6 +14,7 @@ import LectureSection from './components/LectureSection';
 import ContentTypeBadge from '../../../components/common/ContentTypeBadge';
 import QuizSubmission from './components/QuizSubmission';
 import type { Week, WeekContent } from '../../../types/student-role-types/studentMentorshipTypes';
+import logger from '../../../utils/logger';
 
 const StudentMentorshipContent = () => {
   const { mentorshipId, weekId } = useParams<{ mentorshipId: string; weekId?: string }>();
@@ -57,7 +58,7 @@ const StudentMentorshipContent = () => {
         toast.error('Failed to join session. Please try again.');
       }
     } catch (error: unknown) {
-      console.error('Error joining session:', error);
+      logger.error('Error joining session:', error);
       const err = error as {
         response?: {
           data?: {

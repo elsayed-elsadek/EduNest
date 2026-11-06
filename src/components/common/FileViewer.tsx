@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Download, ExternalLink, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
+import logger from '../../utils/logger';
 
 declare global {
   interface Window {
@@ -33,7 +34,7 @@ async function downloadFile(url: string, fallbackName = 'file') {
     URL.revokeObjectURL(objectUrl);
     toast.success('Download complete', { id: toastId });
   } catch (err) {
-    console.error('Download failed', err);
+    logger.error('Download failed', err);
     toast.error('Download failed. Opening in new tab...');
     window.open(url, '_blank');
   }
@@ -72,7 +73,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
         if (!mounted) return;
         setPreviewUrl(objectUrl);
       } catch (err) {
-        console.warn('Preview fetch failed', err);
+        logger.warn('Preview fetch failed', err);
         if (mounted) setPreviewError('Preview not available for this file or server blocked access.');
       } finally {
         if (mounted) setLoading(false);
@@ -118,7 +119,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
                   return mammothLib;
                 }
               } catch (e) {
-                console.warn('Dynamic import of mammoth failed, falling back to CDN', e);
+                logger.warn('Dynamic import of mammoth failed, falling back to CDN', e);
               }
 
               await new Promise<void>((resolve, reject) => {
@@ -142,11 +143,11 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
               setPreviewError(null);
             }
           } catch (mErr) {
-            console.warn('mammoth conversion failed, falling back to Google Docs Viewer', mErr);
+            logger.warn('mammoth conversion failed, falling back to Google Docs Viewer', mErr);
             if (mounted) setPreviewUrl(googleViewerUrl);
           }
         } catch (err) {
-          console.warn('Docx fetch failed', err);
+          logger.warn('Docx fetch failed', err);
           if (mounted) setPreviewError('Preview unavailable for this file or server blocked access.');
         } finally {
           if (mounted) setLoading(false);

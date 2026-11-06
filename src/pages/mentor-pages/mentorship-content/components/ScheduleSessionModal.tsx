@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { createLiveSession, updateLiveSession, type UpdateLiveSessionPayload } from '../../../../services/mentorshipsContent';
 import ModalOverlay from './ModalOverlay';
 import type { ContentItem } from '../types';
+import logger from '../../../../utils/logger';
 
 interface ScheduleSessionModalProps {
   weekId: number | null;
@@ -70,7 +71,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
     } catch (err: any) {
       const serverErrorMessage = err?.errorMessages?.error;
       toast.error(serverErrorMessage || 'Invalid data sent to server');
-      console.error('API Error Response:', err?.response?.data);
+      logger.error('API Error Response:', err?.response?.data);
     } finally {
       setSubmitting(false);
     }

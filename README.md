@@ -243,6 +243,35 @@ Asset URLs (avatars, uploads, files) use the same origin through `getAssetUrl()`
 
 > `VITE_BASE_URL` is a legacy name that is being removed. Do not use it in new code — import from `src/config/env.ts` instead.
 
+### Logging
+
+All application logging goes through **`src/utils/logger.ts`**. It is the only
+module allowed to call `console.*`; ESLint enforces this with `no-console: error`
+and an allowlist for that one file.
+
+```ts
+import logger from '../../utils/logger';
+
+logger.debug('cache miss', key);          // development only
+logger.info('mentorship loaded');
+logger.warn('image failed to load', id);
+logger.error('failed to save project', err);
+```
+
+- **Production:** every method is a no-op — a production build emits no
+  application console output, so tokens and URLs cannot leak through DevTools
+  or a screen share.
+- **Development:** output is forwarded after sanitising every argument.
+  `Authorization` headers, bearer tokens, JWTs, passwords, secrets, API keys,
+  e-mail addresses and query strings are replaced with `[REDACTED]` or stripped.
+  `Error` objects are converted to plain, sanitised copies, so expanding a live
+  axios error in DevTools cannot reveal `config.headers.Authorization`.
+- `sanitizeForLog()` is exported so the error-reporting layer (FE-021) can apply
+  the same redaction before shipping an error to an external service.
+
+Errors must still reach the user through UI state (toasts, error panels); the
+logger is for diagnostics only, never the only error channel.
+
 ### Commands
 
 | Command | What it proves |

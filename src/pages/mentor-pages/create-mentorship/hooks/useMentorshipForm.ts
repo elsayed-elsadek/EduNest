@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import type { MentorshipFormData } from '../types';
 import { createMentorship, ApiValidationError } from '../../../../services/mentorDashboardService';
 import { useAuthStore } from '../../../../store/authStore';
+import logger from '../../../../utils/logger';
 
 export const useMentorshipForm = () => {
     const navigate = useNavigate();
@@ -96,7 +97,7 @@ export const useMentorshipForm = () => {
                 const message = err instanceof Error ? err.message : 'Failed to create mentorship';
                 toast.error(message);
             }
-            console.error('Error creating mentorship:', err);
+            logger.error('Error creating mentorship:', err);
         } finally {
             setSubmitting(false);
         }

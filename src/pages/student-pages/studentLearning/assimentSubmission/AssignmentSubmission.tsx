@@ -6,6 +6,7 @@ import { AxiosError } from 'axios';
 import AssimentDetailsPanel from './AssimentDetailsPanel';
 import StudentSubmissionStatus from './StudentSubmissionStatus';
 import SubmissionForm from './SubmissionForm';
+import logger from '../../../../utils/logger';
 
 interface AssignmentSubmissionProps {
   taskId: number;
@@ -24,7 +25,7 @@ const AssignmentSubmission = ({ taskId }: AssignmentSubmissionProps) => {
       const details = await getStudentTaskDetails(taskId);
       setTaskDetails(details);
     } catch (error) {
-      console.error('Error loading task details:', error);
+      logger.error('Error loading task details:', error);
       toast.error('Failed to load task details');
     } finally {
       setIsLoadingTask(false);
@@ -68,7 +69,7 @@ const AssignmentSubmission = ({ taskId }: AssignmentSubmissionProps) => {
       setFileUrl('');
       toast.success(result.message ?? 'Task submitted successfully!');
     } catch (error) {
-      console.error('Submission error:', error);
+      logger.error('Submission error:', error);
       const err = error as AxiosError<{ errorMessages?: { error?: string } }>;
       const errorMessage = getBackendErrorMessage(err, 'Failed to submit task');
       toast.error(errorMessage);

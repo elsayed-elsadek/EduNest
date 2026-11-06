@@ -2,6 +2,7 @@
 import SockJS from 'sockjs-client';
 import { Client, type StompSubscription } from '@stomp/stompjs';
 import { API_BASE_URL } from '../config/env';
+import logger from '../utils/logger';
 
 const WS_URL = API_BASE_URL
   .replace(/\/api\/v1\/?$/, '')
@@ -40,7 +41,6 @@ class WebSocketService {
       onConnect: () => {
         this.isConnected_  = true;
         this.isConnecting_ = false;
-        console.log('✅ WebSocket connected');
         onConnected?.();
         // flush all queued callbacks
         const pending = [...this.pendingCallbacks];
@@ -52,18 +52,18 @@ class WebSocketService {
         this.isConnecting_ = false;
         this.isConnected_  = false;
         this.subscriptions.clear();
-        console.error('❌ STOMP error:', f.headers['message']);
+        // The broker message is sanitised: it must never echo a token.
+        logger.error('WebSocket STOMP error', f.headers['message']);
       },
 
       onWebSocketError: (e) => {
         this.isConnecting_ = false;
-        console.error('❌ WS error:', e);
+        logger.error('WebSocket connection error', e);
       },
 
       onDisconnect: () => {
         this.isConnected_  = false;
         this.isConnecting_ = false;
-        console.log('🔌 WS disconnected');
       },
     });
 
@@ -153,7 +153,7 @@ class WebSocketService {
 
   sendToRoom(roomId: number | string, content: string): void {
     if (!this.client?.connected) {
-      console.warn('⚠️ Cannot send message — WebSocket not connected');
+      logger.warn('Cannot send message — WebSocket not connected');
       return;
     }
     this.client.publish({ destination: `/app/chat/${roomId}`, body: content });
@@ -161,7 +161,7 @@ class WebSocketService {
 
   sendPrivateMessage(recipientEmail: string, content: string): void {
     if (!this.client?.connected) {
-      console.warn('⚠️ Cannot send message — WebSocket not connected');
+      logger.warn('Cannot send private message — WebSocket not connected');
       return;
     }
     this.client.publish({

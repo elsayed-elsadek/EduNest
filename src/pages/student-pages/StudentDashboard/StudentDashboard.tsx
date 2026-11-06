@@ -111,7 +111,7 @@ const StudentDashboard: FC = () => {
         {!loading && recommended.length > 0 && (
           <RecommendedCourses
             courses={recommended}
-            onAddToCart={id => console.log('Enroll:', id)}
+            onAddToCart={() => {}}
           />
         )}
         {loading && (

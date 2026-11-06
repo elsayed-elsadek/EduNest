@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { getFirstNameFromToken, getFirstNameFromUser, getRoleFromToken, getUserFromToken } from "../utils/jwt";
+import logger from "../utils/logger";
 
 /**
  * Determines the dashboard path based on user role
@@ -23,7 +24,7 @@ const getDashboardPath = (role: string): string => {
       return '/admin/dashboard';
     default:
       // Default fallback for unknown roles
-      console.warn('Unknown role:', role, '- redirecting to mentor dashboard');
+      logger.warn('Unknown role - redirecting to mentor dashboard');
       return '/mentor/dashboard';
   }
 };
@@ -112,21 +113,19 @@ export const useLogin = () => {
               useAuthStore.getState().updateProfile({ userAvatar: fullAvatarUrl });
             }
           } catch (error) {
-            console.warn('Failed to fetch student profile image:', error);
+            logger.warn('Failed to fetch student profile image', error);
           }
         }
 
         // Save Remember Me preference
         if (formData.rememberMe) {
           useAuthStore.getState().setRememberMe(formData.email, true);
-          console.log('✅ Remember Me enabled - Email saved:', formData.email);
         } else {
           useAuthStore.getState().setRememberMe('', false);
         }
 
         // Role-based redirection
         const redirectPath = getDashboardPath(userRole);
-        console.log('🔄 Redirecting to:', redirectPath, 'Role:', userRole);
         navigate(redirectPath);
 
       } else {
@@ -172,7 +171,7 @@ export const useLogin = () => {
           toast.success("A new verification code has been sent to your email. Complete verification to continue.");
           navigate("/verify");
         } catch (otpErr) {
-          console.error("OTP Error:", otpErr);
+          logger.error("Failed to resend the verification code", otpErr);
           toast.error("Failed to send the code. Please try again.");
         }
         return;
@@ -180,7 +179,7 @@ export const useLogin = () => {
 
       const backendMessage = rawMsg || "Something went wrong";
       toast.error(backendMessage);
-      console.error("Login Error:", error);
+      logger.error("Login failed", error);
     } finally {
       setLoading(false);
     }

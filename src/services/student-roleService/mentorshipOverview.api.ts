@@ -84,9 +84,6 @@ export const fetchMentorshipOverview = async (
   mentorshipId: string | number,
   signal?: AbortSignal
 ): Promise<MentorshipOverviewEnrolled> => {
-  console.log('[DEBUG] fetchMentorshipOverview - ID:', mentorshipId);
-
-  const startTime = performance.now();
   const { data } = await api.get<MentorshipOverviewApiResponse>(
     `/api/v1/student/mentorships/${mentorshipId}/overview`,
     {
@@ -98,9 +95,6 @@ export const fetchMentorshipOverview = async (
       signal,
     }
   );
-
-  const endTime = performance.now();
-  console.log('[DEBUG] API fetch complete in', (endTime - startTime).toFixed(2), 'ms');
 
   // Check if student is enrolled (afterEnroll data exists)
   const afterEnrollData = data?.apiResponse?.mentorship?.afterEnroll as Record<string, unknown> | null;

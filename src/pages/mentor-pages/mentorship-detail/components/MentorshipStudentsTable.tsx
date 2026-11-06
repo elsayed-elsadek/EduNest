@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import type { Student } from '../types';
 import { useAuthStore } from '../../../../store/authStore';
+import logger from '../../../../utils/logger';
 
 interface MentorshipStudentsTableProps {
   mentorshipId: string | number;
@@ -54,7 +55,7 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
       } catch (err) {
         const e = err as { name?: string };
         if (e.name === 'AbortError') return;
-        console.warn('Mentorship students fetch failed', err);
+        logger.warn('Mentorship students fetch failed', err);
       } finally {
         setLoading(false);
       }

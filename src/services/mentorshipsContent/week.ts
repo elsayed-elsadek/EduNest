@@ -45,35 +45,23 @@ export const updateWeekTitle = async (id: number, title: string): Promise<WeekRe
 export const getWeeksByMentorship = async (mentorshipId: number): Promise<WeekResponse[]> => {
     // Backend docs: GET /api/v1/week/{mentorshipId}/weeks
     const url = `api/v1/week/${mentorshipId}/weeks`;
-    console.log("🔍 Fetching weeks from URL:", url);
 
     const raw = await handleRequest(api.get<unknown>(url));
-    console.log("RAW RESPONSE 👉", raw);
-    console.log("📊 Response type:", typeof raw);
-    console.log("📊 Is Array?", Array.isArray(raw));
 
     if (Array.isArray(raw)) {
-        console.log("✅ Raw is array, filtering...");
         return (raw as unknown[]).filter((w) => w && typeof w === 'object') as WeekResponse[];
     }
 
     const data = raw as Record<string, unknown>;
     if (data?.apiResponse && typeof data.apiResponse === 'object') {
         const apiRes = data.apiResponse as Record<string, unknown>;
-        console.log("✅ Found apiResponse:", apiRes);
-        console.log("🔎 apiRes.weeks type:", typeof apiRes.weeks, "isArray:", Array.isArray(apiRes.weeks));
 
         if (Array.isArray(apiRes.weeks)) {
             const weeks = apiRes.weeks as unknown[];
-            console.log("✅ Found weeks array with", weeks.length, "items");
-            console.log("🔎 First week:", weeks[0]);
-            console.log("🔎 Weeks before filter:", weeks);
             const filtered = weeks.filter((w) => w && typeof w === 'object');
-            console.log("🔎 Weeks after filter:", filtered);
             return filtered as WeekResponse[];
         }
         if (Array.isArray(apiRes.content)) {
-            console.log("✅ Found content array with", apiRes.content.length, "items");
             return (apiRes.content as unknown[]).filter((w) => w && typeof w === 'object') as WeekResponse[];
         }
     }
@@ -81,12 +69,10 @@ export const getWeeksByMentorship = async (mentorshipId: number): Promise<WeekRe
     const possibleKeys = ['weeks', 'content', 'items', 'results'];
     for (const key of possibleKeys) {
         if (Array.isArray(data?.[key])) {
-            console.log("✅ Found", key, "array with", (data[key] as unknown[]).length, "items");
             return (data[key] as unknown[]).filter((w) => w && typeof w === 'object') as WeekResponse[];
         }
     }
 
-    console.log("❌ No weeks found!");
     return [];
 };
 

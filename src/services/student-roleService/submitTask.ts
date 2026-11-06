@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "../api";
 import { handleRequest, type TaskSubmissionItem } from "../mentorshipsContent";
+import logger from '../../utils/logger';
 
 export interface SubmitTaskPayload {
   file?: File;
@@ -52,7 +53,7 @@ export const submitTask = async (
 
     return { submission, message };
   } catch (error: any) {
-    console.error("Submit Task Error:", error?.response?.data || error);
+    logger.error("Submit Task Error:", error?.response?.data || error);
     throw error;
   }
 };
@@ -91,7 +92,7 @@ export const getStudentTaskDetails = async (taskId: number): Promise<StudentTask
     }
     return raw as StudentTaskDetails;
   } catch (error: any) {
-    console.error("Get Student Task Details Error:", error?.response?.data || error);
+    logger.error("Get Student Task Details Error:", error?.response?.data || error);
     throw error;
   }
 };

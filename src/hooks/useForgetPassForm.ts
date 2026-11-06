@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { forgetPassword } from "../services/authService";
+import logger from '../utils/logger';
 
 interface ForgetPassFormData {
   email: string;
@@ -61,7 +62,7 @@ export const useForgetPassForm = () => {
         "Something went wrong while sending reset email.";
 
       toast.error(backendMessage);
-      console.error("Forget password error:", error);
+      logger.error("Forget password error:", error);
     } finally {
       setLoading(false);
     }

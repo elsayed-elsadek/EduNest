@@ -140,10 +140,6 @@ export const fetchMentorshipDetails = async (
   mentorshipId: string | number,
   signal?: AbortSignal
 ): Promise<MentorshipDetails> => {
-  // 🔍 DEBUG LOG: API fetch starting
-  console.log('[DEBUG] fetchMentorshipDetails - ID:', mentorshipId, 'URL:', `/api/v1/student/mentorships/${mentorshipId}/overview`);
-
-  const startTime = performance.now();
   const { data } = await api.get<MentorshipDetailsApiResponse>(
     `/api/v1/student/mentorships/${mentorshipId}/overview`,
     {
@@ -155,9 +151,6 @@ export const fetchMentorshipDetails = async (
       signal,
     }
   );
-
-  const endTime = performance.now();
-  console.log('[DEBUG] API fetch complete in', (endTime - startTime).toFixed(2), 'ms');
 
   const mentorshipData = data?.apiResponse?.mentorship;
   let payload: Record<string, unknown> | null = null;
@@ -187,8 +180,6 @@ export const fetchMentorshipOverview = async (
   size = 5,
   signal?: AbortSignal
 ): Promise<{ isEnrolled: boolean; afterEnroll: MentorshipOverviewEnrolled | null }> => {
-  console.log('[DEBUG] fetchMentorshipOverview - ID:', mentorshipId, 'Page:', page, 'Size:', size);
-
   const { data } = await api.get<MentorshipOverviewApiResponse>(
     `/api/v1/student/mentorships/${mentorshipId}/overview`,
     {
@@ -213,8 +204,6 @@ export const fetchMentorshipContent = async (
   mentorshipId: string | number,
   signal?: AbortSignal
 ): Promise<{ weeks: Week[] } | { error: string }> => {
-  console.log('[DEBUG] fetchMentorshipContent - ID:', mentorshipId, 'URL:', `/api/v1/student/week/${mentorshipId}/weeks-with-contents`);
-
   try {
     const { data } = await api.get<MentorshipContentResponse>(
       `/api/v1/student/week/${mentorshipId}/weeks-with-contents`,
@@ -243,8 +232,6 @@ export const fetchMentorshipContent = async (
 
 // Custom Hook
 export const useMentorshipDetails = (mentorshipId: number | string, enabled = true) => {
-  console.log('[DEBUG] useMentorshipDetails called - mentorshipId:', mentorshipId, typeof mentorshipId, 'enabled:', enabled);
-
   return useQuery({
     queryKey: mentorshipDetailsKeys.detail(mentorshipId),
     queryFn: ({ signal }) => fetchMentorshipDetails(mentorshipId, signal),
@@ -297,8 +284,6 @@ export const fetchWeekContent = async (
   weekId: string | number,
   signal?: AbortSignal
 ): Promise<WeekContent> => {
-  console.log('[DEBUG] fetchWeekContent - ID:', weekId, 'URL:', `/api/v1/student/week/${weekId}/contents`);
-
   const { data } = await api.get<WeekContentResponse>(
     `/api/v1/student/week/${weekId}/contents`,
     { signal }

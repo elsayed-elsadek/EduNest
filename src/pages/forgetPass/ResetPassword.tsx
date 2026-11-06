@@ -10,6 +10,7 @@ import {
 } from "../../components/resetPass-com";
 import { forgetResetPassword } from "../../services/authService";
 import toast from "react-hot-toast";
+import logger from '../../utils/logger';
 
 const ResetPassword: React.FC = () => {
   const form = useResetPassForm();
@@ -42,7 +43,7 @@ const ResetPassword: React.FC = () => {
         "Something went wrong while resetting password.";
 
       toast.error(backendMessage);
-      console.error("Reset password error:", error);
+      logger.error("Reset password error:", error);
     } finally {
       form.setLoading(false);
     }

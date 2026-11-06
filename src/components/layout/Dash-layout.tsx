@@ -7,6 +7,7 @@ import { useAuthStore } from "../../store/authStore";
 import { getMentorProfile, extractMentorProfile } from "../../services/Mentorprofileservice";
 import { getAssetUrl } from "../../config/env";
 import { getFirstNameFromToken } from "../../utils/jwt";
+import logger from '../../utils/logger';
 
 interface DashLayoutProps {
   children: React.ReactNode;
@@ -55,7 +56,7 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
           });
         }
       } catch (err) {
-        console.error('Failed to fetch profile in DashLayout:', err);
+        logger.error('Failed to fetch profile in DashLayout:', err);
       }
     };
 

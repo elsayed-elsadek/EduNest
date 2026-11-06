@@ -33,8 +33,6 @@ export const createLiveSession = async (payload: CreateLiveSessionPayload): Prom
         time: timeString, // إرسال الوقت كنص "01:20:10"
     };
 
-    console.log("Final Payload:", body);
-
     const raw = await handleRequest(api.post<unknown>('api/v1/liveSession/create', body));
     return raw;
 };

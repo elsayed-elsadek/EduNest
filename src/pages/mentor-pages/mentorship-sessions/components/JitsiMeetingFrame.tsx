@@ -1,5 +1,6 @@
 import { ExternalLink, VideoIcon } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
+import logger from '../../../../utils/logger';
 
 interface JitsiMeetingFrameProps {
   meetingUrl: string;
@@ -25,7 +26,7 @@ const JitsiMeetingFrame: React.FC<JitsiMeetingFrameProps> = ({
 
     // لو المتصفح منع الـ popup
     if (!newWindow) {
-      console.warn('Popup blocked by browser');
+      logger.warn('Popup blocked by browser');
     }
   }, [meetingUrl]);
 

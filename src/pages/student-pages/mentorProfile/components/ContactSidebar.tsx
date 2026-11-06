@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Mail, Globe, Share2, Copy, Check, Github, ExternalLink } from 'lucide-react';
 import type { MentorProfile, SocialMediaLink } from '../../../../services/student-roleService/mentorProfile.api';
+import logger from '../../../../utils/logger';
 
 interface ContactSidebarProps {
   mentorProfile: MentorProfile | null;
@@ -66,7 +67,7 @@ const ContactSidebar = ({ mentorProfile }: ContactSidebarProps) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy: ', err);
+      logger.error('Failed to copy: ', err);
     }
   };
 
@@ -78,8 +79,8 @@ const ContactSidebar = ({ mentorProfile }: ContactSidebarProps) => {
           text: `Check out ${mentorProfile?.mentorFirstName}'s mentorship profile on EduNest!`,
           url: window.location.href,
         });
-      } catch (err) {
-        console.log('Share cancelled or failed', err);
+      } catch {
+        // User cancelled the share sheet or sharing is unavailable.
       }
     } else {
       handleCopyLink();

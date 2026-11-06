@@ -22,6 +22,10 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
+      // Application code must log through `src/utils/logger.ts`, which is the
+      // single module allowed to touch `console.*` (see the override below).
+      // `logger` is a no-op in production builds.
+      'no-console': 'error',
       // jsx-a11y is enabled project-wide, but these seven rules are reported as
       // warnings until the markup remediation tracked in FE-022 lands. They fire
       // on ~248 existing elements; fixing them is accessibility remediation, not
@@ -33,6 +37,15 @@ export default defineConfig([
       'jsx-a11y/anchor-is-valid': 'warn',
       'jsx-a11y/media-has-caption': 'warn',
       'jsx-a11y/no-noninteractive-element-interactions': 'warn',
+    },
+  },
+  {
+    // The logger is the single permitted console sink; everything else must
+    // route through it so production builds stay silent and values are
+    // sanitised before they reach DevTools.
+    files: ['src/utils/logger.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
 ])

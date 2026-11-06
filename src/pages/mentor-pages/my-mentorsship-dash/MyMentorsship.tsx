@@ -9,6 +9,7 @@ import Pagination from '../../../components/common/Pagination/Pagination';
 import { useMentorshipsWithTransform, useDeleteMentorship } from '../../../hooks/useMentorships';
 import { useAuthStore } from '../../../store/authStore';
 import type { Mentorship } from '../../../types/mentorship.types';
+import logger from '../../../utils/logger';
 
 type FilterStatus = 'all' | 'active' | 'draft' | 'completed';
 
@@ -65,7 +66,7 @@ const MentorshipsList: FC = () => {
   const handleDeleteError = (err: unknown) => {
     const axiosErr = err as { response?: { data?: { errorMessages?: { error?: string } } } };
     const msg = axiosErr.response?.data?.errorMessages?.error ?? 'Failed to delete mentorship';
-    console.error('❌ Error deleting mentorship:', msg);
+    logger.error('❌ Error deleting mentorship:', msg);
     toast.error(msg);
   };
 

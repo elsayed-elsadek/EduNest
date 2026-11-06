@@ -23,6 +23,7 @@ import MentorshipStudentsTable from './components/MentorshipStudentsTable';
 import MentorshipContentList from './components/MentorshipContentList';
 import NotFound from '../../NotFound';
 import GlobalLoadingOverlay from '../../../loadingApp/GlobalLoadingOverlay';
+import logger from '../../../utils/logger';
 
 const MentorshipDetail: FC = () => {
   const params = useParams<{ mentorshipId?: string; id?: string }>();
@@ -92,7 +93,7 @@ const MentorshipDetail: FC = () => {
             setMentorshipDashboardStudents(dash.studentsRanks?.content || []);
           }
         } catch (e) {
-          console.warn('Dashboard fetch failed', e);
+          logger.warn('Dashboard fetch failed', e);
         }
       } catch (err) {
         const message =
@@ -125,7 +126,7 @@ const MentorshipDetail: FC = () => {
                 return dateA - dateB;
               });
             } catch (e) {
-              console.warn(`Week ${week.id} failed`, e);
+              logger.warn(`Week ${week.id} failed`, e);
             }
 
             return { week, items };

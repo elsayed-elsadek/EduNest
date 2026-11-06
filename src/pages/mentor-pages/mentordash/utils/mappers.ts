@@ -9,6 +9,7 @@ import type { Session } from '../../../../components/mentor-components/mentor-da
 import type { Review } from '../../../../components/mentor-components/mentor-dash-com/Reviews/Reviews.types';
 import type { SalesData } from '../../../../components/mentor-components/mentor-dash-com/SalesChart/SalesChart.types';
 import type { DashboardCardsData } from '../types';
+import logger from '../../../../utils/logger';
 
 export function isApiErrorResponse(res: unknown): res is { error: string } {
     if (res == null || typeof res !== 'object') return false;
@@ -70,11 +71,9 @@ export function mapSessions(raw: unknown): Session[] {
     const dataArray = extractSessionsData(raw);
 
     if (!Array.isArray(dataArray) || dataArray.length === 0) {
-        console.warn('⚠️ No upcoming sessions data found');
+        logger.warn('⚠️ No upcoming sessions data found');
         return [];
     }
-
-    console.log('📅 Upcoming Sessions Count:', dataArray.length);
 
     return dataArray
         .map((rawItem) => {
@@ -101,12 +100,6 @@ export function mapSessions(raw: unknown): Session[] {
 
             const type = (item.type as Session['type']) ?? 'course';
 
-            if (id && title) {
-                console.log(
-                    `   📌 ${title} (${type}) | ${startTime} - ${endTime}${date ? ` [${date}]` : ''}`
-                );
-            }
-
             return {
                 id,
                 mentorshipId: String(item.mentorshipId ?? item.mentorship_id ?? (item.mentorship && typeof item.mentorship === 'object' && 'id' in item.mentorship ? (item.mentorship as Record<string, unknown>).id : undefined) ?? ''),
@@ -131,11 +124,9 @@ export function mapReviews(raw: unknown): Review[] {
     const dataArray = extractReviewsData(raw);
 
     if (!Array.isArray(dataArray) || dataArray.length === 0) {
-        console.warn('⚠️ No reviews data found');
+        logger.warn('⚠️ No reviews data found');
         return [];
     }
-
-    console.log('⭐ Reviews Count:', dataArray.length);
 
     return dataArray
         .map((rawItem) => {
@@ -148,10 +139,6 @@ export function mapReviews(raw: unknown): Review[] {
             const rating = Number(item.rating) || 0;
             const comment = String(item.comment ?? item.feedBack ?? '');
             const studentAvatar = item.studentAvatar ? String(item.studentAvatar) : undefined;
-
-            if (id && rating > 0) {
-                console.log(`   ⭐ ${studentName}: ${rating}/5 - "${comment.substring(0, 40)}${comment.length > 40 ? '...' : ''}"`);
-            }
 
             return {
                 id,
@@ -169,11 +156,10 @@ export function mapReviews(raw: unknown): Review[] {
 export function mapNotifications(raw: unknown): Notification[] {
     const dataArray = extractNotificationsData(raw);
     if (!Array.isArray(dataArray) || dataArray.length === 0) {
-        console.warn('⚠️ No notifications data found');
+        logger.warn('⚠️ No notifications data found');
         return [];
     }
 
-    console.log('🔔 Notifications Count:', dataArray.length);
     return dataArray
         .map((item) => {
             const n = item as Record<string, unknown>;
@@ -215,11 +201,9 @@ export function mapRevenueChart(raw: unknown): SalesData[] {
     const dataArray = extractRevenueChartData(raw);
 
     if (!Array.isArray(dataArray) || dataArray.length === 0) {
-        console.warn('⚠️ No revenue chart data found');
+        logger.warn('⚠️ No revenue chart data found');
         return [];
     }
-
-    console.log('📊 Revenue Chart Data Points:', dataArray.length);
 
     return dataArray
         .map((rawItem) => {
@@ -235,10 +219,6 @@ export function mapRevenueChart(raw: unknown): SalesData[] {
             );
             const rawMonth = item.month ?? item.label ?? item.date ?? '';
             const month = String(rawMonth);
-
-            if (value > 0 && month) {
-                console.log(`   📈 ${month}: $${value.toLocaleString()}`);
-            }
 
             return {
                 month,

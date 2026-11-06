@@ -20,9 +20,6 @@ const MentorshipOverviewPage = () => {
     [data]
   );
 
-  console.log('[DEBUG] MentorshipOverviewPage - normalizedId:', normalizedId, 'hasValidId:', hasValidId);
-  console.log('[DEBUG] MentorshipOverviewPage - isLoading:', isLoading, 'isError:', isError, 'data:', data);
-
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />

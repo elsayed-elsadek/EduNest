@@ -11,6 +11,7 @@ import Pagination from '../../../components/common/Pagination/Pagination';
 import type { Student } from '../../../types/Students.types';
 import { getMentorStudents } from '../../../services/Studentsservice';
 import { extractStudentsData } from '../../../services/Studentsservice';
+import logger from '../../../utils/logger';
 
 // Helper 
 function isApiErrorResponse(res: unknown): res is { error: string } {
@@ -62,7 +63,6 @@ const StudentsList: FC = () => {
         }
 
         const extracted = extractStudentsData(res);
-        console.log(`📚 Students: ${extracted.content.length} / ${extracted.totalElements} total`);
 
         // Map to the Student type already used in your components
         const mapped: Student[] = extracted.content.map((s) => ({
@@ -82,7 +82,7 @@ const StudentsList: FC = () => {
         if (!cancelled) {
           const msg = (err as { message?: string })?.message ?? 'Failed to load students';
           setError(msg);
-          console.error('❌ Students fetch error:', err);
+          logger.error('❌ Students fetch error:', err);
         }
       })
       .finally(() => {

@@ -39,7 +39,6 @@ const Register: React.FC = () => {
         : await registerMentor(form.formData);
       
       const res = response as { message?: string };
-      console.log('Server Response:', response);
       form.clearErrors();
       toast.success(res.message || 'Registration Successful');
       
@@ -51,8 +50,7 @@ const Register: React.FC = () => {
         
         const otpRes = await sendOtp(form.formData.email) as { message?: string };
         toast.success(otpRes.message || 'OTP sent to your email');
-      } catch (otpErr: unknown) {
-        console.log('OTP Error:', otpErr);
+      } catch {
         // Continue to verify page even if OTP fails
       }
       
@@ -61,9 +59,7 @@ const Register: React.FC = () => {
     } catch (err: any) {
       const errorStatus = err.response?.status;
       const errorData = err.response?.data;
-      
-      console.log('Error Response:', errorData);
-      
+
       // Extract error message from any potential source
       const rawMsg = errorData?.errorMessages?.['Email Error'] 
         || errorData?.message 
@@ -83,8 +79,7 @@ const Register: React.FC = () => {
           localStorage.setItem("registrationType", form.joinAs);
           const otpRes = await sendOtp(form.formData.email) as { message?: string };
           toast.success(otpRes.message || 'A new verification code has been sent to your email');
-        } catch (otpErr) {
-          console.log('OTP Error:', otpErr);
+        } catch {
           toast.error('Failed to send the code. Please try again.');
         }
         navigate("/verify");
@@ -108,7 +103,6 @@ const Register: React.FC = () => {
         form.setGeneralError(typeof errorMessage === 'string' ? errorMessage : 'Registration Failed');
         toast.error(typeof errorMessage === 'string' ? errorMessage : 'Registration Failed');
       }
-      console.log(err);
     } finally {
       form.setLoading(false);
     }
