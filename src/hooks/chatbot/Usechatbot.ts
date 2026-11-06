@@ -1,8 +1,8 @@
 
 import { useState, useCallback, useRef } from 'react';
 import type { ChatMessage, ChatApiResponse } from '../../types/chatbot/Chatbot.types';
+import { CHATBOT_API_URL } from '../../config/env';
 
-const CHATBOT_API = 'http://127.0.0.1:8000/chat';
 const CHATBOT_NAME = 'Neo';
 
 const SUGGESTED = [
@@ -44,7 +44,11 @@ export const useChatbot = () => {
     abortRef.current = new AbortController();
 
     try {
-      const res = await fetch(CHATBOT_API, {
+      if (!CHATBOT_API_URL) {
+        throw new Error('chatbot-not-configured');
+      }
+
+      const res = await fetch(CHATBOT_API_URL, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ message: msg }),

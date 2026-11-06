@@ -2,10 +2,6 @@ import axios from 'axios';
 import { getAuthToken } from '../store/authStore';
 import { API_BASE_URL, IS_PRODUCTION } from '../config/env';
 
-// Re-exported so existing consumers keep working while they migrate to
-// importing from `src/config/env` directly.
-export { API_BASE_URL };
-
 // Production mode check - only log in development
 const isDev = !IS_PRODUCTION;
 

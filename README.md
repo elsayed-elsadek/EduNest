@@ -185,6 +185,7 @@ All runtime configuration is read through a single module, `src/config/env.ts`. 
 | Variable | Required | Example | Purpose |
 | :--- | :--- | :--- | :--- |
 | `VITE_API_BASE_URL` | Production: **yes**<br>Development: no | `https://api.example.com` | Backend origin used by Axios, WebSocket connections and asset URLs |
+| `VITE_CHATBOT_API_URL` | No | `https://chat.example.com/chat` | Chatbot service endpoint (separate backend) |
 
 > Vite only exposes `VITE_*` variables to the browser, and their values are **inlined into the bundle at build time**. Never put a password, private API key or any other secret in a `VITE_*` variable.
 
@@ -227,12 +228,16 @@ $env:VITE_API_BASE_URL="https://api.example.com"; npm run build
 | `https://api.example.com/?x=1` | ❌ rejected — no query string or hash |
 | `http://localhost:8080` (production build) | ❌ rejected — local hosts are not allowed in production |
 
+The same rules apply to `VITE_CHATBOT_API_URL`.
+
 #### Missing or invalid configuration
 
 `src/config/env.ts` validates the value when the bundle loads:
 
 - **Production:** a missing `VITE_API_BASE_URL`, a non-absolute URL, or a localhost host throws immediately with a message prefixed `[env]`, so the app fails fast instead of silently calling the wrong backend.
 - **Development:** a missing variable falls back to the local backend; an invalid value still throws.
+
+`VITE_CHATBOT_API_URL` follows the same validation rules, but is optional: when it is unset in a production build the chatbot widget is disabled while the rest of the app keeps working.
 
 Asset URLs (avatars, uploads, files) use the same origin through `getAssetUrl()`; `src/utils/imageUtils.ts` is a thin wrapper over it.
 

@@ -2,6 +2,7 @@
 import { Mail, MessageCircle } from 'lucide-react';
 import type { FC } from 'react';
 import type { Student } from '../../../types/viewStudent.types';
+import { getAssetUrl } from '../../../config/env';
 
 interface ProfileHeaderProps {
   student: Student;
@@ -10,17 +11,8 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader: FC<ProfileHeaderProps> = ({ student, onMail, onChat }) => {
-  const avatarSrc = student.avatar
-    ? student.avatar.startsWith('http')
-      ? student.avatar
-      : `http://localhost:8080${student.avatar}`
-    : null;
-
-  const coverSrc = student.coverImage
-    ? student.coverImage.startsWith('http')
-      ? student.coverImage
-      : `http://localhost:8080${student.coverImage}`
-    : null;
+  const avatarSrc = getAssetUrl(student.avatar);
+  const coverSrc = getAssetUrl(student.coverImage);
 
   return (
     <div className="overflow-hidden">

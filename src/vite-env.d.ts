@@ -15,6 +15,13 @@ interface ImportMetaEnv {
    * rejected when it is missing.
    */
   readonly VITE_API_BASE_URL?: string;
+
+  /**
+   * Absolute URL of the chatbot service, e.g. `https://chat.example.com/chat`.
+   * Optional: when absent the chatbot widget is disabled in production and
+   * falls back to the local service in development.
+   */
+  readonly VITE_CHATBOT_API_URL?: string;
 }
 
 interface ImportMeta {
