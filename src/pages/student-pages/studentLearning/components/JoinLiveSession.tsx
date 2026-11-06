@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { PlayCircle, Video, X, ExternalLink } from 'lucide-react';
 import type { ContentItem } from '../../../../types/student-role-types/studentMentorshipTypes';
 import sessionImg from '../../../../assets/studentImgs/liveSession.webp';
-import { openExternalUrl } from '../../../../utils/safeExternalUrl';
+import { isSafeExternalUrl, openExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface ContentHeroProps {
   item: ContentItem;
@@ -64,7 +64,7 @@ const ContentHero = ({
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <a
-              href={meetingUrl}
+              href={isSafeExternalUrl(meetingUrl) ? meetingUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto bg-[var(--primary-500)]  px-6 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg text-white no-underline hover:scale-[1.02] active:scale-[0.98]"

@@ -4,6 +4,7 @@ import React from 'react';
 import { Award, CheckCircle, Clock, AlertCircle, Download, Link } from 'lucide-react';
 import type { TaskSubmission, ProjectStatistics } from '../../../../services/projectService';
 import { getAssetUrl } from '../../../../config/env';
+import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 type Props = {
   submissionsList: TaskSubmission[];
@@ -101,7 +102,7 @@ export const ProjectSubmissionsTable: React.FC<Props> = ({
 
                   {/* Link Column */}
                   <td className="p-4">
-                    {getLinkUrl(sub) ? (
+                    {isSafeExternalUrl(getLinkUrl(sub)) ? (
                         <a
                           href={getLinkUrl(sub)!}
                           target="_blank"
@@ -117,7 +118,7 @@ export const ProjectSubmissionsTable: React.FC<Props> = ({
 
                   {/* File Column */}
                   <td className="p-4">
-                    {getFileUrl(sub) ? (
+                    {isSafeExternalUrl(getFileUrl(sub)) ? (
                       <a
                         href={getFileUrl(sub)!}
                         target="_blank"

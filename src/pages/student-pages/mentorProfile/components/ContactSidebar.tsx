@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Mail, Globe, Share2, Copy, Check, Github, ExternalLink } from 'lucide-react';
 import type { MentorProfile, SocialMediaLink } from '../../../../services/student-roleService/mentorProfile.api';
 import logger from '../../../../utils/logger';
+import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface ContactSidebarProps {
   mentorProfile: MentorProfile | null;
@@ -148,7 +149,7 @@ const ContactSidebar = ({ mentorProfile }: ContactSidebarProps) => {
                   return (
                     <a
                       key={social.media}
-                      href={social.link}
+                      href={isSafeExternalUrl(social.link) ? social.link : undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-2xl text-slate-600 font-medium text-sm transition-all duration-300 ${meta.color} group`}

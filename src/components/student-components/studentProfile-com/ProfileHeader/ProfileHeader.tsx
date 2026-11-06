@@ -2,6 +2,7 @@
 import type { FC } from 'react';
 import { Github, Linkedin, Pencil, Mail, Settings } from 'lucide-react';
 import type { ProfileHeaderProps } from './ProfileHeader.types';
+import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 const ProfileHeader: FC<ProfileHeaderProps> = ({ profile, onEditProfile }) => {
   const { firstName, lastName, role, email, avatar, githubUrl, linkedinUrl } = profile;
@@ -47,9 +48,9 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({ profile, onEditProfile }) => {
         <div className="flex flex-wrap items-center gap-3 mt-4">
           {/* GitHub */}
           <a
-            href={githubUrl || '#'}
+            href={isSafeExternalUrl(githubUrl) ? githubUrl : '#'}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Github className="w-4 h-4" />
@@ -58,9 +59,9 @@ const ProfileHeader: FC<ProfileHeaderProps> = ({ profile, onEditProfile }) => {
 
           {/* LinkedIn */}
           <a
-            href={linkedinUrl || '#'}
+            href={isSafeExternalUrl(linkedinUrl) ? linkedinUrl : '#'}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Linkedin className="w-4 h-4 text-blue-600" />

@@ -3,6 +3,7 @@ import { type FC, useState, useRef, useEffect } from 'react';
 import { Edit3, Trash2 } from 'lucide-react';
 import type { Message } from '../../../../types/mentor-meaasges.types';
 import { getAssetUrl } from '../../../../config/env';
+import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface MessageBubbleProps {
   message:      Message;
@@ -110,14 +111,15 @@ const MessageBubble: FC<MessageBubbleProps> = ({
                   ? cleaned
                   : getAssetUrl(cleaned.startsWith('/uploads/') ? cleaned : `/uploads/${cleaned}`) ?? null)
                 : null;
+              const safeUrl = isSafeExternalUrl(url) ? url : null;
 
               // Image preview if looks like image by extension
-              const isImg = !!url && /\.(png|jpe?g|gif|webp|bmp|svg)$/iu.test(cleaned);
-              if (isImg && url) {
+              const isImg = !!safeUrl && /\.(png|jpe?g|gif|webp|bmp|svg)$/iu.test(cleaned);
+              if (isImg && safeUrl) {
                 return (
                   <div className="flex flex-col gap-2">
                     <img
-                      src={url}
+                      src={safeUrl}
                       alt={cleaned}
                       className="max-w-[220px] max-h-[220px] rounded-xl object-cover"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
@@ -127,12 +129,12 @@ const MessageBubble: FC<MessageBubbleProps> = ({
                 );
               }
 
-              if (hasAttachmentName && url) {
+              if (hasAttachmentName && safeUrl) {
                 return (
                   <a
-                    href={url}
+                    href={safeUrl}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 underline decoration-dotted underline-offset-2"
                     title={cleaned}
                   >

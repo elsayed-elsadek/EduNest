@@ -250,7 +250,7 @@ AI responses and uploaded DOCX files are untrusted input. Chatbot Markdown is es
 Run the security-focused DOM and URL tests with:
 
 ```bash
-npm test -- src/utils/__tests__/security.test.ts src/components/common/__tests__/securityRendering.test.tsx
+npm test -- --pool=threads --maxWorkers=1 src/utils/__tests__/security.test.ts src/components/common/__tests__/securityRendering.test.tsx
 ```
 
 ### Logging

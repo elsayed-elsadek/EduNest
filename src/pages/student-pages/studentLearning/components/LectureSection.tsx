@@ -1,5 +1,6 @@
 import { useLecture } from '../../../../services/student-roleService/lecture.api';
 import LoadingSpinner from '../../../../components/common/LoadingSpinner';
+import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface LectureSectionProps {
   lectureId: number;
@@ -86,8 +87,19 @@ const LectureSection = ({ lectureId, fallbackTitle }: LectureSectionProps) => {
     );
   }
 
-  const isDirectVideo = isDirectVideoUrl(lectureUrl);
-  const isEmbeddable = isEmbeddableUrl(lectureUrl);
+  const isSafeUrl = isSafeExternalUrl(lectureUrl);
+  const isSafeBlobVideo = lectureUrl.toLowerCase().startsWith('blob:') && isDirectVideoUrl(lectureUrl);
+  if (!isSafeUrl && !isSafeBlobVideo) {
+    return (
+      <div className="rounded-3xl bg-white p-8 shadow-lg text-center">
+        <h3 className="mb-2 text-xl font-bold text-slate-900">{title}</h3>
+        <p className="text-slate-600">Lecture content has an invalid URL.</p>
+      </div>
+    );
+  }
+
+  const isDirectVideo = isDirectVideoUrl(lectureUrl) && (isSafeUrl || isSafeBlobVideo);
+  const isEmbeddable = isSafeUrl && isEmbeddableUrl(lectureUrl);
 
   return (
     <div className="space-y-4">
@@ -140,4 +152,3 @@ const LectureSection = ({ lectureId, fallbackTitle }: LectureSectionProps) => {
 };
 
 export default LectureSection;
-
