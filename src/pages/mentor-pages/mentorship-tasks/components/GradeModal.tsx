@@ -7,6 +7,7 @@ import type { GradePayload } from '../../../../services/mentorshipsContent/task'
 import { gradeTaskSubmission } from '../../../../services/mentorshipsContent/task';
 import toast from 'react-hot-toast';
 import type { GradeModalProps } from './types';
+import { openExternalUrl } from '../../../../utils/safeExternalUrl';
 
 const GradeModal: FC<GradeModalProps> = ({ submission, maxPoints, onClose, onGraded }) => {
     const [score, setScore] = useState<string>(
@@ -82,7 +83,7 @@ const GradeModal: FC<GradeModalProps> = ({ submission, maxPoints, onClose, onGra
                     {submission.uploadedFilePath && (
                         <div className="w-full mt-0.5">
                             <button
-                                onClick={() => window.open(buildFullFileUrl(submission.uploadedFilePath), '_blank')}
+                                onClick={() => openExternalUrl(buildFullFileUrl(submission.uploadedFilePath))}
                                 className="flex items-center gap-3 w-full px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-sm font-semibold hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
                             >
                                 <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">

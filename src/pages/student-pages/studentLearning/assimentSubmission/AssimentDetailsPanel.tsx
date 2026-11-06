@@ -4,6 +4,7 @@ import type { StudentTaskDetails } from '../../../../services/student-roleServic
 import FileViewer from '../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
 import logger from '../../../../utils/logger';
+import { openExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface AssimentDetailsPanelProps {
   taskDetails: StudentTaskDetails;
@@ -147,7 +148,7 @@ const AssimentDetailsPanel = ({ taskDetails }: AssimentDetailsPanelProps) => {
                           } catch (err) {
                             logger.error('Force download failed:', err);
                             toast.error('Direct download unavailable, opening file...');
-                            window.open(url, '_blank');
+                            openExternalUrl(url);
                           }
                         }}
                         className="flex items-center gap-1.5 text-sm bg-white border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium transition-colors"

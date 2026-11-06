@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { PlayCircle, Video, X, ExternalLink } from 'lucide-react';
 import type { ContentItem } from '../../../../types/student-role-types/studentMentorshipTypes';
 import sessionImg from '../../../../assets/studentImgs/liveSession.webp';
+import { openExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface ContentHeroProps {
   item: ContentItem;
@@ -26,7 +27,7 @@ const ContentHero = ({
     // Fallback: if tab wasn't opened yet, open once when session becomes active.
     if (!openedRef.current && showIframe && meetingUrl) {
       openedRef.current = true;
-      window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+      openExternalUrl(meetingUrl);
     }
   }, [showIframe, meetingUrl]);
 
@@ -110,7 +111,7 @@ const ContentHero = ({
           onClick={() => {
             if (!openedRef.current && meetingUrl) {
               openedRef.current = true;
-              window.open(meetingUrl, '_blank', 'noopener,noreferrer');
+              openExternalUrl(meetingUrl);
             }
             onJoinSession(item.id);
           }}

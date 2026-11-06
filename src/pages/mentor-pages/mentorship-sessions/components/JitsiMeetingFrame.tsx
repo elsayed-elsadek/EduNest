@@ -1,6 +1,7 @@
 import { ExternalLink, VideoIcon } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import logger from '../../../../utils/logger';
+import { openExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface JitsiMeetingFrameProps {
   meetingUrl: string;
@@ -18,11 +19,7 @@ const JitsiMeetingFrame: React.FC<JitsiMeetingFrameProps> = ({
 
     openedRef.current = true;
 
-    const newWindow = window.open(
-      meetingUrl,
-      '_blank',
-      'noopener,noreferrer'
-    );
+    const newWindow = openExternalUrl(meetingUrl);
 
     // لو المتصفح منع الـ popup
     if (!newWindow) {

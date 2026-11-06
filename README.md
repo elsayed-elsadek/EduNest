@@ -243,6 +243,16 @@ Asset URLs (avatars, uploads, files) use the same origin through `getAssetUrl()`
 
 > `VITE_BASE_URL` is a legacy name that is being removed. Do not use it in new code — import from `src/config/env.ts` instead.
 
+### Frontend rendering security
+
+AI responses and uploaded DOCX files are untrusted input. Chatbot Markdown is escaped and restricted to a small formatting allowlist; HTML generated from DOCX previews is sanitized with DOMPurify using a separate document-formatting allowlist. External navigation accepts only HTTP(S) URLs and opens new tabs with `noopener,noreferrer` to prevent opener access and reverse tabnabbing. DOCX conversion uses the bundled Mammoth npm dependency and does not fetch the converter from a CDN.
+
+Run the security-focused DOM and URL tests with:
+
+```bash
+npm test -- src/utils/__tests__/security.test.ts src/components/common/__tests__/securityRendering.test.tsx
+```
+
 ### Logging
 
 All application logging goes through **`src/utils/logger.ts`**. It is the only
