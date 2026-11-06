@@ -3,6 +3,7 @@ import { ArrowUpRight, Github, Linkedin } from 'lucide-react';
 import type { FC } from 'react';
 import type { SocialMedia } from '../../../types/viewStudent.types';
 import type { JSX } from 'react/jsx-runtime';
+import { isSafeExternalUrl } from '../../../utils/safeExternalUrl';
 
 interface SocialMediaSectionProps {
   socialMedia: SocialMedia[];
@@ -70,7 +71,7 @@ const SocialMediaSection: FC<SocialMediaSectionProps> = ({ socialMedia }) => {
           );
 
           return hasUrl ? (
-            <a key={social.platform} href={social.url} target="_blank" rel="noopener noreferrer" className="block no-underline">
+            <a key={social.platform} href={isSafeExternalUrl(social.url) ? social.url : undefined} target="_blank" rel="noopener noreferrer" className="block no-underline">
               {inner}
             </a>
           ) : (
@@ -83,4 +84,3 @@ const SocialMediaSection: FC<SocialMediaSectionProps> = ({ socialMedia }) => {
 };
 
 export default SocialMediaSection;
-

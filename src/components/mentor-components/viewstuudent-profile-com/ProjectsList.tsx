@@ -8,6 +8,7 @@ import {
   Trophy, Zap, Flame, Lightbulb, Palette, Crown, Users, Medal,
 } from 'lucide-react';
 import type { Project, ProjectTab, AwardedBadge } from '../../../types/viewStudent.types';
+import { isSafeExternalUrl } from '../../../utils/safeExternalUrl';
 
 const PRIMARY = '#0f5e8b';
 
@@ -259,7 +260,7 @@ const ProjectsList: FC<ProjectsListProps> = ({
                         <div className="flex flex-wrap gap-2 mb-0">
                           {hasLink && (
                             <a
-                              href={project.submissionLink}
+                              href={isSafeExternalUrl(project.submissionLink) ? project.submissionLink : undefined}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-85"

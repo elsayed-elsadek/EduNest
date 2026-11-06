@@ -1,4 +1,5 @@
 import type { StatCardData, ChartPoint, TopMentor, ActivityEvent } from '../types/admin-role-types/admin-dash.types';
+import { escapeHtml } from './sanitizeHtml';
 
 interface DashboardExportData {
   stats:     StatCardData[];
@@ -19,32 +20,32 @@ const buildHtml = (data: DashboardExportData): string => {
   const statsRows = stats
     .map(s => `
       <div class="stat-card">
-        <p class="stat-label">${s.label}</p>
-        <p class="stat-value">${s.value}</p>
+        <p class="stat-label">${escapeHtml(String(s.label))}</p>
+        <p class="stat-value">${escapeHtml(String(s.value))}</p>
       </div>`)
     .join('');
 
   const chartRows = chartData
-    .map(c => `<tr><td>${c.month}</td><td>${c.sessions}</td></tr>`)
+    .map(c => `<tr><td>${escapeHtml(String(c.month))}</td><td>${escapeHtml(String(c.sessions))}</td></tr>`)
     .join('');
 
   const mentorRows = mentors
     .map(m => `
       <tr>
         <td>${m.rank}</td>
-        <td>${m.name}</td>
-        <td>${m.email}</td>
-        <td>${m.students}</td>
-        <td>${m.revenue}</td>
+        <td>${escapeHtml(String(m.name))}</td>
+        <td>${escapeHtml(String(m.email))}</td>
+        <td>${escapeHtml(String(m.students))}</td>
+        <td>${escapeHtml(String(m.revenue))}</td>
       </tr>`)
     .join('');
 
   const eventRows = events
     .map(e => `
       <tr class="${e.isAlert ? 'alert-row' : ''}">
-        <td>${e.title}</td>
-        <td>${e.description}</td>
-        <td>${e.timeLabel}</td>
+        <td>${escapeHtml(String(e.title))}</td>
+        <td>${escapeHtml(String(e.description))}</td>
+        <td>${escapeHtml(String(e.timeLabel))}</td>
       </tr>`)
     .join('');
 
@@ -249,7 +250,7 @@ export const exportDashboardSummary = (data: DashboardExportData): void => {
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
 
-  const win = window.open(url, '_blank');
+  const win = window.open(url, '_blank', 'noopener,noreferrer');
 
   if (win) {
     win.addEventListener('load', () => URL.revokeObjectURL(url));

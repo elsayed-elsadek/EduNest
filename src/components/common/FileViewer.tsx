@@ -1,15 +1,10 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Download, ExternalLink, FileText } from 'lucide-react';
+import mammoth from 'mammoth';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
-
-declare global {
-  interface Window {
-    mammoth?: {
-      convertToHtml?: (opts: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
-    };
-  }
-}
+import { isSafeExternalUrl, openExternalUrl } from '../../utils/safeExternalUrl';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 
 const IMAGE_EXT = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
 const VIDEO_EXT = ['mp4', 'webm', 'ogg'];
@@ -19,6 +14,7 @@ const OFFICE_EXT = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'];
 
 async function downloadFile(url: string, fallbackName = 'file') {
   try {
+    if (!isSafeExternalUrl(url)) throw new Error('Invalid download URL');
     const toastId = toast.loading('Starting download...');
     const response = await fetch(url);
     if (!response.ok) throw new Error('File fetch failed');
@@ -36,7 +32,7 @@ async function downloadFile(url: string, fallbackName = 'file') {
   } catch (err) {
     logger.error('Download failed', err);
     toast.error('Download failed. Opening in new tab...');
-    window.open(url, '_blank');
+    openExternalUrl(url);
   }
 }
 
@@ -60,6 +56,9 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
     setPreviewUrl(null);
     setPreviewError(null);
     if (!cleanedUrl) return;
+    if (!isSafeExternalUrl(cleanedUrl)) {
+      return () => { mounted = false; };
+    }
 
     const tryFetchBlob = async () => {
       // Only attempt blob preview for common web-renderable types
@@ -107,39 +106,9 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
           const arrayBuffer = await resp.arrayBuffer();
 
           try {
-            // attempt to use window.mammoth (if loaded) or load mammoth from installed package/CDN at runtime
-            const loadMammoth = async () => {
-              if (typeof window !== 'undefined' && window.mammoth) return window.mammoth;
-
-              try {
-                const mod = await import('mammoth');
-                const mammothLib = (mod && (mod.default || mod)) as Window['mammoth'] | undefined;
-                if (mammothLib) {
-                  window.mammoth = mammothLib;
-                  return mammothLib;
-                }
-              } catch (e) {
-                logger.warn('Dynamic import of mammoth failed, falling back to CDN', e);
-              }
-
-              await new Promise<void>((resolve, reject) => {
-                const existing = document.querySelector('script[data-mammoth-cdn]');
-                if (existing) return resolve();
-                const s = document.createElement('script');
-                s.src = 'https://unpkg.com/mammoth/mammoth.browser.min.js';
-                s.setAttribute('data-mammoth-cdn', '1');
-                s.onload = () => resolve();
-                s.onerror = () => reject(new Error('Failed to load mammoth from CDN'));
-                document.head.appendChild(s);
-              });
-              return window.mammoth;
-            };
-
-            const mammoth = await loadMammoth();
-            if (!mammoth || !mammoth.convertToHtml) throw new Error('mammoth not available');
             const { value } = await mammoth.convertToHtml({ arrayBuffer });
             if (mounted) {
-              setConvertedHtml(value as string);
+              setConvertedHtml(sanitizeHtml(value, 'document'));
               setPreviewError(null);
             }
           } catch (mErr) {
@@ -169,6 +138,9 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
   }, [cleanedUrl]);
 
   if (!cleanedUrl) return null;
+  if (!isSafeExternalUrl(cleanedUrl)) {
+    return <div className={`w-full rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 ${className}`}>Invalid file URL.</div>;
+  }
 
   const ext = (() => {
     try {
@@ -265,7 +237,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => {
-                  if (officeEmbed) window.open(officeEmbed, '_blank', 'noopener');
+                  if (officeEmbed) openExternalUrl(officeEmbed);
                 }}
                 className="inline-flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
@@ -274,7 +246,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
 
               <button
                 onClick={() => {
-                  window.open(cleanedUrl, '_blank', 'noopener');
+                  openExternalUrl(cleanedUrl);
                 }}
                 className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary-500)] text-white px-3 py-1.5 text-sm font-medium hover:opacity-95"
               >

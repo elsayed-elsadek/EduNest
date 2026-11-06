@@ -3,79 +3,7 @@ import { type FC, useState, useRef, useEffect } from 'react';
 import { X, Send, Maximize2, Minimize2 } from 'lucide-react';
 import { useChatbot } from '../../../hooks/chatbot/Usechatbot';
 import { useAuthStore } from '../../../store/authStore';
-
-function formatBotText(raw: string): string {
-  const text = raw.trim().replace(/\r\n/g, '\n');
-  const blocks = text.split(/\n{2,}/);
-  const numberedPattern = /^(\d+)\.\s+(.+)/;
-  const bulletPattern   = /^[-•*]\s+(.+)/;
-
-  const renderedBlocks = blocks.map(block => {
-    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return '';
-
-    if (lines.every(l => numberedPattern.test(l))) {
-      const items = lines.map(l => {
-        const m = l.match(numberedPattern)!;
-        return `<li><span class="list-num">${m[1]}.</span><span class="list-text">${inlineFormat(m[2])}</span></li>`;
-      });
-      return `<ol class="bot-list">${items.join('')}</ol>`;
-    }
-
-    if (lines.every(l => bulletPattern.test(l))) {
-      const items = lines.map(l => {
-        const m = l.match(bulletPattern)!;
-        return `<li><span class="list-text">${inlineFormat(m[1])}</span></li>`;
-      });
-      return `<ul class="bot-list">${items.join('')}</ul>`;
-    }
-
-    const hasList = lines.some(l => numberedPattern.test(l) || bulletPattern.test(l));
-    if (hasList) {
-      const result: string[] = [];
-      let listItems: string[] = [];
-      let listType: 'ol' | 'ul' | null = null;
-      const flushList = () => {
-        if (listItems.length) {
-          result.push(`<${listType} class="bot-list">${listItems.join('')}</${listType}>`);
-          listItems = []; listType = null;
-        }
-      };
-      lines.forEach(line => {
-        const nm = line.match(numberedPattern);
-        const bm = line.match(bulletPattern);
-        if (nm) {
-          if (listType === 'ul') flushList();
-          listType = 'ol';
-          listItems.push(`<li><span class="list-num">${nm[1]}.</span><span class="list-text">${inlineFormat(nm[2])}</span></li>`);
-        } else if (bm) {
-          if (listType === 'ol') flushList();
-          listType = 'ul';
-          listItems.push(`<li><span class="list-text">${inlineFormat(bm[1])}</span></li>`);
-        } else {
-          flushList();
-          result.push(`<p>${inlineFormat(line)}</p>`);
-        }
-      });
-      flushList();
-      return result.join('');
-    }
-
-    return `<p>${lines.map(inlineFormat).join('<br/>')}</p>`;
-  });
-
-  return renderedBlocks.filter(Boolean).join('');
-}
-
-function inlineFormat(str: string): string {
-  return str
-    .replace(/^#{1,4}\s*/, '')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-    .replace(/`(.+?)`/g,       '<code>$1</code>')
-    .replace(/\*{1,3}/g, '')
-    .trim();
-}
+import { formatBotText } from '../../../utils/formatBotText';
 
 // ─── Bot face SVG (trigger button) ───────────────────────────────────────────
 const BotFaceIcon: FC = () => (
@@ -129,7 +57,7 @@ const BotMiniAvatar: FC = () => (
 );
 
 // ─── Message Bubble 
-const MessageBubble: FC<{ role: 'user' | 'bot'; text: string; expanded?: boolean; chatbotName: string }> = ({
+export const MessageBubble: FC<{ role: 'user' | 'bot'; text: string; expanded?: boolean; chatbotName: string }> = ({
   role, text, expanded, chatbotName,
 }) => {
   const isBot = role === 'bot';

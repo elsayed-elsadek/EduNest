@@ -7,6 +7,7 @@ import DashLayout from '../../../components/layout/Dash-layout';
 import ProfileSection from '../../../components/mentor-components/mentor-profile-com/ProfileSection';
 import { useMentorProfile } from '../../../hooks/Usementorprofile';
 import type { UpdateMentorProfileRequest } from '../../../types/mentor-profile.types';
+import { isSafeExternalUrl } from '../../../utils/safeExternalUrl';
 
 //  Edit Modal
 interface EditModalProps {
@@ -248,7 +249,7 @@ const ProfilePage: FC = () => {
                   <div>
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">LinkedIn</label>
                     {profile?.links?.linkedin
-                      ? <a href={ensureHttps(profile.links.linkedin)} target="_blank" rel="noopener noreferrer"
+                      ? <a href={isSafeExternalUrl(ensureHttps(profile.links.linkedin)) ? ensureHttps(profile.links.linkedin) : undefined} target="_blank" rel="noopener noreferrer"
                         className="text-sm text-[#0f5e8b] font-medium break-all hover:underline">
                         {profile.links.linkedin}
                       </a>
@@ -258,7 +259,7 @@ const ProfilePage: FC = () => {
                   <div>
                     <label className="block text-[11px] font-bold text-gray-400 mb-2">GitHub</label>
                     {profile?.links?.github
-                      ? <a href={ensureHttps(profile.links.github)} target="_blank" rel="noopener noreferrer"
+                      ? <a href={isSafeExternalUrl(ensureHttps(profile.links.github)) ? ensureHttps(profile.links.github) : undefined} target="_blank" rel="noopener noreferrer"
                         className="text-sm text-[#0f5e8b] font-medium break-all hover:underline">
                         {profile.links.github}
                       </a>
@@ -313,5 +314,4 @@ const ProfilePage: FC = () => {
 };
 
 export default ProfilePage;
-
 

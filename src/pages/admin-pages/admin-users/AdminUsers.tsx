@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import {  Bell, ChevronDown, Loader2, X, Github, Linkedin, Globe, Award, Trash2 } from 'lucide-react';
 import UserList from './components/UserList';
 import { getAssetUrl } from '../../../config/env';
+import { isSafeExternalUrl } from '../../../utils/safeExternalUrl';
 import SendNotificationModal from './components/SendNotificationModal';
 import SendEmailModal from './components/SendEmailModal';
 import AssignBadgeModal from './components/AssignBadgeModal';
@@ -217,7 +218,7 @@ const Users: React.FC = () => {
                     return (
                       <a
                         key={url || idx}
-                        href={url}
+                        href={isSafeExternalUrl(url) ? url : undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition-all shadow-xs"
@@ -231,7 +232,7 @@ const Users: React.FC = () => {
                     return (
                       <a
                         key={url || idx}
-                        href={url}
+                        href={isSafeExternalUrl(url) ? url : undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-100 text-blue-600 hover:text-blue-800 rounded-xl text-xs font-semibold transition-all shadow-xs"
@@ -244,7 +245,7 @@ const Users: React.FC = () => {
                   return (
                     <a
                       key={url || idx}
-                      href={url}
+                      href={isSafeExternalUrl(url) ? url : undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold transition-all shadow-xs"

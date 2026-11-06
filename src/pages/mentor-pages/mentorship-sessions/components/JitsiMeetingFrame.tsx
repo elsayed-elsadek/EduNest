@@ -1,6 +1,7 @@
 import { ExternalLink, VideoIcon } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import logger from '../../../../utils/logger';
+import { isSafeExternalUrl, openExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface JitsiMeetingFrameProps {
   meetingUrl: string;
@@ -18,11 +19,7 @@ const JitsiMeetingFrame: React.FC<JitsiMeetingFrameProps> = ({
 
     openedRef.current = true;
 
-    const newWindow = window.open(
-      meetingUrl,
-      '_blank',
-      'noopener,noreferrer'
-    );
+    const newWindow = openExternalUrl(meetingUrl);
 
     // لو المتصفح منع الـ popup
     if (!newWindow) {
@@ -49,7 +46,7 @@ The meeting has opened in a new tab. Return there to join the session.       </p
       </button>
 
            <a
-              href={meetingUrl}
+              href={isSafeExternalUrl(meetingUrl) ? meetingUrl : undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto bg-[var(--primary-500)]  px-6 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg text-white no-underline hover:scale-[1.02] active:scale-[0.98]"

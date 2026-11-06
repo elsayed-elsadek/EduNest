@@ -4,6 +4,7 @@ import type { StudentProjectDetails } from '../../../../../services/student-role
 import FileViewer from '../../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
 import logger from '../../../../../utils/logger';
+import { isSafeExternalUrl, openExternalUrl } from '../../../../../utils/safeExternalUrl';
 
 interface ProjectDetailsPanelProps {
   projectDetails: StudentProjectDetails;
@@ -110,7 +111,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                   </div>
 
                   <a
-                    href={getLinkUrl()}
+                    href={isSafeExternalUrl(getLinkUrl()) ? getLinkUrl() : undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-sm bg-amber-600 text-white px-3 py-1.5 rounded-lg hover:bg-amber-700 font-medium transition-colors"
@@ -140,6 +141,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                           const url = getFileUrl();
                           if (!url) return;
                           try {
+                            if (!isSafeExternalUrl(url)) throw new Error('Invalid download URL');
                             const toastId = toast.loading('Starting download...');
                             const response = await fetch(url);
                             if (!response.ok) throw new Error('File fetch failed');
@@ -157,7 +159,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                           } catch (err) {
                             logger.error('Force download failed:', err);
                             toast.error('Direct download unavailable, opening file...');
-                            window.open(url, '_blank');
+                            openExternalUrl(url);
                           }
                         }}
                         className="flex items-center gap-1.5 text-sm bg-white border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-slate-700 font-medium transition-colors"
@@ -166,7 +168,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                         Download
                       </button>
                       <a
-                        href={getFileUrl()}
+                        href={isSafeExternalUrl(getFileUrl()) ? getFileUrl() : undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-sm bg-[var(--primary-500)] text-white px-3 py-1.5 rounded-lg hover:bg-[var(--primary-dark)] font-medium transition-colors"

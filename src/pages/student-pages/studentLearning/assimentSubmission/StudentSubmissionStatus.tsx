@@ -5,6 +5,7 @@ import ContentTypeBadge from '../../../../components/common/ContentTypeBadge';
 import type { StudentTaskDetails } from '../../../../services/student-roleService/submitTask';
 import FileViewer from '../../../../components/common/FileViewer';
 import { buildFullFileUrl } from '../../../../utils/fileUrl';
+import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface StudentSubmissionStatusProps {
   taskDetails: StudentTaskDetails;
@@ -93,7 +94,7 @@ const StudentSubmissionStatus = ({ taskDetails }: StudentSubmissionStatusProps) 
                 <LinkIcon className="w-4 h-4 text-blue-600" />
                 <div className="flex-1">
                   <p className="text-sm text-slate-500">Submitted Link</p>
-                  <a href={submissionUrl} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline break-all">
+                  <a href={isSafeExternalUrl(submissionUrl) ? submissionUrl : undefined} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline break-all">
                     View Submission
                   </a>
                 </div>
@@ -108,7 +109,7 @@ const StudentSubmissionStatus = ({ taskDetails }: StudentSubmissionStatusProps) 
                 <Download className="w-4 h-4 text-slate-600" />
                 <div className="flex-1">
                   <p className="text-sm text-slate-500">Submitted File</p>
-                  <a href={uploadedFilePath} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline">
+                  <a href={isSafeExternalUrl(uploadedFilePath) ? uploadedFilePath : undefined} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline">
                     View Your submission
                   </a>
                 </div>
@@ -133,7 +134,7 @@ const StudentSubmissionStatus = ({ taskDetails }: StudentSubmissionStatusProps) 
                 <LinkIcon className="w-4 h-4 text-blue-600 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-slate-500 font-medium">Link</p>
-                  <a href={submissionUrl} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline break-all text-sm">
+                  <a href={isSafeExternalUrl(submissionUrl) ? submissionUrl : undefined} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline break-all text-sm">
                     View Link
                   </a>
                 </div>
@@ -145,7 +146,7 @@ const StudentSubmissionStatus = ({ taskDetails }: StudentSubmissionStatusProps) 
                   <Download className="w-4 h-4 text-slate-600 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-slate-500 font-medium">File</p>
-                    <a href={uploadedFilePath} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline text-sm">
+                    <a href={isSafeExternalUrl(uploadedFilePath) ? uploadedFilePath : undefined} target="_blank" rel="noopener noreferrer" className="text-[var(--primary-500)] hover:text-[var(--primary-dark)] font-medium underline text-sm">
                       View File
                     </a>
                   </div>
