@@ -16,6 +16,7 @@ import type {
 } from '../../../../types/student-role-types/quiz.types';
 import axios from 'axios';
 import { getBackendErrorMessage } from '../../../../services/student-roleService/apiResponseHelpers';
+import logger from '../../../../utils/logger';
 
 interface QuizSubmissionProps {
   quizId: number;
@@ -122,7 +123,7 @@ const QuizSubmission = ({ quizId }: QuizSubmissionProps) => {
       setTimeLeft(quiz.durationMinutes * 60);
       setStage('quiz');
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       toast.error('Failed to load questions. Please try again.');
       setStage('intro');
     }
@@ -186,7 +187,7 @@ const QuizSubmission = ({ quizId }: QuizSubmissionProps) => {
         }
         setStage('intro');
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         setErrorMsg('Failed to load quiz. Please try again.');
         setStage('error');
       }
@@ -244,7 +245,7 @@ const QuizSubmission = ({ quizId }: QuizSubmissionProps) => {
       const reviewData = res?.Review ?? [];
       setReviewList(reviewData);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       toast.error('Failed to load answers.');
     } finally {
       setLoadingAnswers(false);

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Video, VideoOff, Users, PhoneOff } from 'lucide-react';
 import type { LiveSessionInfo } from '../../../../services/mentorshipsContent/liveSession';
+import logger from '../../../../utils/logger';
 
 interface LiveSessionPrejoinProps {
     sessionInfo: LiveSessionInfo;
@@ -65,7 +66,7 @@ const LiveSessionPrejoin: React.FC<LiveSessionPrejoinProps> = ({
                     videoRef.current.srcObject = mediaStream;
                 }
             } catch (error) {
-                console.error('Error accessing media devices:', error);
+                logger.error('Error accessing media devices:', error);
                 setPermissionError(true);
             }
         };

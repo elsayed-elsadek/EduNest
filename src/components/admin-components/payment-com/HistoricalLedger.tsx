@@ -38,7 +38,7 @@ const HistoricalLedger: FC<HistoricalLedgerProps> = ({
       <LedgerFilters
         search={search}
         onSearch={onSearch}
-        onOpenFilters={() => console.log('Open filters')}
+        onOpenFilters={() => {}}
       />
     </div>
 

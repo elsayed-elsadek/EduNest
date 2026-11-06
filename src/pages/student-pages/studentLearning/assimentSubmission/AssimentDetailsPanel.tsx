@@ -3,6 +3,7 @@ import { getAssetUrl } from '../../../../config/env';
 import type { StudentTaskDetails } from '../../../../services/student-roleService/submitTask';
 import FileViewer from '../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
+import logger from '../../../../utils/logger';
 
 interface AssimentDetailsPanelProps {
   taskDetails: StudentTaskDetails;
@@ -144,7 +145,7 @@ const AssimentDetailsPanel = ({ taskDetails }: AssimentDetailsPanelProps) => {
                             URL.revokeObjectURL(objectUrl);
                             toast.success('Download complete', { id: toastId });
                           } catch (err) {
-                            console.error('Force download failed:', err);
+                            logger.error('Force download failed:', err);
                             toast.error('Direct download unavailable, opening file...');
                             window.open(url, '_blank');
                           }

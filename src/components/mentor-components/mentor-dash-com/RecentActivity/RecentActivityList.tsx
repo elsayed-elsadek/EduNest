@@ -16,8 +16,7 @@ const RecentActivityList: FC<RecentActivityListWithPaginationProps> = ({
   totalPages = 1,
   onPageChange,
 }) => {
-  const handleView = (id: string) => {
-    console.log('View activity:', id);
+  const handleView = () => {
     // TODO: Navigate to activity detail
   };
 

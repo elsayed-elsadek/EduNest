@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { type ProjectResponse, updateProject, deleteProject } from '../../../../services/projectService';
 import { X, AlertTriangle, Upload, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
+import logger from '../../../../utils/logger';
 
 interface EditProjectModalProps {
   project: ProjectResponse | null;
@@ -101,7 +102,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, isO
     errorMessage = rawError;
   }
   toast.error(errorMessage);
-  console.error("Original Error:", err);
+  logger.error("Original Error:", err);
 }finally {
       setIsSubmitting(false);
     }

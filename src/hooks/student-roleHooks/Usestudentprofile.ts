@@ -16,6 +16,7 @@ import type {
   ProfileCertificateApi,
 } from '../../types/student-role-types/profile.types';
 import { getAssetUrl } from '../../config/env';
+import logger from '../../utils/logger';
 
 // ── helpers
 
@@ -55,7 +56,7 @@ function selectBadgeIcon(title: string, idx: number): string {
 
 function mapBadges(raw: StudentProfileApi): AchievementBadge[] {
   if (!Array.isArray(raw.badges)) {
-    console.warn('Badges data is not an array:', raw.badges);
+    logger.warn('Badges data is not an array:', raw.badges);
     return [];
   }
 
@@ -74,7 +75,7 @@ function mapBadges(raw: StudentProfileApi): AchievementBadge[] {
 
 function mapProjects(raw: StudentProfileApi): ActiveProject[] {
   if (!Array.isArray(raw.projects)) {
-    console.warn('Projects data is not an array:', raw.projects);
+    logger.warn('Projects data is not an array:', raw.projects);
     return [];
   }
 
@@ -99,7 +100,7 @@ function mapCredentials(raw: StudentProfileApi): CredentialEntry[] {
     : (raw.certificates as { content?: ProfileCertificateApi[] })?.content || [];
 
   if (!Array.isArray(certsArray)) {
-    console.warn('Certificates data is not in expected format:', raw.certificates);
+    logger.warn('Certificates data is not in expected format:', raw.certificates);
     return [];
   }
 
@@ -132,7 +133,7 @@ export const useStudentProfile = () => {
       try {
         const raw = res.apiResponse?.profile;
         if (!raw) {
-          console.warn('No profile data in API response');
+          logger.warn('No profile data in API response');
           return undefined;
         }
 
@@ -143,7 +144,7 @@ export const useStudentProfile = () => {
           credentials: mapCredentials(raw),
         };
       } catch (error) {
-        console.error('Error mapping profile data:', error);
+        logger.error('Error mapping profile data:', error);
         return undefined;
       }
     },

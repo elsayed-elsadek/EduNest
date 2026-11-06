@@ -1,5 +1,6 @@
 import api from '../api';
 import { handleRequest } from './utils';
+import logger from '../../utils/logger';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -173,7 +174,7 @@ export const createTask = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
 
-    console.error("Create Task Error:", error?.response?.data || error);
+    logger.error("Create Task Error:", error?.response?.data || error);
 
     throw error;
   }
@@ -237,7 +238,7 @@ export const updateTask = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
 
-    console.error("Update Task Error:", error?.response?.data || error);
+    logger.error("Update Task Error:", error?.response?.data || error);
 
     throw error;
   }

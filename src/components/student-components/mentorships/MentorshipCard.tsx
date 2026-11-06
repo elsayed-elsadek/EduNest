@@ -3,6 +3,7 @@ import { Clock, User } from 'lucide-react';
 import type { MentorshipData } from '../../../types/mentorship';
 import { getAssetUrl } from '../../../config/env';
 import NoCover from '../../student-components/common/Nocover/Nocover';
+import logger from '../../../utils/logger';
 
 interface MentorshipCardProps {
   mentorship: MentorshipData;
@@ -17,9 +18,6 @@ interface MentorshipCardProps {
  */
 const MentorshipCard: FC<MentorshipCardProps> = memo(({ mentorship, onClick, onHover }) => {
 
-  // Debug: Log mentorship data
-  console.log('Mentorship data:', mentorship);
-
   // Format price with thousand separators
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -33,7 +31,7 @@ const MentorshipCard: FC<MentorshipCardProps> = memo(({ mentorship, onClick, onH
   // Handle image loading error / show placeholder
   const [imgError, setImgError] = useState(false);
   const handleImageError = () => {
-    console.warn('Image failed to load for mentorship:', mentorship.id, mentorship.title);
+    logger.warn('Image failed to load for mentorship:', mentorship.id, mentorship.title);
     setImgError(true);
   };
 

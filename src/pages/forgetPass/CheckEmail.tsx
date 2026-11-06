@@ -7,6 +7,7 @@ import {
   forgetPassword,
   forgetPasswordVerifyOtp,
 } from "../../services/authService";
+import logger from '../../utils/logger';
 
 
 const CheckEmail: React.FC = () => {
@@ -99,7 +100,7 @@ const CheckEmail: React.FC = () => {
         "Something went wrong while verifying the code.";
 
       setErrorMessage(backendMessage);
-      console.error("Verify OTP error:", error);
+      logger.error("Verify OTP error:", error);
     } finally {
       setLoading(false);
     }
@@ -126,7 +127,7 @@ const CheckEmail: React.FC = () => {
         "Something went wrong while resending the code.";
 
       setErrorMessage(backendMessage);
-      console.error("Resend code error:", error);
+      logger.error("Resend code error:", error);
     }
   };
 

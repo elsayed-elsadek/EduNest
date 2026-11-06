@@ -12,6 +12,7 @@ import { faVideo } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import Pagination from '../../../components/mentor-components/mentor-dash-com/Pagination/Pagination';
 import GlobalLoadingOverlay from '../../../loadingApp/GlobalLoadingOverlay';
+import logger from '../../../utils/logger';
 
 const MentorshipSessions: FC = () => {
     const { id: mentorshipId } = useParams<{ id: string }>();
@@ -53,7 +54,7 @@ const MentorshipSessions: FC = () => {
                 }
                 
                 setError(message);
-                console.error('Error loading sessions:', err);
+                logger.error('Error loading sessions:', err);
             } finally {
                 setLoading(false);
             }
@@ -125,7 +126,7 @@ const MentorshipSessions: FC = () => {
                 message = error.message as string || message;
             }
             
-            console.error(message);
+            logger.error(message);
             setActiveSession(null);
         } finally {
             setActionLoading(false);

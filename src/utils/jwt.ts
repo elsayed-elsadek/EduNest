@@ -1,6 +1,6 @@
-/**
- * Utility functions for JWT token handling
- */
+/** Utility functions for JWT token handling */
+
+import logger from './logger';
 
 /**
  * Safely decodes a Base64URL JWT payload and returns UTF-8 text.
@@ -41,8 +41,9 @@ export function decodeToken(token: string): Record<string, unknown> | null {
 
     const decodedJson = decodeBase64UrlUtf8(parts[1]);
     return JSON.parse(decodedJson);
-  } catch (error) {
-    console.error("Failed to decode token:", error);
+  } catch {
+    // Never log the token or the parser error: both can contain token payload data.
+    logger.warn("Failed to decode token payload");
     return null;
   }
 }

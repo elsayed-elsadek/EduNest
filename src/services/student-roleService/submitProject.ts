@@ -1,5 +1,6 @@
 import api from "../api";
 import { handleRequest } from "../mentorshipsContent";
+import logger from '../../utils/logger';
 
 export interface SubmitProjectPayload {
   file?: File;
@@ -54,7 +55,7 @@ export const submitProject = async (
     return { submission: raw };
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
-    console.error("Submit Project Error:", err?.response?.data ?? err?.message ?? error);
+    logger.error("Submit Project Error:", err?.response?.data ?? err?.message ?? error);
     throw error;
   }
 };
@@ -96,7 +97,7 @@ export const getStudentProjectDetails = async (projectId: number): Promise<Stude
     return raw as StudentProjectDetails;
   } catch (error: unknown) {
     const err = error as { response?: { data?: unknown }; message?: string };
-    console.error("Get Student Project Details Error:", err?.response?.data ?? err?.message ?? error);
+    logger.error("Get Student Project Details Error:", err?.response?.data ?? err?.message ?? error);
     throw error;
   }
 };

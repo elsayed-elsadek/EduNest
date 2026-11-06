@@ -6,6 +6,7 @@ import { AxiosError } from 'axios';
 import ProjectDetailsPanel from './components/ProjectDetailsPanel';
 import ProjectSubmissionStatus from './components/ProjectSubmissionStatus';
 import ProjectSubmissionForm from './components/ProjectSubmissionForm';
+import logger from '../../../../utils/logger';
 
 interface ProjectSubmissionProps {
   projectId: number;
@@ -24,7 +25,7 @@ const ProjectSubmission = ({ projectId }: ProjectSubmissionProps) => {
       const details = await getStudentProjectDetails(projectId);
       setProjectDetails(details);
     } catch (error) {
-      console.error('Error loading project details:', error);
+      logger.error('Error loading project details:', error);
       toast.error('Failed to load project details');
     } finally {
       setIsLoadingProject(false);
@@ -69,7 +70,7 @@ const ProjectSubmission = ({ projectId }: ProjectSubmissionProps) => {
       setFile(null);
       setFileUrl('');
     } catch (error) {
-      console.error('Submission error:', error);
+      logger.error('Submission error:', error);
       const err = error as AxiosError<{ errorMessages?: { error?: string } }>;
       const errorMessage = getBackendErrorMessage(err, 'Failed to submit project');
       toast.error(errorMessage);

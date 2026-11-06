@@ -5,6 +5,7 @@ import { formatDateTimeLocal } from '../../../../utils/helpers';
 import ModalOverlay from './ModalOverlay';
 import type { ApiError } from '../../../../types/auth';
 import type { ContentType, ContentItem } from '../types';
+import logger from '../../../../utils/logger';
 
 interface AddAssignmentModalProps {
   weekId: number | null;
@@ -73,7 +74,7 @@ const AddAssignmentModal: FC<AddAssignmentModalProps> = ({ weekId, editingItem, 
         onSuccess({ type: 'assignment', title: title.trim(), isDraft: true });
       }
     } catch (err) {
-      console.error('Assignment save error', err);
+      logger.error('Assignment save error', err);
       const serverError = (err as ApiError).errorMessages?.error || (err instanceof Error ? err.message : undefined);
       toast.error(serverError || 'Failed to save assignment');
     } finally {

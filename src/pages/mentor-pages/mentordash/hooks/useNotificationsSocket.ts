@@ -3,6 +3,7 @@ import { wsService } from '../../../../services/Websocketservice';
 import type { NotificationApiDto, Notification } from '../../../../types/mentornotification.types';
 import { toUiNotification } from '../../../../types/mentornotification.types';
 import type { PaginationMeta } from './helpers';
+import logger from '../../../../utils/logger';
 
 type SetNotifications = (updater: (prev: Notification[]) => Notification[]) => void;
 type SetNotificationPagination = (updater: (prev: PaginationMeta) => PaginationMeta) => void;
@@ -32,10 +33,8 @@ export function useNotificationsSocket(
             totalElements: (prev.totalElements || 0) + 1,
           }));
         }
-
-        console.log('🔔 Real-time notification received:', notification.title);
       } catch (err) {
-        console.error('Failed to process notification:', err);
+        logger.error('Failed to process notification:', err);
       }
     };
 

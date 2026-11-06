@@ -3,6 +3,7 @@ import { buildFullFileUrl } from '../../../../../utils/fileUrl';
 import type { StudentProjectDetails } from '../../../../../services/student-roleService/submitProject';
 import FileViewer from '../../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
+import logger from '../../../../../utils/logger';
 
 interface ProjectDetailsPanelProps {
   projectDetails: StudentProjectDetails;
@@ -154,7 +155,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                             URL.revokeObjectURL(objectUrl);
                             toast.success('Download complete', { id: toastId });
                           } catch (err) {
-                            console.error('Force download failed:', err);
+                            logger.error('Force download failed:', err);
                             toast.error('Direct download unavailable, opening file...');
                             window.open(url, '_blank');
                           }

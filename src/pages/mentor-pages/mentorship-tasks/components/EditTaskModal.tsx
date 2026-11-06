@@ -3,6 +3,7 @@ import { X, Upload, File as FileIcon } from 'lucide-react';
 import { getTaskById, updateTask } from '../../../../services/mentorshipsContent/task';
 import type { UpdateTaskPayload } from '../../../../services/mentorshipsContent/task';
 import toast from 'react-hot-toast';
+import logger from '../../../../utils/logger';
 
 interface EditTaskModalProps {
     isOpen: boolean;
@@ -52,7 +53,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ isOpen, onClose, taskId, 
                             const minutes = String(dateObj.getMinutes()).padStart(2, '0');
                             setDueAt(`${year}-${month}-${day}T${hours}:${minutes}`);
                         } catch (e) {
-                            console.error(e);
+                            logger.error(e);
                         }
                     } else {
                         setDueAt('');

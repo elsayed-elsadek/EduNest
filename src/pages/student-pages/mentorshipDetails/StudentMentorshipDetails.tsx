@@ -15,31 +15,21 @@ const MentorshipDetailsPage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
 
-  // 🔍 DEBUG LOG: Raw ID from URL
-  console.log('[DEBUG] Raw mentorshipId from URL:', mentorshipId, typeof mentorshipId);
+  const normalizedId = Number(mentorshipId ?? '');
+  const hasValidId = Number.isFinite(normalizedId) && normalizedId > 0;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentPage(0);
   }, [mentorshipId]);
 
-  const normalizedId = Number(mentorshipId ?? '');
-  const hasValidId = Number.isFinite(normalizedId) && normalizedId > 0;
-
-  // 🔍 DEBUG LOG: ID parsing result
-  console.log('[DEBUG] normalizedId:', normalizedId, 'hasValidId:', hasValidId, 'for raw:', mentorshipId);
-
   const { data, isLoading, isError, error } = useMentorshipDetails(normalizedId, hasValidId);
-  const { data: overviewData, isLoading: overviewLoading } = useMentorshipOverview(
+  const { data: overviewData } = useMentorshipOverview(
     normalizedId,
     currentPage,
     5,
     hasValidId
   );
-
-  // 🔍 DEBUG LOG: Query status
-  console.log('[DEBUG] useMentorshipDetails - isLoading:', isLoading, 'isError:', isError, error?.message);
-  console.log('[DEBUG] useMentorshipOverview - isLoading:', overviewLoading, 'isEnrolled:', overviewData?.isEnrolled);
 
   const mentorship = useMemo<MentorshipDetails | undefined>(() => data as MentorshipDetails | undefined, [data]);
   const isEnrolled = overviewData?.isEnrolled ?? false;

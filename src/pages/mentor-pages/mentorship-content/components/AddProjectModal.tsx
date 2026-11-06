@@ -5,6 +5,7 @@ import { formatDateTimeLocal } from '../../../../utils/helpers';
 import ModalOverlay from './ModalOverlay';
 import type { ApiError } from '../../../../types/auth';
 import type { ContentItem } from '../types';
+import logger from '../../../../utils/logger';
 
 interface AddProjectModalProps {
   weekId: number | null;
@@ -49,9 +50,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
           endAt: formatDateTimeLocal(endAt),
           points: points || 0,
         };
-        console.log('Updating project', { id: editingItem.id, payload });
-        const res = await updateProject(Number(editingItem.id), payload);
-        console.log('Update response', res);
+        await updateProject(Number(editingItem.id), payload);
         toast.success('Project updated successfully');
         onSuccess(title.trim(), editingItem.id);
       } else {
@@ -70,7 +69,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
         onSuccess(title.trim());
       }
     } catch (err) {
-      console.error('Project save error', err);
+      logger.error('Project save error', err);
       const serverError = (err as ApiError).errorMessages?.error || (err as Error).message;
       toast.error(serverError || 'Failed to save project');
     } finally {

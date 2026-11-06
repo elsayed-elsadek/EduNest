@@ -6,6 +6,7 @@ import NoCover from '../../../../components/student-components/common/Nocover/No
 import { Menu, Transition } from '@headlessui/react';
 import type { Mentorship } from '../../../../types/mentorship.types';
 import { getAssetUrl } from '../../../../config/env';
+import logger from '../../../../utils/logger';
 
 interface MentorshipTableRowProps {
   mentorship: Mentorship;
@@ -33,7 +34,7 @@ const MentorshipTableRow: FC<MentorshipTableRowProps> = ({
                 className="w-full h-full object-cover rounded-lg cursor-pointer"
                 loading="lazy"
                 onError={(e) => {
-                  console.warn('Image load failed:', mentorship.coverImageUrl);
+                  logger.warn('Image load failed:', mentorship.coverImageUrl);
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
                 onClick={() => onDetails(mentorship.id)}

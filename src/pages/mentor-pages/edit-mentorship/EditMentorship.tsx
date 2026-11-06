@@ -16,6 +16,7 @@ import { queryKeys } from '../../../lib/queryClient';
 import { useAuthStore } from '../../../store/authStore';
 import type { MentorshipFormData } from './types';
 import EditMentorshipForm from './components/EditMentorshipForm';
+import logger from '../../../utils/logger';
 
 const EditMentorship: FC = () => {
   const params = useParams<{ mentorshipId?: string; id?: string }>();
@@ -97,7 +98,7 @@ const EditMentorship: FC = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load mentorship';
         setError(message);
-        console.error('Error loading mentorship:', err);
+        logger.error('Error loading mentorship:', err);
       } finally {
         setLoading(false);
       }
@@ -174,7 +175,7 @@ const EditMentorship: FC = () => {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to update mentorship';
       toast.error(message);
-      console.error('Error updating mentorship:', err);
+      logger.error('Error updating mentorship:', err);
     } finally {
       setSubmitting(false);
     }
@@ -212,7 +213,7 @@ const EditMentorship: FC = () => {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete cover image';
       toast.error(message);
-      console.error('Error deleting cover image:', err);
+      logger.error('Error deleting cover image:', err);
     } finally {
       setDeletingCover(false);
     }

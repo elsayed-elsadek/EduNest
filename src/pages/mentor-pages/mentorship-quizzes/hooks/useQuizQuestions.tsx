@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../../../../store/authStore';
 import type { Question, CreateQuestionPayload, UpdateQuestionPayload } from '../../../../services/mentorshipsContent/quiz';
 import { getQuestionsByQuizId, createQuestion, updateQuestion, deleteQuestion } from '../../../../services/mentorshipsContent/quiz';
+import logger from '../../../../utils/logger';
 
 export const useQuizQuestions = () => {
     const { id: mentorshipId, quizId } = useParams<{ id: string; quizId: string }>();
@@ -119,7 +120,7 @@ export const useQuizQuestions = () => {
             }
             closeModal();
         } catch (err: unknown) {
-            console.error('Error saving question:', err);
+            logger.error('Error saving question:', err);
             const errorObj = err as { errorMessages?: { error?: string }; message?: string };
             const message = errorObj?.errorMessages?.error || errorObj?.message || 'Failed to save question';
             toast.error(message);
