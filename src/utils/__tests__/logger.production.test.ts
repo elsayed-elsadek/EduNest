@@ -21,6 +21,8 @@ describe('logger in production', () => {
     ];
 
     vi.stubEnv('DEV', false);
+    vi.stubEnv('VITE_API_BASE_URL', 'https://unit-test-api.example.com');
+    vi.stubEnv('VITE_CHATBOT_API_URL', 'https://unit-test-chat.example.com/chat');
     vi.resetModules();
     const { default: productionLogger } = await import('../logger');
 

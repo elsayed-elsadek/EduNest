@@ -1,3 +1,5 @@
+import { IS_DEVELOPMENT } from '../config/env';
+
 /**
  * Application logger.
  *
@@ -22,10 +24,9 @@
  */
 
 /**
- * `import.meta.env.DEV` is inlined by Vite at build time. In a production
- * bundle it becomes `false`, so every logger method returns immediately.
+ * The centralized environment configuration provides the build mode.
  */
-const isEnabled: boolean = import.meta.env.DEV;
+const isEnabled: boolean = IS_DEVELOPMENT;
 
 const REDACTED = '[REDACTED]';
 

@@ -1,8 +1,18 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+import { normalizeApiBaseUrl, normalizeChatbotUrl } from './src/config/envValidation';
 
-export default defineConfig({
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+
+  if (command === 'build') {
+    const options = { isProduction: true };
+    normalizeApiBaseUrl(env.VITE_API_BASE_URL, options);
+    normalizeChatbotUrl(env.VITE_CHATBOT_API_URL, options);
+  }
+
+  return {
   // plugins: [react()],
   define: {
     global: 'globalThis',  // ← أضيفي السطر ده
@@ -95,4 +105,5 @@ export default defineConfig({
   },
   // تحسين وقت البناء
   cacheDir: 'node_modules/.vite',
+  };
 });
