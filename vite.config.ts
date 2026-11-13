@@ -81,14 +81,6 @@ export default defineConfig(({ command, mode }) => {
             if (id.includes('axios') || id.includes('zustand') || id.includes('@tanstack')) {
               return 'vendor-misc';
             }
-            // Video conferencing - تحميل كسول جداً
-            if (id.includes('@jitsi')) {
-              return 'vendor-jitsi';
-            }
-            // Alerts
-            if (id.includes('sweetalert2')) {
-              return 'vendor-alerts';
-            }
             return 'vendor';
           }
         },
@@ -101,7 +93,6 @@ export default defineConfig(({ command, mode }) => {
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'axios', 'zustand'],
-    exclude: ['@jitsi/react-sdk'],
   },
   // تحسين وقت البناء
   cacheDir: 'node_modules/.vite',

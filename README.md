@@ -20,7 +20,7 @@ The architecture features strict Role-Based Access Control (RBAC), custom-tailor
 | **Styling** | TailwindCSS | Utility-first, responsive interface design |
 | **HTTP Client** | Axios | Interceptor-configured API communications |
 | **Real-time Engine**| WebSocket / STOMP | Instant bidirectional messaging and system notifications |
-| **Video Conferencing**| @jitsi/react-sdk | Integrated, low-latency live mentoring sessions |
+| **Video Conferencing**| External meeting URL | Opens scheduled live sessions in a new tab |
 | **User Alerts** | react-hot-toast | Non-blocking, accessible visual notifications |
 
 ---
@@ -80,8 +80,6 @@ manualChunks(id) {
     if (id.includes('react')) return 'vendor-react';
     if (id.includes('charts')) return 'vendor-charts';
     if (id.includes('icons')) return 'vendor-icons';
-    if (id.includes('@jitsi')) return 'vendor-jitsi';
-    if (id.includes('alert') || id.includes('toast')) return 'vendor-alerts';
     return 'vendor-misc';
   }
 }
@@ -160,8 +158,8 @@ src/
 
 ### Prerequisites
 
-- Node.js **24** (pinned in `.nvmrc`; Vite 8 requires `^20.19.0 || >=22.12.0`).
-- npm 11+ (ships with Node 24).
+- Node.js **22.12.0 or newer** (Vite 8 and Vitest 5 require at least 22.12.0; CI pins Node 24 in `.nvmrc`).
+- npm 11.6.2 (recorded in `package.json` as the package manager version).
 
 Use the pinned toolchain so your machine matches CI:
 
