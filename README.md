@@ -214,6 +214,12 @@ VITE_API_BASE_URL=https://api.staging.example.com npm run build
 $env:VITE_API_BASE_URL="https://api.example.com"; npm run build
 ```
 
+The GitHub Actions build reads `VITE_API_BASE_URL` from the repository Actions
+variable of the same name. Configure it under **Settings → Secrets and variables
+→ Actions → Variables** with the real deployed backend origin; CI rejects a
+missing or local URL. Do not use the documentation example URLs as deployment
+configuration.
+
 #### Accepted URL format
 
 | Value | Result |
