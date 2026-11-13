@@ -18,6 +18,11 @@ coverage
 # Temporary local backup of a broken install (safe to delete, never commit)
 node_modules_broken
 
+# Environment files — never commit real environment values
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -28,5 +33,4 @@ node_modules_broken
 *.njsproj
 *.sln
 *.sw?
-.env
 .history/

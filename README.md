@@ -251,6 +251,19 @@ Run the security-focused DOM and URL tests with:
 npm test -- --pool=threads --maxWorkers=1 src/utils/__tests__/security.test.ts src/components/common/__tests__/securityRendering.test.tsx
 ```
 
+### Secrets, environment hygiene & rotation
+
+No credentials ever belong in this repository. All `VITE_*` variables are **public** by design — Vite inlines them into the bundle — so sensitive values (backend secrets, payment keys, service credentials) must never be placed in any `VITE_*` variable. Real environment files (`.env`, `.env.*`) are git-ignored; only the placeholder template `.env.example` is tracked.
+
+Secret scanning runs automatically in CI: the `secrets` job executes [gitleaks](https://github.com/gitleaks/gitleaks-action) against the working tree **and the full commit history** on every PR to `master` and every push to `master`, and fails the pipeline on any finding.
+
+**If a secret is ever exposed (committed or leaked):**
+
+1. **Rotate immediately** at the issuing provider — deleting the file from the code is not enough, the value remains recoverable in git history.
+2. Consider the exposed value compromised from the moment it entered the history, not from the moment it was discovered.
+3. Replace the removed value with a fresh one stored outside the repository (password manager / provider secret store) and update `.env.example` so it contains a placeholder, never a real value.
+4. If the secret was pushed to a shared remote, notify the maintainers so they can coordinate rotation and, if necessary, history cleanup with `git filter-repo`.
+
 ### Logging
 
 All application logging goes through **`src/utils/logger.ts`**. It is the only

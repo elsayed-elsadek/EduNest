@@ -7,7 +7,6 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
   },
   // Add timeout to prevent hanging requests
   timeout: 15000,

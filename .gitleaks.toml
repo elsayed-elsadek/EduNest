@@ -1,0 +1,17 @@
+# Gitleaks configuration for EduNest.
+# Extends the default rule set and allows only the two known-safe example
+# tokens documented in the FE-011 history-scan triage (2026-11-13):
+#   1. jwt.io's public demo token, used as a fixture in src/utils/__tests__/logger.test.ts
+#   2. A truncated token illustration ("eyJ...") in GRADUATION_PROJECT_DOCUMENTATION_PART1.md
+# Everything else is still detected. If a new finding appears, triage it —
+# do not add it here unless it is provably a non-secret.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known-safe example/demo tokens (see FE-011 history-scan triage)"
+regexes = [
+  '''eyJhbGciOiJIUzI1NiJ9\.eyJzdWIiOiIxMjM0NTY3ODkwIn0\.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U''',
+  '''eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9\.\.\.''',
+]
