@@ -1,23 +1,24 @@
 {
-  "name": "mentors-app",
+  "name": "edunest",
   "version": "0.0.0",
   "private": true,
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "homepage": "https://github.com/elsayed-elsadek/mentorHup#readme",
+  "description": "EduNest frontend for mentorship, learning, and student progress.",
+  "homepage": "https://github.com/elsayed-elsadek/EduNest#readme",
   "bugs": {
-    "url": "https://github.com/elsayed-elsadek/mentorHup/issues"
+    "url": "https://github.com/elsayed-elsadek/EduNest/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elsayed-elsadek/mentorHup.git"
+    "url": "git+https://github.com/elsayed-elsadek/EduNest.git"
   },
   "license": "ISC",
   "author": "",
   "type": "module",
+  "packageManager": "npm@11.6.2",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.12.0",
+    "npm": ">=11.6.2"
   },
-  "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
     "start": "npm run dev",
@@ -37,32 +38,23 @@
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@headlessui/react": "^2.2.9",
-    "@jitsi/react-sdk": "^1.4.4",
     "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-query": "^5.90.5",
-    "aos": "^2.3.4",
     "axios": "^1.13.1",
     "dompurify": "^3.4.17",
-    "html2pdf": "^0.0.11",
     "html2pdf.js": "^0.14.0",
     "lucide-react": "^0.563.0",
     "mammoth": "^1.12.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hot-toast": "^2.6.0",
-    "react-is": "^19.2.4",
-    "react-player": "^3.4.0",
     "react-router-dom": "^7.9.4",
     "recharts": "^3.8.1",
     "sockjs-client": "^1.6.1",
-    "sweetalert2": "^11.26.17",
-    "sweetalert2-react-content": "^5.1.1",
-    "zod": "^4.4.3",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@tanstack/react-query-devtools": "^5.90.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
