@@ -3,6 +3,7 @@ import type { FC } from 'react';
 import type { Student } from '../types';
 import { useAuthStore } from '../../../../store/authStore';
 import logger from '../../../../utils/logger';
+import { fetchWithTimeout } from '../../../../utils/fetchWithTimeout';
 
 interface MentorshipStudentsTableProps {
   mentorshipId: string | number;
@@ -40,7 +41,7 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
         if (token) headers.Authorization = `Bearer ${token}`;
 
-        const res = await fetch(url, { signal: controller.signal, headers });
+        const res = await fetchWithTimeout(url, { signal: controller.signal, headers });
         if (!res.ok) throw new Error('Failed to fetch students');
         const data = await res.json();
 

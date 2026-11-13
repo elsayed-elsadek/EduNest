@@ -26,14 +26,22 @@ const NotFound = () => {
           The page you're looking for doesn't exist or has been moved.
         </p>
 
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="inline-block mt-6 px-6 py-3 rounded-xl text-white font-medium transition hover:opacity-90"
-          style={{ backgroundColor: "var(--primary-500)" }}
-        >
-          Go back 
-        </button>
+        {/* Back / Home */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 rounded-xl text-white font-medium transition hover:opacity-90"
+            style={{ backgroundColor: "var(--primary-500)" }}
+          >
+            Go home
+          </button>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-3 rounded-xl font-medium transition hover:bg-gray-100 border border-gray-300 text-gray-700"
+          >
+            Go back
+          </button>
+        </div>
       </div>
     </div>
   );

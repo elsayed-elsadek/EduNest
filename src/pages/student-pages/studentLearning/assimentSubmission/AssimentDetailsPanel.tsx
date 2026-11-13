@@ -3,6 +3,7 @@ import { getAssetUrl } from '../../../../config/env';
 import type { StudentTaskDetails } from '../../../../services/student-roleService/submitTask';
 import FileViewer from '../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
+import { fetchWithTimeout } from '../../../../utils/fetchWithTimeout';
 import logger from '../../../../utils/logger';
 import { isSafeExternalUrl, openExternalUrl } from '../../../../utils/safeExternalUrl';
 
@@ -133,7 +134,7 @@ const AssimentDetailsPanel = ({ taskDetails }: AssimentDetailsPanelProps) => {
                           try {
                             if (!isSafeExternalUrl(url)) throw new Error('Invalid download URL');
                             const toastId = toast.loading('Starting download...');
-                            const response = await fetch(url);
+                            const response = await fetchWithTimeout(url);
                             if (!response.ok) throw new Error('File fetch failed');
                             const blob = await response.blob();
                             const objectUrl = URL.createObjectURL(blob);

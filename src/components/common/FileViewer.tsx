@@ -3,6 +3,7 @@ import { Download, ExternalLink, FileText } from 'lucide-react';
 import mammoth from 'mammoth';
 import toast from 'react-hot-toast';
 import logger from '../../utils/logger';
+import { fetchWithTimeout } from '../../utils/fetchWithTimeout';
 import { isSafeExternalUrl, openExternalUrl } from '../../utils/safeExternalUrl';
 import { sanitizeHtml } from '../../utils/sanitizeHtml';
 
@@ -16,7 +17,7 @@ async function downloadFile(url: string, fallbackName = 'file') {
   try {
     if (!isSafeExternalUrl(url)) throw new Error('Invalid download URL');
     const toastId = toast.loading('Starting download...');
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     if (!response.ok) throw new Error('File fetch failed');
     const blob = await response.blob();
     const objectUrl = URL.createObjectURL(blob);
@@ -65,7 +66,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
       if (!cleanedUrl) return;
       setLoading(true);
       try {
-        const resp = await fetch(cleanedUrl, { credentials: 'include' });
+        const resp = await fetchWithTimeout(cleanedUrl, { credentials: 'include' });
         if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`);
         const blob = await resp.blob();
         objectUrl = URL.createObjectURL(blob);
@@ -101,7 +102,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ url, className = '', height = '
         setEmbedFailed(false);
 
         try {
-          const resp = await fetch(cleanedUrl, { credentials: 'include' });
+          const resp = await fetchWithTimeout(cleanedUrl, { credentials: 'include' });
           if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`);
           const arrayBuffer = await resp.arrayBuffer();
 
