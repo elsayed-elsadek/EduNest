@@ -3,6 +3,7 @@ import { buildFullFileUrl } from '../../../../../utils/fileUrl';
 import type { StudentProjectDetails } from '../../../../../services/student-roleService/submitProject';
 import FileViewer from '../../../../../components/common/FileViewer';
 import toast from 'react-hot-toast';
+import { fetchWithTimeout } from '../../../../../utils/fetchWithTimeout';
 import logger from '../../../../../utils/logger';
 import { isSafeExternalUrl, openExternalUrl } from '../../../../../utils/safeExternalUrl';
 
@@ -143,7 +144,7 @@ const ProjectDetailsPanel = ({ projectDetails }: ProjectDetailsPanelProps) => {
                           try {
                             if (!isSafeExternalUrl(url)) throw new Error('Invalid download URL');
                             const toastId = toast.loading('Starting download...');
-                            const response = await fetch(url);
+                            const response = await fetchWithTimeout(url);
                             if (!response.ok) throw new Error('File fetch failed');
                             const blob = await response.blob();
                             const objectUrl = URL.createObjectURL(blob);

@@ -24,8 +24,9 @@ export const queryClient = new QueryClient({
       // Don't refetch on window focus for stale data (reduces API calls)
       refetchOnWindowFocus: false,
       
-      // Don't refetch when reconnecting (saves bandwidth)
-      refetchOnReconnect: false,
+      // Refresh stale queries when the connection comes back — the offline
+      // banner recovers automatically instead of needing a manual reload.
+      refetchOnReconnect: true,
       
       // Keep previous render while fetching (better UX)
       placeholderData: (previousData: unknown) => previousData,

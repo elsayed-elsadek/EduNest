@@ -7,9 +7,28 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 const temporaryDirectories: string[] = [];
 
+/**
+ * Best-effort recursive removal with retries. On Windows the directory may
+ * briefly remain locked right after the spawned vite build exits (its cwd is
+ * the temporary directory), which surfaces as EPERM — retrying resolves it,
+ * and a leftover directory in the OS temp folder is harmless.
+ */
+function removeDirectoryBestEffort(directory: string, attempts = 5): void {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      rmSync(directory, { recursive: true, force: true });
+      return;
+    } catch {
+      if (attempt === attempts) return;
+      // Synchronous sleep between retries (node only — this is a test file).
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50 * attempt);
+    }
+  }
+}
+
 afterEach(() => {
   for (const directory of temporaryDirectories.splice(0)) {
-    rmSync(directory, { recursive: true, force: true });
+    removeDirectoryBestEffort(directory);
   }
 });
 

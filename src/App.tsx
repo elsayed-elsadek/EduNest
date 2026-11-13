@@ -12,6 +12,8 @@ import AdminPayment from './pages/admin-pages/AdminPayment/AdminPayment';
 import MentorshipOverviewPage from './pages/student-pages/studentLearning/MentorshipOverviewPage';
 import AdminUsers from './pages/admin-pages/admin-users/AdminUsers';
 import ChatbotWidget from './components/common/ChatbotWidget/ChatbotWidget';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import OfflineBanner from './components/common/OfflineBanner';
 
 // Lazy load all page components for code splitting
 // This significantly reduces initial bundle size and improves FCP/LCP
@@ -153,8 +155,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       {showNavbar && <Navbar />}
+      <OfflineBanner />
       <Suspense fallback={<PageLoader />}>
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/become-mentor" element={<BecomeMentor />} />
@@ -231,6 +235,7 @@ function App() {
             </Route>
           </Route>
         </Routes>
+        </ErrorBoundary>
       </Suspense>
       {showChatbot && <ChatbotWidget />}
     </QueryClientProvider>

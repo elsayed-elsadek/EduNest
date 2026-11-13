@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { fetchWithTimeout } from '../../../../utils/fetchWithTimeout';
 import { API_BASE_URL } from '../../../../config/env';
 
 
@@ -30,7 +31,7 @@ const StatusToggleModal: React.FC<StatusToggleModalProps> = ({
   const handleToggle = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/mentorship/${mentorshipId}`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/api/v1/mentorship/${mentorshipId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

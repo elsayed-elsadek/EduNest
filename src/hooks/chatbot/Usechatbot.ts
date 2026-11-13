@@ -2,6 +2,7 @@
 import { useState, useCallback, useRef } from 'react';
 import type { ChatMessage, ChatApiResponse } from '../../types/chatbot/Chatbot.types';
 import { CHATBOT_API_URL } from '../../config/env';
+import { fetchWithTimeout } from '../../utils/fetchWithTimeout';
 
 const CHATBOT_NAME = 'Neo';
 
@@ -48,7 +49,7 @@ export const useChatbot = () => {
         throw new Error('chatbot-not-configured');
       }
 
-      const res = await fetch(CHATBOT_API_URL, {
+      const res = await fetchWithTimeout(CHATBOT_API_URL, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ message: msg }),
