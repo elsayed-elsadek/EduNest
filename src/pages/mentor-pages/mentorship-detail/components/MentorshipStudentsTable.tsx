@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import type { Student } from '../types';
-import { useAuthStore } from '../../../../store/authStore';
+import api from '../../../../services/api';
 import logger from '../../../../utils/logger';
-import { fetchWithTimeout } from '../../../../utils/fetchWithTimeout';
 
 interface MentorshipStudentsTableProps {
   mentorshipId: string | number;
@@ -24,7 +23,6 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalElements, setTotalElements] = useState<number>(initialStudents.length ?? 0);
   const [loading, setLoading] = useState<boolean>(false);
-  const token = useAuthStore((s) => s.token);
 
   useEffect(() => {
     if (mentorshipId === undefined || mentorshipId === null) return;
@@ -37,13 +35,14 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
         params.set('studentPage', String(currentPage));
         params.set('studentSize', String(pageSize));
 
-        const url = `/api/v1/dashboard/mentorship/${mentorshipId}?${params.toString()}`;
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-        if (token) headers.Authorization = `Bearer ${token}`;
-
-        const res = await fetchWithTimeout(url, { signal: controller.signal, headers });
-        if (!res.ok) throw new Error('Failed to fetch students');
-        const data = await res.json();
+        // Auth (`Authorization: Bearer <jwt>`) and the absolute API origin are
+        // handled by the shared axios client — no manual headers or relative
+        // URLs here.
+        const res = await api.get(`/api/v1/dashboard/mentorship/${mentorshipId}`, {
+          params: { studentPage: currentPage, studentSize: pageSize },
+          signal: controller.signal,
+        });
+        const data = res.data as { studentsRanks?: { content?: Student[]; totalPages?: number; totalElements?: number } | null };
 
         const ranks = data?.studentsRanks ?? null;
         if (ranks) {
@@ -54,9 +53,10 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
           setTotalPages(1);
         }
       } catch (err) {
-        const e = err as { name?: string };
-        if (e.name === 'AbortError') return;
-        logger.warn('Mentorship students fetch failed', err);
+        const e = err as { name?: string; code?: string };
+        if (e.name === 'AbortError' || e.code === 'ERR_CANCELED') return;
+        // Message only — never the raw axios error (its config carries the auth header).
+        logger.warn('Mentorship students fetch failed:', err instanceof Error ? err.message : 'unknown error');
       } finally {
         setLoading(false);
       }
@@ -64,7 +64,7 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
 
     fetchStudents();
     return () => controller.abort();
-  }, [mentorshipId, currentPage, pageSize, token]);
+  }, [mentorshipId, currentPage, pageSize]);
 
   const goToPage = (page: number) => {
     if (page < 0 || page >= totalPages) return;
@@ -81,8 +81,11 @@ const MentorshipStudentsTable: FC<MentorshipStudentsTableProps> = ({
         <h3 className="font-bold text-gray-900 text-base sm:text-lg">Students on This Mentorship</h3>
         {totalElements > 5 && (
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            <label className="text-xs sm:text-sm text-gray-400 font-medium">Per page:</label>
+            <label htmlFor={`mentorship-students-page-size-${mentorshipId}`} className="text-xs sm:text-sm text-gray-400 font-medium">
+              Per page:
+            </label>
             <select
+              id={`mentorship-students-page-size-${mentorshipId}`}
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(0); }}
               className="border border-gray-200 rounded-lg px-2 py-1 text-xs sm:text-sm bg-gray-50 text-gray-700 font-medium focus:outline-none focus:border-[var(--primary-500)] transition"

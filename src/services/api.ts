@@ -40,7 +40,10 @@ api.interceptors.request.use((config) => {
   const token = getAuthToken();
 
   if (token) {
-    config.headers.Authorization = token;
+    // Contract (Integration Handbook §3 / EB-30): cross-origin CORS sets
+    // allowCredentials=false, so protected REST requests authenticate via
+    // `Authorization: Bearer <jwt>` — a raw token is rejected.
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
