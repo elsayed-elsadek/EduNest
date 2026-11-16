@@ -8,42 +8,80 @@ import {
   ConfirmPasswordInput,
   ResetPasswordSubmitButton,
 } from "../../components/resetPass-com";
-import { forgetResetPassword } from "../../services/authService";
+import { forgetResetPassword, extractBackendMessage } from "../../services/authService";
 import toast from "react-hot-toast";
 import logger from '../../utils/logger';
+
+/**
+ * Backend-enforced TTL for the single-use resetToken (Integration Handbook §4:
+ * "Single-use Reset Token (TTL: 5 Minutes)"). Enforced locally so an expired
+ * token is never submitted — the user is returned to Step 1 instead.
+ */
+const RESET_TOKEN_TTL_MS = 5 * 60 * 1000;
+
+/** Where Step 1 (request a fresh code) lives. */
+const FORGET_PASS_ROUTE = "/forget-password";
+
+interface ResetPassRouteState {
+  email?: string;
+  resetToken?: unknown;
+  capturedAt?: unknown;
+}
 
 const ResetPassword: React.FC = () => {
   const form = useResetPassForm();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const state = location.state as { email?: string } | null;
+  const state = (location.state ?? null) as ResetPassRouteState | null;
   const email = state?.email || localStorage.getItem("resetEmail") || "";
+  // The reset token lives in navigation state ONLY — never in storage.
+  const resetToken = typeof state?.resetToken === "string" && state.resetToken ? state.resetToken : "";
+  const capturedAt = typeof state?.capturedAt === "number" ? state.capturedAt : 0;
+
+  // Strict single-use: set the moment the request is dispatched. No failure
+  // path — ambiguous or definitive — ever unlocks the token for a retry.
+  const tokenConsumed = React.useRef(false);
+
+  const returnToStepOne = (message: string) => {
+    toast.error(message);
+    navigate(FORGET_PASS_ROUTE);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.validate()) return;
 
-    if (!email) {
-      toast.error("Email not found. Please restart the reset password process.");
+    if (!email || !resetToken) {
+      returnToStepOne("Session expired. Please restart the reset password process.");
       return;
     }
 
+    if (!capturedAt || Date.now() - capturedAt > RESET_TOKEN_TTL_MS) {
+      returnToStepOne("Your reset code has expired. Please request a new one.");
+      return;
+    }
+
+    if (tokenConsumed.current) return;
+    tokenConsumed.current = true;
+
     form.setLoading(true);
     try {
-      await forgetResetPassword(email, form.formData.password);
-      toast.success("Password reset successfully.");
+      const message = await forgetResetPassword(email, resetToken, form.formData.password);
+      toast.success(message || "Password reset successfully.");
       navigate("/reset-success");
-    } catch (error) {
-      const backendMessage =
-        (typeof error === "object" && (error as { errorMessages?: { error?: string }; message?: string })?.errorMessages?.error) ||
-        (typeof error === "object" && (error as { message?: string })?.message) ||
-        (typeof error === "string" ? error : null) ||
-        "Something went wrong while resetting password.";
+    } catch (error: unknown) {
+      const backendMessage = extractBackendMessage(
+        error,
+        "Something went wrong while resetting password."
+      );
 
-      toast.error(backendMessage);
-      logger.error("Reset password error:", error);
+      // The token is single-use and already consumed — any failure (ambiguous
+      // network error, lost response, or backend rejection) means the user
+      // must restart from Step 1. Never allow a retry with the same token.
+      logger.error("Reset password error:", backendMessage);
+      returnToStepOne(backendMessage);
     } finally {
       form.setLoading(false);
     }

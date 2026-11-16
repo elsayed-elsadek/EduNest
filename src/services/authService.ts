@@ -53,11 +53,77 @@ export const loginUser = (email: string, password: string) =>
 export const forgetPassword = (email: string) => 
   handleRequest(api.post(ENDPOINTS.FORGET_PWD, { email }));
 
-export const forgetPasswordVerifyOtp = (email: string, otp: string) => 
-  handleRequest(api.post(ENDPOINTS.FORGET_PWD_VERIFY, { email, otp }));
+export interface VerifyResetOtpResult {
+  resetToken: string;
+  message: string;
+}
 
-export const forgetResetPassword = (email: string, newPassword: string) => 
-  handleRequest(api.post(ENDPOINTS.FORGET_PWD_RESET, { email, newPassword }));
+/**
+ * Verifies the password-reset OTP and returns the single-use `resetToken`
+ * plus the backend's own success message.
+ *
+ * Contract (Integration Handbook §4 / live OpenAPI): the response is a
+ * `SimpleResponse` envelope — `{ apiResponse: { resetToken, message } }` —
+ * and the token is valid for 5 minutes and consumed by the very first
+ * `POST /forget-password/reset` call.
+ *
+ * Callers must keep the token in React memory / navigation state only.
+ */
+export const forgetPasswordVerifyOtp = async (
+  email: string,
+  otp: string
+): Promise<VerifyResetOtpResult> => {
+  const data = await handleRequest<unknown>(
+    api.post(ENDPOINTS.FORGET_PWD_VERIFY, { email, otp })
+  );
+
+  const apiResponse = (data as { apiResponse?: Record<string, unknown> })?.apiResponse;
+  const resetToken = apiResponse?.resetToken;
+  const message = typeof apiResponse?.message === "string" ? apiResponse.message : "";
+
+  if (typeof resetToken !== "string" || !resetToken) {
+    throw new Error("Verification succeeded but no reset token was returned.");
+  }
+
+  return { resetToken, message };
+};
+
+/**
+ * Resets the password with a verified single-use `resetToken`.
+ * Returns the backend's own success message for display.
+ */
+export const forgetResetPassword = async (
+  email: string,
+  resetToken: string,
+  newPassword: string
+): Promise<string> => {
+  const data = await handleRequest<unknown>(
+    api.post(ENDPOINTS.FORGET_PWD_RESET, { email, resetToken, newPassword })
+  );
+
+  const message = (data as { apiResponse?: { message?: unknown } })?.apiResponse?.message;
+
+  return typeof message === "string" ? message : "";
+};
+
+/**
+ * Extracts a user-facing message from an unknown axios/backend error without
+ * ever exposing the request body (which contains the OTP or reset token).
+ */
+export function extractBackendMessage(error: unknown, fallback: string): string {
+  const err = error as {
+    response?: { data?: { errorMessages?: { error?: string }; message?: string; apiResponse?: { message?: string } } };
+    message?: string;
+  } | null;
+
+  return (
+    err?.response?.data?.errorMessages?.error ||
+    err?.response?.data?.apiResponse?.message ||
+    err?.response?.data?.message ||
+    (typeof err?.message === "string" && err.message ? err.message : "") ||
+    fallback
+  );
+}
 
 // --- Account Restore ---
 
