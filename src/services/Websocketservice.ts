@@ -1,5 +1,4 @@
 
-import SockJS from 'sockjs-client';
 import { Client, type StompSubscription } from '@stomp/stompjs';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
@@ -7,6 +6,22 @@ import logger from '../utils/logger';
 const WS_URL = API_BASE_URL
   .replace(/\/api\/v1\/?$/, '')
   .replace(/\/$/, '');
+
+/**
+ * Native WebSocket endpoint for STOMP over WebSocket (Integration Handbook §9.1).
+ *
+ * The backend decommissioned the SockJS handshake interceptor (BLK-20), so
+ * SockJS fallback transports can no longer authenticate — the only supported
+ * transport is a native WebSocket at `/ws/websocket`, with `ws://` on HTTP
+ * origins and `wss://` on HTTPS ones.
+ */
+export function buildWsUrl(baseUrl: string): string {
+  const { protocol, host } = new URL(baseUrl);
+  const scheme = protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${scheme}//${host}/ws/websocket`;
+}
+
+const WS_ENDPOINT = buildWsUrl(WS_URL);
 
 type MessageCallback = (data: unknown) => void;
 
@@ -17,6 +32,7 @@ class WebSocketService {
   private pendingCallbacks: (() => void)[] = [];
   private isConnected_:     boolean = false;
   private isConnecting_:    boolean = false;
+  private errorListeners:   Set<MessageCallback> = new Set();
 
   connect(token: string, onConnected?: () => void): void {
     // Already fully connected — run callback immediately
@@ -34,13 +50,27 @@ class WebSocketService {
     this.isConnecting_ = true;
 
     this.client = new Client({
-      webSocketFactory: () => new SockJS(`${WS_URL}/ws`),
+      // Native WebSocket only — SockJS fallback transports cannot authenticate
+      // against the current backend (BLK-20).
+      webSocketFactory: () => new WebSocket(WS_ENDPOINT),
+      // Raw JWT WITHOUT a Bearer prefix — the STOMP CONNECT interceptor binds
+      // the native header directly; a `Bearer ` prefix fails validation and
+      // terminates the session (Handbook §9.1).
       connectHeaders:   { Authorization: token },
       reconnectDelay:   5000,
 
       onConnect: () => {
         this.isConnected_  = true;
         this.isConnecting_ = false;
+        // Mandatory FIRST subscription (Handbook §9.1): interceptor exceptions
+        // during async channel processing are dropped rather than emitted as
+        // STOMP ERROR frames — the server pushes them here instead.
+        this._subscribe('/user/queue/errors', (data) => {
+          const summary =
+            typeof data === 'string' ? data : JSON.stringify(data);
+          logger.error('WebSocket server error', summary);
+          this.errorListeners.forEach((cb) => cb(data));
+        });
         onConnected?.();
         // flush all queued callbacks
         const pending = [...this.pendingCallbacks];
@@ -133,6 +163,18 @@ class WebSocketService {
       this.subscriptions.delete(destination);
     }
     this.listeners.delete(destination);
+  }
+
+  /**
+   * Registers a handler for server-pushed errors on `/user/queue/errors`
+   * (authorization failures, validation errors). Returns an unsubscribe
+   * function. Handlers persist across reconnects until unsubscribed.
+   */
+  onError(cb: MessageCallback): () => void {
+    this.errorListeners.add(cb);
+    return () => {
+      this.errorListeners.delete(cb);
+    };
   }
 
   subscribeToNotifications(cb: MessageCallback): void {

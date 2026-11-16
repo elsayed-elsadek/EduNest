@@ -50,7 +50,6 @@
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.9.4",
     "recharts": "^3.8.1",
-    "sockjs-client": "^1.6.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -62,7 +61,6 @@
     "@types/node": "^24.9.2",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
-    "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "^5.1.0",
     "autoprefixer": "^10.4.15",
