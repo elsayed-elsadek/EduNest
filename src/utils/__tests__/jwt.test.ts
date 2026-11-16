@@ -4,7 +4,9 @@ import {
   getFirstNameFromToken,
   getFirstNameFromUser,
   getRoleFromToken,
+  getTokenExpiration,
   getUserFromToken,
+  isTokenValid,
 } from '../jwt';
 
 /** Base64URL-encodes a UTF-8 string (JWT segments are UTF-8, not Latin-1). */
@@ -122,6 +124,57 @@ describe('getUserFromToken', () => {
 
   it('returns null for an invalid token', () => {
     expect(getUserFromToken('broken')).toBeNull();
+  });
+});
+
+describe('getTokenExpiration (FE-008)', () => {
+  it('returns the exp claim in milliseconds', () => {
+    expect(getTokenExpiration(makeToken({ exp: 1700000 }))).toBe(1_700_000_000);
+  });
+
+  it('accepts a string-encoded exp', () => {
+    expect(getTokenExpiration(makeToken({ exp: '1700000' }))).toBe(1_700_000_000);
+  });
+
+  it('returns null when there is no exp claim', () => {
+    expect(getTokenExpiration(makeToken({ sub: '1' }))).toBeNull();
+  });
+
+  it('returns null for a malformed token', () => {
+    expect(getTokenExpiration('broken')).toBeNull();
+  });
+});
+
+describe('isTokenValid (FE-008)', () => {
+  it('accepts a token that expires in the future', () => {
+    const future = Math.floor(Date.now() / 1000) + 3600;
+
+    expect(isTokenValid(makeToken({ exp: future }))).toBe(true);
+  });
+
+  it('rejects a token that expired outside the clock-skew window', () => {
+    const past = Math.floor(Date.now() / 1000) - 120;
+
+    expect(isTokenValid(makeToken({ exp: past }))).toBe(false);
+  });
+
+  it('tolerates a token that expired within the skew window', () => {
+    const justPast = Math.floor(Date.now() / 1000) - 5;
+
+    expect(isTokenValid(makeToken({ exp: justPast }))).toBe(true);
+  });
+
+  it('treats a token without an exp claim as structurally valid (defer to 401s)', () => {
+    expect(isTokenValid(makeToken({ sub: '1' }))).toBe(true);
+  });
+
+  it.each([
+    ['an empty string', ''],
+    ['a non-JWT string', 'garbage'],
+    ['a two-segment string', 'header.payload'],
+    ['a payload that is not JSON', `${toBase64Url('{}')}.${toBase64Url('nope')}.signature`],
+  ])('rejects %s', (_label, token) => {
+    expect(isTokenValid(token)).toBe(false);
   });
 });
 

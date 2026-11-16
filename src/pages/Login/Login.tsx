@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useLogin } from "../../hooks/useLogin";
 import { useAuthStore } from "../../store/authStore";
@@ -16,6 +16,10 @@ const Login: React.FC = () => {
     handleInputChange,
     handleSubmit
   } = useLogin();
+
+  // FE-008: /login?reason=expired — the session ended (logout/401/expiry)
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get("reason") === "expired";
 
   // Load saved email and rememberMe state on component mount
   useEffect(() => {
@@ -40,6 +44,15 @@ const Login: React.FC = () => {
         className="flex flex-col gap-6 w-full max-w-[500px] mx-auto mt-[20%] sm:mt-[5%]"
         aria-label="Login form"
       >
+        {sessionExpired && (
+          <div
+            role="alert"
+            className="w-full rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            Your session has expired. Please log in again to continue.
+          </div>
+        )}
+
         <h1 className="text-2xl font-semibold text-gray-800  text-center">
           Welcome back to EduNest!
         </h1>

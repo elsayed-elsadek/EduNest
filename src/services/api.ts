@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { getAuthToken } from '../store/authStore';
+import { getAuthToken, handleSessionExpired } from '../store/authStore';
+import { isTokenValid } from '../utils/jwt';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
 
@@ -39,12 +40,24 @@ api.interceptors.request.use((config) => {
 
   const token = getAuthToken();
 
-  if (token) {
-    // Contract (Integration Handbook §3 / EB-30): cross-origin CORS sets
-    // allowCredentials=false, so protected REST requests authenticate via
-    // `Authorization: Bearer <jwt>` — a raw token is rejected.
-    config.headers.Authorization = `Bearer ${token}`;
+  if (!token) {
+    return config;
   }
+
+  // Contract (Integration Handbook §3 / EB-30): cross-origin CORS sets
+  // allowCredentials=false, so protected REST requests authenticate via
+  // `Authorization: Bearer <jwt>` — a raw token is rejected.
+  //
+  // FE-008: a token we already know is expired or malformed is treated as
+  // unauthenticated — end the session locally instead of guaranteeing a 401.
+  if (!isTokenValid(token)) {
+    handleSessionExpired();
+    return Promise.reject(
+      Object.assign(new Error('Session expired'), { code: 'SESSION_EXPIRED' })
+    );
+  }
+
+  config.headers.Authorization = `Bearer ${token}`;
 
   return config;
 });
@@ -53,8 +66,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Ignore canceled requests (normal cleanup when component unmounts)
-    if (error.code === 'ERR_CANCELED') {
+    // Ignore canceled requests (normal cleanup when component unmounts) and the
+    // local SESSION_EXPIRED rejection (its redirect is already running).
+    if (error.code === 'ERR_CANCELED' || error.code === 'SESSION_EXPIRED') {
       return Promise.reject(error);
     }
 
@@ -64,6 +78,13 @@ api.interceptors.response.use(
     // `logger` redacts headers/tokens and strips query strings in development,
     // and is a no-op in production.
     logger.error(`API Error ${status} (${code}) on ${url}:`, error.message);
+
+    // FE-008: a 401 on a protected endpoint means the session is no longer
+    // valid — clear it exactly once (guarded) and redirect to /login?reason=expired.
+    if (status === 401 && !isPublicAuthRequest(error.config?.url)) {
+      handleSessionExpired();
+    }
+
     return Promise.reject(error);
   }
 );

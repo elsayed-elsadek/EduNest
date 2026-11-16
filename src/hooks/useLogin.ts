@@ -6,7 +6,7 @@ import { getAssetUrl } from "../config/env";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
-import { getFirstNameFromToken, getFirstNameFromUser, getRoleFromToken, getUserFromToken } from "../utils/jwt";
+import { getFirstNameFromToken, getFirstNameFromUser, getRoleFromToken, getUserFromToken, isTokenValid } from "../utils/jwt";
 import logger from "../utils/logger";
 
 /**
@@ -72,7 +72,7 @@ export const useLogin = () => {
       const jwt = apiResponse?.jwt as string | undefined;
       const statusMessage = apiResponse?.status as string | undefined || "Logged in successfully!";
 
-      if (jwt) {
+      if (jwt && isTokenValid(jwt)) {
         toast.success(statusMessage);
 
         // Extract user information from JWT token
@@ -128,6 +128,9 @@ export const useLogin = () => {
         const redirectPath = getDashboardPath(userRole);
         navigate(redirectPath);
 
+      } else if (jwt) {
+        // FE-008: never authenticate the session with a malformed or expired token.
+        toast.error("We couldn't start your session because the token was invalid. Please try again.");
       } else {
         // لم يتم إرجاع توكن، نعتبرها محاولة فاشلة
         toast.error(statusMessage || "Login failed. Please check your credentials.");

@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { isTokenValid } from '../utils/jwt';
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
@@ -14,6 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const userRole = useAuthStore((state) => state.userRole);
+  const token = useAuthStore((state) => state.token);
 
   // Return a generic loader or null while Zustand restores state from local storage
   if (!isHydrated) {
@@ -23,6 +25,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Check authentication
   if (requireAuth && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // FE-008: an expired or malformed token must be treated as unauthenticated —
+  // land on /login with a "session expired" reason instead of rendering content.
+  if (requireAuth && token && !isTokenValid(token)) {
+    return <Navigate to="/login?reason=expired" replace />;
   }
 
   // Check role-based access

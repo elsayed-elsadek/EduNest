@@ -48,6 +48,49 @@ export function decodeToken(token: string): Record<string, unknown> | null {
   }
 }
 
+/** Clock-skew allowance when checking token expiry (30s). */
+const EXPIRY_SKEW_MS = 30_000;
+
+/**
+ * Returns the token's `exp` claim as a Unix timestamp in milliseconds.
+ * @param token The JWT token string
+ * @returns Expiry in ms, or null when the token is malformed or has no `exp`
+ */
+export function getTokenExpiration(token: string): number | null {
+  const payload = decodeToken(token);
+  if (!payload) return null;
+
+  const exp = payload.exp;
+  if (typeof exp === "number" && Number.isFinite(exp)) {
+    return exp * 1000;
+  }
+  if (typeof exp === "string" && exp.trim() !== "" && Number.isFinite(Number(exp))) {
+    return Number(exp) * 1000;
+  }
+  return null;
+}
+
+/**
+ * Whether a token is well-formed and not expired (FE-008).
+ *
+ * A token without an `exp` claim is treated as structurally valid — the
+ * backend contract does not always include expiry, and a live 401 remains
+ * the authoritative signal in that case.
+ * @param token The JWT token string
+ * @returns false for malformed or expired tokens
+ */
+export function isTokenValid(token: string): boolean {
+  if (!token || typeof token !== "string") return false;
+
+  const payload = decodeToken(token);
+  if (!payload) return false; // malformed → unauthenticated
+
+  const expiresAt = getTokenExpiration(token);
+  if (expiresAt === null) return true; // no exp claim → defer to 401 handling
+
+  return expiresAt > Date.now() - EXPIRY_SKEW_MS;
+}
+
 /**
  * Extracts the first name from a JWT token
  * @param token The JWT token string
