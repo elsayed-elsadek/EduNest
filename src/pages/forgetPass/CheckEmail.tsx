@@ -6,6 +6,7 @@ import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import {
   forgetPassword,
   forgetPasswordVerifyOtp,
+  extractBackendMessage,
 } from "../../services/authService";
 import logger from '../../utils/logger';
 
@@ -83,24 +84,25 @@ const CheckEmail: React.FC = () => {
     const otp = code.join("");
 
     try {
-      await forgetPasswordVerifyOtp(email, otp);
-      setSuccessMessage("Code verified successfully.");
+      // Returns the single-use resetToken (valid 5 minutes) + backend message.
+      // The token is kept in navigation state ONLY — never persisted or logged.
+      const { resetToken, message } = await forgetPasswordVerifyOtp(email, otp);
+      setSuccessMessage(message || "Code verified successfully.");
 
       // حفظ الإيميل احتياطًا لو المستخدم دخل صفحة reset مباشرة
       localStorage.setItem("resetEmail", email);
 
-      // الانتقال إلى صفحة تغيير الباسورد
-      navigate("/reset-password", { state: { email } });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const backendMessage =
-        error?.response?.data?.errorMessages?.error ||
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong while verifying the code.";
+      // الانتقال إلى صفحة تغيير الباسورد — token يمر عبر state فقط
+      navigate("/reset-password", { state: { email, resetToken, capturedAt: Date.now() } });
+    } catch (error: unknown) {
+      const backendMessage = extractBackendMessage(
+        error,
+        "Something went wrong while verifying the code."
+      );
 
       setErrorMessage(backendMessage);
-      logger.error("Verify OTP error:", error);
+      // Log the message only — never the raw error (its request body holds the OTP).
+      logger.error("Verify OTP error:", backendMessage);
     } finally {
       setLoading(false);
     }
@@ -118,16 +120,14 @@ const CheckEmail: React.FC = () => {
     try {
       await forgetPassword(email);
       setSuccessMessage("A new code has been sent to your email.");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const backendMessage =
-        error?.response?.data?.errorMessages?.error ||
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong while resending the code.";
+    } catch (error: unknown) {
+      const backendMessage = extractBackendMessage(
+        error,
+        "Something went wrong while resending the code."
+      );
 
       setErrorMessage(backendMessage);
-      logger.error("Resend code error:", error);
+      logger.error("Resend code error:", backendMessage);
     }
   };
 
