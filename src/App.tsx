@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import AdminLayout from './components/admin-components/shared/AdminLayout';
 import './index.css';
 import { useAuthStore } from './store/authStore';
+import { isTokenValid } from './utils/jwt';
 import { ProtectedRoute } from './routes';
 import { queryClient } from './lib/queryClient';
 import AdminDashboard from './pages/admin-pages/AdminDashboard/AdminDashboard';
@@ -126,24 +127,40 @@ const getDashboardPath = (role: string): string => {
   }
 };
 
+// Auth pages that hand an already-authenticated visitor to their dashboard (FE-008)
+const AUTH_PAGE_PATHS = [
+  '/login',
+  '/register',
+  '/verify',
+  '/success',
+  '/know-about',
+  '/forgot-password',
+  '/check-email',
+  '/reset-password',
+  '/reset-success',
+  '/restore-account',
+  '/confirm-restore',
+  '/start-Started',
+];
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Initialize app - check for Remember Me on first load
+  // FE-008: only hand already-authenticated users (valid token + remember me)
+  // to their role dashboard when they open an auth page — never hijack public
+  // pages on every load.
   useEffect(() => {
-    const token = useAuthStore.getState().token;
-    const rememberMe = useAuthStore.getState().rememberMe;
-    const lastEmail = useAuthStore.getState().lastEmail;
-    const userRole = useAuthStore.getState().userRole;
+    const { token, rememberMe, lastEmail, userRole } = useAuthStore.getState();
+    const onAuthPage = AUTH_PAGE_PATHS.some(
+      (path) => location.pathname === path || location.pathname.startsWith(`${path}/`),
+    );
 
-    // If user has valid token and Remember Me is enabled, redirect to role-based dashboard
-    if (token && rememberMe && lastEmail) {
+    if (token && isTokenValid(token) && rememberMe && lastEmail && onAuthPage) {
       const dashboardPath = getDashboardPath(userRole);
       navigate(dashboardPath, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on component mount
+  }, [location.pathname, navigate]);
 
   // Only show navbar on home page
   const showNavbar = location.pathname === '/';

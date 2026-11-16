@@ -2,12 +2,35 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { InternalAxiosRequestConfig } from 'axios';
 
 const getAuthToken = vi.fn(() => '');
+const handleSessionExpired = vi.fn();
 
 vi.mock('../../store/authStore', () => ({
   getAuthToken: () => getAuthToken(),
+  handleSessionExpired: () => handleSessionExpired(),
 }));
 
 import api from '../api';
+
+/** Base64URL-encodes a UTF-8 string. */
+function toBase64Url(input: string): string {
+  const bytes = new TextEncoder().encode(input);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/** FE-008: request-interceptor validation requires a well-formed JWT. */
+function makeToken(payload: Record<string, unknown>): string {
+  return [
+    toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' })),
+    toBase64Url(JSON.stringify(payload)),
+    'signature',
+  ].join('.');
+}
+
+const VALID_TOKEN = makeToken({ sub: '1' }); // no exp claim → structurally valid
 
 /**
  * Captures the request config the interceptor produced by swapping the
@@ -50,18 +73,19 @@ describe('api request interceptor — Authorization header contract', () => {
   beforeEach(() => {
     getAuthToken.mockReset();
     getAuthToken.mockReturnValue('');
+    handleSessionExpired.mockClear();
   });
 
   it('sends `Authorization: Bearer <jwt>` on protected requests', async () => {
-    getAuthToken.mockReturnValue('raw.jwt.value');
+    getAuthToken.mockReturnValue(VALID_TOKEN);
 
     const config = await capturedConfig(() => api.get('/api/v1/some-protected-resource'));
 
-    expect(authHeader(config)).toBe('Bearer raw.jwt.value');
+    expect(authHeader(config)).toBe(`Bearer ${VALID_TOKEN}`);
   });
 
   it('sends no Authorization header on public auth paths (login)', async () => {
-    getAuthToken.mockReturnValue('raw.jwt.value');
+    getAuthToken.mockReturnValue(VALID_TOKEN);
 
     const config = await capturedConfig(() => api.post('/login-api', { email: 'a@b.com', password: 'x' }));
 
@@ -87,11 +111,11 @@ describe('api request interceptor — Authorization header contract', () => {
   });
 
   it('does not double the Bearer prefix', async () => {
-    getAuthToken.mockReturnValue('tok');
+    getAuthToken.mockReturnValue(VALID_TOKEN);
 
     const config = await capturedConfig(() => api.get('/api/v1/another'));
 
-    expect(String(authHeader(config))).not.toBe('Bearer Bearer tok');
+    expect(String(authHeader(config))).not.toBe(`Bearer Bearer ${VALID_TOKEN}`);
     expect(String(authHeader(config)).startsWith('Bearer ')).toBe(true);
     expect(String(authHeader(config)).split('Bearer ').length - 1).toBe(1);
   });

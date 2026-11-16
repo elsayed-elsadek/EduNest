@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useSearchParams } from 'react-router-dom';
+import type { ReactElement } from 'react';
 import ProtectedRoute from '../ProtectedRoute';
 import { useAuthStore } from '../../store/authStore';
 
@@ -8,23 +9,32 @@ interface RenderOptions {
   isHydrated?: boolean;
   isAuthenticated?: boolean;
   userRole?: string;
+  token?: string;
   allowedRoles?: string[];
   requireAuth?: boolean;
+}
+
+/** Login route that surfaces the `reason` query param so expired-session redirects can be asserted. */
+function LoginProbe(): ReactElement {
+  const [params] = useSearchParams();
+  const reason = params.get('reason');
+  return <p>login page{reason ? `:${reason}` : ''}</p>;
 }
 
 function renderProtectedRoute({
   isHydrated = true,
   isAuthenticated = false,
   userRole = '',
+  token = '',
   allowedRoles,
   requireAuth,
 }: RenderOptions = {}) {
-  useAuthStore.setState({ isHydrated, isAuthenticated, userRole });
+  useAuthStore.setState({ isHydrated, isAuthenticated, userRole, token });
 
   return render(
     <MemoryRouter initialEntries={['/protected']}>
       <Routes>
-        <Route path="/login" element={<p>login page</p>} />
+        <Route path="/login" element={<LoginProbe />} />
         <Route path="/mentor/dashboard" element={<p>mentor dashboard</p>} />
         <Route path="/student/dashboard" element={<p>student dashboard</p>} />
         <Route path="/admin/dashboard" element={<p>admin dashboard</p>} />
@@ -36,6 +46,24 @@ function renderProtectedRoute({
       </Routes>
     </MemoryRouter>,
   );
+}
+
+/** Base64URL-encodes a UTF-8 string. */
+function toBase64Url(input: string): string {
+  const bytes = new TextEncoder().encode(input);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function makeToken(payload: Record<string, unknown>): string {
+  return [
+    toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' })),
+    toBase64Url(JSON.stringify(payload)),
+    'signature',
+  ].join('.');
 }
 
 describe('ProtectedRoute', () => {
@@ -127,5 +155,53 @@ describe('ProtectedRoute', () => {
     });
 
     expect(screen.getByText('secret content')).toBeInTheDocument();
+  });
+
+  describe('FE-008 — token validity', () => {
+    it('sends a user with an expired token to /login with a session-expired reason', () => {
+      const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
+
+      renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: expiredToken,
+      });
+
+      expect(screen.getByText('login page:expired')).toBeInTheDocument();
+      expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+    });
+
+    it('treats a malformed token as unauthenticated', () => {
+      renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: 'garbage',
+      });
+
+      expect(screen.getByText('login page:expired')).toBeInTheDocument();
+      expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+    });
+
+    it('keeps the session for a user whose token has a future expiry', () => {
+      const validToken = makeToken({ exp: Math.floor(Date.now() / 1000) + 3600 });
+
+      renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: validToken,
+      });
+
+      expect(screen.getByText('secret content')).toBeInTheDocument();
+    });
+
+    it('keeps the session for a token without an exp claim (defer to 401s)', () => {
+      renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: makeToken({ sub: '1' }),
+      });
+
+      expect(screen.getByText('secret content')).toBeInTheDocument();
+    });
   });
 });
