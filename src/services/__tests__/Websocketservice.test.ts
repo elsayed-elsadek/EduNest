@@ -66,6 +66,16 @@ const { FakeClient, clientInstances } = vi.hoisted((): {
 
 vi.mock('@stomp/stompjs', () => ({ Client: FakeClient }));
 
+// Pin the API origin so the WS endpoint asserted below is deterministic.
+// CI sets VITE_API_BASE_URL to the deployed URL (wss://...), while local
+// .env uses localhost — without this pin the factory test would be
+// environment-dependent (it failed exactly that way on CI). Everything
+// else from the real config module stays intact.
+vi.mock('../../config/env', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return { ...actual, API_BASE_URL: 'http://localhost:8080' };
+});
+
 import { buildWsUrl, wsService } from '../Websocketservice';
 
 describe('buildWsUrl — native WebSocket endpoint construction', () => {
