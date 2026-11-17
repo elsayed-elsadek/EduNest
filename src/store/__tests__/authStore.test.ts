@@ -3,7 +3,7 @@
  * remember-me storage routing, targeted logout, one-shot session expiry
  * handler, and hydration validation/migration of legacy storage.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getAuthToken,
   handleSessionExpired,
@@ -34,6 +34,7 @@ const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
 function resetStore(): void {
   useAuthStore.setState({
     token: '',
+    refreshToken: '',
     isAuthenticated: false,
     userName: '',
     userEmail: '',
@@ -59,6 +60,13 @@ beforeEach(async () => {
   resetSessionExpiredGuard();
   // jsdom logs "Not implemented: navigation" for the hard redirect in logout().
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  // FE-027: logout() fires a best-effort revoke request — stub the network.
+  vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })));
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe('remember-me storage routing (FE-008)', () => {
@@ -77,6 +85,15 @@ describe('remember-me storage routing (FE-008)', () => {
 
     expect(window.localStorage.getItem('auth-storage')).toContain(validToken);
     expect(window.sessionStorage.getItem('auth-storage')).toBeNull();
+  });
+
+  it('persists the refresh token together with the access token (FE-027)', () => {
+    useAuthStore.getState().setAuth({ token: validToken, refreshToken: 'rt1' });
+    useAuthStore.getState().setRememberMe('sara@example.com', true);
+
+    const blob = window.localStorage.getItem('auth-storage') ?? '';
+    expect(blob).toContain(validToken);
+    expect(blob).toContain('rt1');
   });
 
   it('a remember-me-off session dies with the tab (simulated)', () => {
@@ -115,6 +132,63 @@ describe('logout (FE-008)', () => {
     expect(window.localStorage.getItem('registrationEmail')).toBeNull();
     // Unrelated preferences survive (AC: theme survives logout).
     expect(window.localStorage.getItem('theme')).toBe('dark');
+  });
+
+  it('revokes the refresh session server-side before wiping (FE-027 / TC-REFRESH-08)', async () => {
+    const fetchMock = vi.fn(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      (..._args: unknown[]) => Promise.resolve({ ok: true, status: 200, json: async () => ({}) })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    useAuthStore.getState().setAuth({ token: validToken, refreshToken: 'rt-revoke-me' });
+
+    useAuthStore.getState().logout();
+
+    // best-effort revocation with the refresh token (idempotent per contract)
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [unknown, { body: string }];
+    expect(String(url)).toContain('/login-api/logout');
+    expect(JSON.parse(init.body)).toEqual({ refreshToken: 'rt-revoke-me' });
+    // client clearing is the BLK-04 mitigation — access JWTs stay valid until expiry
+    expect(useAuthStore.getState().token).toBe('');
+    expect(useAuthStore.getState().refreshToken).toBe('');
+    expect(window.localStorage.getItem('auth-storage')).toBeNull();
+  });
+});
+
+describe('cross-tab sync (FE-027)', () => {
+  it('adopts a pair rotated by a peer tab via the storage event', () => {
+    const peerToken = makeToken({ sub: 'peer' });
+    useAuthStore.getState().setAuth({ token: validToken, refreshToken: 'rt1' });
+    // remember-me-on → the pair lives in the SHARED localStorage (sessionStorage
+    // sessions are per-tab by design and never sync across tabs)
+    useAuthStore.getState().setRememberMe('sara@example.com', true);
+
+    // peer tab persisted its rotated pair into the shared localStorage
+    window.localStorage.setItem(
+      'auth-storage',
+      JSON.stringify({
+        state: { token: peerToken, refreshToken: 'rt2', rememberMe: true, isAuthenticated: true },
+        version: 0,
+      })
+    );
+    window.dispatchEvent(new StorageEvent('storage', { key: 'auth-storage' }));
+
+    expect(useAuthStore.getState().token).toBe(peerToken);
+    expect(useAuthStore.getState().refreshToken).toBe('rt2');
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+  });
+
+  it('a peer logout (cleared storage) ends this tab session too', () => {
+    useAuthStore.getState().setAuth({ token: validToken, refreshToken: 'rt1' });
+    useAuthStore.getState().setRememberMe('sara@example.com', true);
+
+    window.localStorage.removeItem('auth-storage');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'auth-storage' }));
+
+    expect(useAuthStore.getState().token).toBe('');
+    expect(useAuthStore.getState().refreshToken).toBe('');
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });
 });
 
