@@ -10,6 +10,7 @@ import {
   confirmDeleteAccount,
 } from '../services/Mentorsettingsservice';
 import type { ChangeEmailRequest, ChangePasswordRequest } from '../types/mentor-settings.types';
+import { parseApiError } from '../services/errors';
 
 export const useMentorSettings = () => {
   const logout  = useAuthStore((s) => s.logout);
@@ -26,17 +27,9 @@ export const useMentorSettings = () => {
     setTimeout(() => setSuccess(null), 3000);
   };
 
-  const extractError = (err: unknown): string => {
-    if (!err || typeof err !== 'object') return 'Something went wrong';
-    const e = err as Record<string, unknown>;
-    if (e.errorMessages && typeof e.errorMessages === 'object') {
-      const msgs = e.errorMessages as Record<string, unknown>;
-      const first = Object.values(msgs)[0];
-      if (typeof first === 'string') return first;
-    }
-    if (typeof e.message === 'string') return e.message;
-    return 'Something went wrong';
-  };
+  // EF-2: single source of truth for error message extraction (unified
+  // envelope first, legacy shapes as fallback — never a raw technical string).
+  const extractError = (err: unknown): string => parseApiError(err).message;
 
   // ── Email Step 1: request change (sends OTP to newEmail) ──────────────────
   const handleRequestEmailChange = async (data: ChangeEmailRequest) => {

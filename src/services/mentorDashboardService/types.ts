@@ -38,16 +38,8 @@ export interface ApiValidationErrorResponse {
   message?: string;
 }
 
-/** Error class holding field errors from API */
-export class ApiValidationError extends Error {
-  fieldErrors: Record<string, string>;
-
-  constructor(message: string, fieldErrors: Record<string, string>) {
-    super(message);
-    this.name = 'ApiValidationError';
-    this.fieldErrors = fieldErrors;
-  }
-}
+/** Error class holding field errors from API — canonical definition in services/errors.ts (EF-2). */
+export { ApiValidationError } from '../errors';
 
 /** Paginated mentorships list response */
 export interface MentorshipsPageResponse {

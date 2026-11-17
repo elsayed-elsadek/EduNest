@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
+import { parseApiError } from '../../services/errors';
 import {
   requestEmailChange,
   confirmEmailChange,
@@ -9,7 +10,7 @@ import {
   deactivateAccount,
   requestDeleteAccount,
   confirmDeleteAccount,
-} from '../../services/Mentorsettingsservice'; 
+} from '../../services/Mentorsettingsservice';
 import type { ChangeEmailRequest, ChangePasswordRequest } from '../../types/mentor-settings.types';
 
 export const useStudentSettings = () => {
@@ -25,16 +26,9 @@ export const useStudentSettings = () => {
     toast.success(msg);
   };
 
-  const extractError = (err: unknown): string => {
-    if (!err || typeof err !== 'object') return 'Something went wrong';
-    const e = err as Record<string, unknown>;
-    if (e.errorMessages && typeof e.errorMessages === 'object') {
-      const first = Object.values(e.errorMessages as Record<string, unknown>)[0];
-      if (typeof first === 'string') return first;
-    }
-    if (typeof e.message === 'string') return e.message;
-    return 'Something went wrong';
-  };
+  // EF-2: single source of truth for error message extraction (unified
+  // envelope first, legacy shapes as fallback — never a raw technical string).
+  const extractError = (err: unknown): string => parseApiError(err).message;
 
   const handleRequestEmailChange = async (data: ChangeEmailRequest) => {
     clear(); setLoading(true);

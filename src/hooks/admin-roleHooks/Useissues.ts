@@ -12,76 +12,13 @@ import {
 import type { AllResponse } from '../../services/admin-role-service/issueservice';
 import { mapApiMessage, UI_TO_API } from '../../types/admin-role-types/issues.types';
 import type { AdminMessage, MessageStatus } from '../../types/admin-role-types/issues.types';
+import { parseApiError } from '../../services/errors';
 
 export const ISSUES_KEY = ['contact-messages'] as const;
 
-// Helper: Extract error message from Axios error response safely
-const extractErrorMessage = (err: unknown): string => {
-  if (!err || typeof err !== 'object') {
-    // Handle string errors directly
-    if (typeof err === 'string') {
-      return err;
-    }
-    return 'An error occurred while sending notification';
-  }
-
-  const error = err as Record<string, unknown>;
-
-  // First check if it's already the response data (from service error handling)
-  // Check errorMessages.error from backend
-  if (error.errorMessages && typeof error.errorMessages === 'object') {
-    const msgs = error.errorMessages as Record<string, unknown>;
-    if (typeof msgs.error === 'string') {
-      return msgs.error;
-    }
-  }
-  
-  // Check apiResponse.Status
-  if (error.apiResponse && typeof error.apiResponse === 'object') {
-    const apiResp = error.apiResponse as Record<string, unknown>;
-    if (typeof apiResp.Status === 'string') {
-      return apiResp.Status;
-    }
-  }
-
-  // Try Axios error structure: error.response.data
-  if (error.response && typeof error.response === 'object') {
-    const response = error.response as Record<string, unknown>;
-    const data = response.data;
-    
-    if (data && typeof data === 'object') {
-      const dataObj = data as Record<string, unknown>;
-      
-      // Check errorMessages.error from backend
-      if (dataObj.errorMessages && typeof dataObj.errorMessages === 'object') {
-        const msgs = dataObj.errorMessages as Record<string, unknown>;
-        if (typeof msgs.error === 'string') {
-          return msgs.error;
-        }
-      }
-      
-      // Check apiResponse.Status (success messages)
-      if (dataObj.apiResponse && typeof dataObj.apiResponse === 'object') {
-        const apiResp = dataObj.apiResponse as Record<string, unknown>;
-        if (typeof apiResp.Status === 'string') {
-          return apiResp.Status;
-        }
-      }
-    }
-    
-    // Check HTTP status code
-    if (typeof response.status === 'number') {
-      return `Request failed with status code ${response.status}`;
-    }
-  }
-
-  // Fallback to error.message
-  if (typeof error.message === 'string') {
-    return error.message;
-  }
-
-  return 'An error occurred while sending notification';
-};
+// EF-2: single source of truth for error message extraction (unified envelope
+// first, legacy shapes as fallback — never a raw technical string).
+const extractErrorMessage = (err: unknown): string => parseApiError(err).message;
 
 export const useIssues = () => {
   const qc = useQueryClient();

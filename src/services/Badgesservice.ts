@@ -1,62 +1,21 @@
 
 import api from './api';
+// EF-2: one canonical ApiValidationError (previously duplicated here) — the
+// re-export keeps every existing import path and instanceof check working.
+import { ApiValidationError, parseApiError } from './errors';
 
-export class ApiValidationError extends Error {
-  fieldErrors: Record<string, string>;
+export { ApiValidationError } from './errors';
 
-  constructor(message: string, fieldErrors: Record<string, string>) {
-    super(message);
-    this.name = 'ApiValidationError';
-    this.fieldErrors = fieldErrors;
-  }
-}
-
-const getValidationFieldErrors = (error: unknown): Record<string, string> | null => {
-  const err = error as { response?: { data?: unknown }; message?: string };
-  const data = err?.response?.data;
-  if (data && typeof data === 'object' && data !== null && 'errorMessages' in data) {
-    const messages = (data as { errorMessages?: Record<string, string> }).errorMessages;
-    if (messages && typeof messages === 'object') {
-      return messages;
-    }
-  }
-  return null;
-};
-
-// ── Error extractor — handles all backend error shapes ───────────────────────
-const extractError = (error: unknown): string => {
-  const err = error as {
-    response?: {
-      data?: {
-        errorMessages?: Record<string, unknown>;
-        apiResponse?:   { message?: string };
-        message?:       string;
-      }
-    };
-    message?: string;
-  };
-  const data = err?.response?.data;
-  if (data?.errorMessages && typeof data.errorMessages === 'object') {
-    const firstValue = Object.values(data.errorMessages)[0];
-    if (typeof firstValue === 'string') return firstValue;
-    if (typeof firstValue === 'object') return JSON.stringify(firstValue);
-  }
-  if (data?.apiResponse?.message)       return data.apiResponse.message;
-  if (data?.message)                    return data.message;
-  if (typeof data === 'string')         return data;
-  if (err?.message)                     return err.message;
-  return 'Something went wrong';
-};
-
+// ── Error handling — centralized in parseApiError (unified envelope first,
+//    legacy `errorMessages` / `apiResponse.message` fallbacks, safe generic) ──
 const handleRequest = async <T>(req: Promise<{ data: T }>): Promise<T> => {
   try { return (await req).data; }
   catch (error) {
-    const fieldErrors = getValidationFieldErrors(error);
-    if (fieldErrors && Object.keys(fieldErrors).length > 0) {
-      const message = Object.values(fieldErrors)[0] ?? 'Validation failed';
-      throw new ApiValidationError(message, fieldErrors);
+    const parsed = parseApiError(error);
+    if (Object.keys(parsed.fields).length > 0) {
+      throw new ApiValidationError(parsed.message, parsed.fields);
     }
-    throw extractError(error);
+    throw parsed.message;
   }
 };
 
