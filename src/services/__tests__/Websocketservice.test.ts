@@ -173,19 +173,37 @@ describe('wsService — STOMP over native WebSocket', () => {
     ]);
   });
 
-  it('keeps publication behavior unchanged (room: raw body, private: recipientEmail payload)', () => {
+  it('publishes room SEND frames as a {"content": "..."} JSON object (EF-1)', () => {
     wsService.connect('raw.jwt.token');
 
     const client = lastClient();
 
     wsService.sendToRoom('abc', 'hello room');
-    expect(client.frames[0]).toEqual({ destination: '/app/chat/abc', body: 'hello room' });
+    expect(client.frames[0]).toEqual({
+      destination: '/app/chat/abc',
+      body: JSON.stringify({ content: 'hello room' }),
+    });
 
     wsService.sendPrivateMessage('mentor@test.com', 'hi there');
     expect(client.frames[1]).toEqual({
       destination: '/app/chat.private',
       body: JSON.stringify({ recipientEmail: 'mentor@test.com', content: 'hi there' }),
     });
+  });
+
+  it('never sends a room message as a raw string body (EF-1 — DTO binding)', () => {
+    wsService.connect('raw.jwt.token');
+
+    const client = lastClient();
+    wsService.sendToRoom('abc', 'hello room');
+
+    const frame = client.frames[0];
+    expect(frame.destination).toBe('/app/chat/abc');
+    // A raw string body fails ChatMessageRequest binding server-side: the
+    // message is NOT stored and an error lands on /user/queue/errors. The
+    // body must therefore always parse to an object carrying `content`.
+    expect(frame.body).not.toBe('hello room');
+    expect(JSON.parse(frame.body)).toEqual({ content: 'hello room' });
   });
 
   it('fans out /user/queue/errors payloads to registered onError handlers', () => {

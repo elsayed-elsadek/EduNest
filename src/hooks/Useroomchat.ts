@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 import { getAssetUrl } from '../config/env';
 import { wsService } from '../services/Websocketservice';
@@ -67,6 +68,24 @@ const dedupe = (msgs: Message[]): Message[] => {
   return Array.from(map.values());
 };
 
+/**
+ * EF-1 — extracts a human-readable message from a `/user/queue/errors` payload.
+ * The backend pushes the exception message (e.g. "Message content must not be
+ * blank"); STOMP delivers it as a parsed string, but an object body is handled
+ * defensively so the UI never shows raw JSON.
+ */
+const toErrorMessage = (data: unknown): string => {
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    for (const key of ['message', 'error', 'content']) {
+      const value = obj[key];
+      if (typeof value === 'string' && value.trim()) return value;
+    }
+  }
+  return 'Message could not be sent';
+};
+
 export const useRoomChat = () => {
   const token      = useAuthStore((s) => s.token);
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -85,6 +104,19 @@ export const useRoomChat = () => {
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
+  }, []);
+
+  // EF-1 (AC#2): the backend rejects invalid room-chat SEND frames — a raw
+  // string body, or blank `content` — by pushing to `/user/queue/errors`.
+  // Surface those as toasts so the send button never fails silently.
+  // wsService owns the subscription (registered once, survives reconnects);
+  // this only fans the payloads out to the UI and cleans up on unmount.
+  useEffect(() => {
+    const off = wsService.onError((data) => {
+      if (!mountedRef.current) return;
+      toast.error(toErrorMessage(data));
+    });
+    return off;
   }, []);
 
   const fetchRooms = useCallback(async () => {
