@@ -216,3 +216,95 @@ describe('api — dead-token local rejection (FE-008, unchanged)', () => {
     expect(handleSessionExpiredMock).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('api — unified error contract (EF-2)', () => {
+  it('a 401 ERR_UNAUTHENTICATED envelope on a protected path still triggers ONE refresh, no logout', async () => {
+    const oldToken = makeToken({ sub: 'old' });
+    const newToken = makeToken({ sub: 'new' });
+    getAuthTokenMock.mockReturnValueOnce(oldToken).mockReturnValue(newToken);
+    refreshAccessTokenMock.mockResolvedValue(newToken);
+    stubAdapter((_config, seenCalls) =>
+      seenCalls > 1
+        ? { status: 200, data: { ok: true } }
+        : { status: 401, data: { errorCode: 'ERR_UNAUTHENTICATED', message: 'Authentication required. Please log in.' } }
+    );
+
+    const result = await api.get('/api/v1/protected');
+
+    expect(result.status).toBe(200);
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+  });
+
+  it('a login 401 with an EXISTING session never refreshes and never logs out', async () => {
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: 'active-session' })); // valid session in another flow
+    stubAdapter(() => ({
+      status: 401,
+      data: { errorCode: 'ERR_INVALID_CREDENTIALS', message: 'Invalid email or password.' },
+    }));
+
+    const rejection = await api.post('/login-api', { email: 'a@b.com', password: 'x' }).catch((e) => e);
+
+    expect(refreshAccessTokenMock).not.toHaveBeenCalled();
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+    // EF-2: the unified, parsed error rides along for the UI to render
+    expect(rejection.normalized).toMatchObject({
+      errorCode: 'ERR_INVALID_CREDENTIALS',
+      message: 'Invalid email or password.',
+      status: 401,
+      fields: {},
+    });
+  });
+
+  it('a 403 envelope carries the clean message without touching the session', async () => {
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: '1' }));
+    stubAdapter(() => ({
+      status: 403,
+      data: { errorCode: 'ERR_FORBIDDEN', message: 'You do not have permission to access this resource.' },
+    }));
+
+    const rejection = await api.get('/api/v1/protected').catch((e) => e);
+
+    expect(refreshAccessTokenMock).not.toHaveBeenCalled();
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+    expect(rejection.normalized).toMatchObject({
+      errorCode: 'ERR_FORBIDDEN',
+      message: 'You do not have permission to access this resource.',
+      status: 403,
+    });
+  });
+
+  it('a 400 ERR_VALIDATION with fields exposes the field map for forms', async () => {
+    stubAdapter(() => ({
+      status: 400,
+      data: { errorCode: 'ERR_VALIDATION', message: 'Validation failed.', fields: { email: 'Invalid email' } },
+    }));
+
+    const rejection = await api.post('/api/v1/register/mentor', {}).catch((e) => e);
+
+    expect(rejection.normalized.fields).toEqual({ email: 'Invalid email' });
+  });
+
+  it('a 500 WITHOUT refId normalizes cleanly — no reference to render', async () => {
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: '1' }));
+    stubAdapter(() => ({
+      status: 500,
+      data: { errorCode: 'ERR_INTERNAL_SYSTEM', message: 'Something went wrong on our side.' },
+    }));
+
+    const rejection = await api.get('/api/v1/protected').catch((e) => e);
+
+    expect(rejection.normalized.errorCode).toBe('ERR_INTERNAL_SYSTEM');
+    expect(rejection.normalized.refId).toBeUndefined();
+  });
+
+  it('an ERR_VALIDATION envelope without a fields object still normalizes (no crash)', async () => {
+    stubAdapter(() => ({ status: 400, data: { errorCode: 'ERR_VALIDATION', message: 'Validation failed.' } }));
+
+    const rejection = await api.post('/api/v1/register/student', {}).catch((e) => e);
+
+    expect(rejection.normalized.errorCode).toBe('ERR_VALIDATION');
+    expect(rejection.normalized.fields).toEqual({});
+    expect(rejection.normalized.message).toBe('Validation failed.');
+  });
+});

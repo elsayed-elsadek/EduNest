@@ -15,6 +15,7 @@ import {
   type Notification,
   type NotificationApiDto,
 } from '../types/mentornotification.types';
+import { parseApiError } from '../services/errors';
 
 export const useNotifications = () => {
   const token      = useAuthStore((s) => s.token);
@@ -25,15 +26,9 @@ export const useNotifications = () => {
   const [loading,       setLoading      ] = useState(false);
   const [error,         setError        ] = useState<string | null>(null);
 
-  const extractError = (err: unknown): string => {
-    if (!err || typeof err !== 'object') return 'Something went wrong';
-    const e = err as Record<string, unknown>;
-    if (e.errorMessages && typeof e.errorMessages === 'object') {
-      const first = Object.values(e.errorMessages as Record<string, unknown>)[0];
-      if (typeof first === 'string') return first;
-    }
-    return typeof e.message === 'string' ? e.message : 'Something went wrong';
-  };
+  // EF-2: single source of truth for error message extraction (unified
+  // envelope first, legacy shapes as fallback — never a raw technical string).
+  const extractError = (err: unknown): string => parseApiError(err).message;
 
   // ── Fetch all notifications ────────────────────────────────────────────────
   const fetchNotifications = useCallback(async () => {

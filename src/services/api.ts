@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken, handleSessionExpired } from '../store/authStore';
 import { refreshAccessToken } from './authRefresh';
+import { parseApiError, type NormalizedApiError } from './errors';
 import { isTokenValid } from '../utils/jwt';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
@@ -111,6 +112,13 @@ api.interceptors.response.use(
       // clear the session exactly once (guarded) → /login?reason=expired.
       handleSessionExpired();
     }
+
+    // EF-2: attach the unified, parsed error (envelope → legacy → generic) so
+    // UI consumers can branch on `errorCode` and render the clean `message`.
+    // Purely additive — the silent-refresh and logout logic above is untouched:
+    // errorCode is classification only, never an additional logout trigger.
+    const normalized: NormalizedApiError = parseApiError(error);
+    (error as Error & { normalized?: NormalizedApiError }).normalized = normalized;
 
     return Promise.reject(error);
   }

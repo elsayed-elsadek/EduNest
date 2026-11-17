@@ -3,6 +3,7 @@ import type { FormErrors } from '../types/auth';
 import { sendRestoreOtp, confirmRestore } from '../services/authService';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { showApiError } from '../utils/showApiError';
 
 interface RestoreFormData {
   email: string;
@@ -72,9 +73,10 @@ export const useRestoreForm = () => {
       localStorage.setItem('restoreEmail', formData.email);
 
       setStep('otp');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to send OTP');
+    } catch (error) {
+      // EF-2: unified envelope message (clean, with refId on 5xx) instead of
+      // ad-hoc body probing.
+      showApiError(error);
     } finally {
       setLoading(false);
     }
