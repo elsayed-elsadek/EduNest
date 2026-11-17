@@ -7,6 +7,10 @@ const handleSessionExpired = vi.fn();
 vi.mock('../../store/authStore', () => ({
   getAuthToken: () => getAuthToken(),
   handleSessionExpired: () => handleSessionExpired(),
+  // FE-027 exports consumed by authRefresh.ts (loaded via api.ts's import chain)
+  getStoredAuth: () => ({ token: '', refreshToken: '' }),
+  setTokenPair: () => undefined,
+  notifyAuthPeers: () => undefined,
 }));
 
 import api from '../api';

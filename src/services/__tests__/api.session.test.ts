@@ -1,18 +1,25 @@
 /**
- * FE-008 — session lifecycle behaviour of the shared axios instance:
- * one 401 handler, no 401 storm, dead tokens rejected before hitting the wire.
+ * FE-027 — session lifecycle of the shared axios instance:
+ * a 401 on a protected endpoint triggers ONE silent refresh and replays the
+ * request; a refresh failure rejects without an infinite loop; dead tokens are
+ * still rejected locally before hitting the wire.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { InternalAxiosRequestConfig } from 'axios';
 
-const { getAuthTokenMock, handleSessionExpiredMock } = vi.hoisted(() => ({
+const { getAuthTokenMock, handleSessionExpiredMock, refreshAccessTokenMock } = vi.hoisted(() => ({
   getAuthTokenMock: vi.fn(() => ''),
   handleSessionExpiredMock: vi.fn(),
+  refreshAccessTokenMock: vi.fn(),
 }));
 
 vi.mock('../../store/authStore', () => ({
   getAuthToken: () => getAuthTokenMock(),
   handleSessionExpired: () => handleSessionExpiredMock(),
+}));
+
+vi.mock('../authRefresh', () => ({
+  refreshAccessToken: (...args: unknown[]) => refreshAccessTokenMock(...args),
 }));
 
 import api from '../api';
@@ -34,26 +41,47 @@ function makeToken(payload: Record<string, unknown>): string {
   ].join('.');
 }
 
-/** Adapter that answers every request with the given status and counts calls. */
-function stubAdapter(status: number): { calls: number } {
-  const state = { calls: 0 };
+interface AdapterReply {
+  status: number;
+  data?: unknown;
+  headers?: Record<string, string>;
+}
+
+/** Adapter answering per-URL, recording every call's URL + Authorization header. */
+function stubAdapter(
+  handler: (config: InternalAxiosRequestConfig, seenCalls: number) => AdapterReply
+): { calls: Array<{ url?: string; auth?: string }> } {
+  const state = { calls: [] as Array<{ url?: string; auth?: string }> };
   api.defaults.adapter = ((config: InternalAxiosRequestConfig) => {
-    state.calls += 1;
+    state.calls.push({
+      url: config.url,
+      auth:
+        typeof config.headers?.Authorization === 'string' ? config.headers.Authorization : undefined,
+    });
+    const seenCalls = state.calls.filter((c) => c.url === config.url).length;
+    const reply = handler(config, seenCalls);
+    const response = {
+      status: reply.status,
+      statusText: reply.status >= 400 ? 'Error' : 'OK',
+      data: reply.data ?? {},
+      headers: reply.headers ?? {},
+      config,
+    };
+    if (reply.status >= 200 && reply.status < 300) return Promise.resolve(response);
     return Promise.reject(
-      Object.assign(new Error('Request failed'), {
-        code: 'ERR_BAD_REQUEST',
-        config,
-        response: { status, statusText: 'Error', data: {}, headers: {}, config },
-      })
+      Object.assign(new Error('Request failed'), { code: 'ERR_BAD_REQUEST', config, response })
     );
   }) as never;
   return state;
 }
 
+const REFRESH_BODY = { apiResponse: { jwt: makeToken({ sub: 'new' }), refreshToken: 'rt2' } };
+
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   getAuthTokenMock.mockReset().mockReturnValue('');
   handleSessionExpiredMock.mockClear();
+  refreshAccessTokenMock.mockReset();
   api.defaults.adapter = undefined as never;
 });
 
@@ -62,34 +90,108 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('api — session lifecycle (FE-008)', () => {
-  it('a 401 on a protected endpoint triggers the session-expired handler once per request', async () => {
-    stubAdapter(401);
-    getAuthTokenMock.mockReturnValue(makeToken({ exp: Math.floor(Date.now() / 1000) + 600 }));
+describe('api — silent refresh on 401 (FE-027)', () => {
+  it('replays a protected request once with the rotated token after a refresh', async () => {
+    const oldToken = makeToken({ sub: 'old' });
+    const newToken = makeToken({ sub: 'new' });
+    // the replay re-runs the request interceptor, which reads the (rotated) store
+    getAuthTokenMock.mockReturnValueOnce(oldToken).mockReturnValue(newToken);
+    refreshAccessTokenMock.mockResolvedValue(newToken);
+    const state = stubAdapter((config, seenCalls) =>
+      config.url?.includes('refresh')
+        ? { status: 200, data: REFRESH_BODY }
+        : seenCalls > 1
+          ? { status: 200, data: { ok: true } }
+          : { status: 401, data: { errorCode: 'ERR_INVALID_TOKEN' } }
+    );
+
+    const result = await api.get('/api/v1/protected');
+
+    expect(result.status).toBe(200);
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(refreshAccessTokenMock).toHaveBeenCalledWith(oldToken);
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+    // initial 401 + replayed retry — the retry carried the rotated token
+    const protectedCalls = state.calls.filter((c) => c.url === '/api/v1/protected');
+    expect(protectedCalls).toHaveLength(2);
+    expect(protectedCalls[1].auth).toBe(`Bearer ${newToken}`);
+  });
+
+  it('5 concurrent 401s all recover through the single-flight refresh', async () => {
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: 'old' }));
+    refreshAccessTokenMock.mockResolvedValue(makeToken({ sub: 'new' }));
+    stubAdapter((config, seenCalls) =>
+      config.url?.includes('refresh')
+        ? { status: 200, data: REFRESH_BODY }
+        : seenCalls > 1
+          ? { status: 200, data: { ok: true } }
+          : { status: 401, data: {} }
+    );
+
+    const results = await Promise.allSettled([
+      api.get('/api/v1/protected'),
+      api.get('/api/v1/protected'),
+      api.get('/api/v1/protected'),
+      api.get('/api/v1/protected'),
+      api.get('/api/v1/protected'),
+    ]);
+
+    expect(results.every((r) => r.status === 'fulfilled')).toBe(true);
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+  });
+
+  it('a 401 after the replay clears the session exactly once — no refresh loop', async () => {
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: 'old' }));
+    refreshAccessTokenMock.mockResolvedValue(makeToken({ sub: 'new' }));
+    stubAdapter(() => ({ status: 401, data: {} })); // protected endpoint stays 401
 
     await expect(api.get('/api/v1/protected')).rejects.toBeDefined();
 
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
     expect(handleSessionExpiredMock).toHaveBeenCalledTimes(1);
   });
 
-  it('a 401 on a public auth path does not clear the session', async () => {
-    stubAdapter(401);
+  it('a failed refresh rejects the original request without a second refresh', async () => {
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: 'old' }));
+    refreshAccessTokenMock.mockRejectedValue(
+      Object.assign(new Error('Refresh token rejected'), { code: 'SESSION_EXPIRED' })
+    );
+    stubAdapter((config) =>
+      config.url?.includes('refresh')
+        ? { status: 401, data: { errorCode: 'ERR_INVALID_TOKEN' } }
+        : { status: 401, data: {} }
+    );
+
+    await expect(api.get('/api/v1/protected')).rejects.toMatchObject({
+      code: 'SESSION_EXPIRED',
+    });
+
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('a 401 on a public auth path never refreshes and never clears the session', async () => {
+    stubAdapter(() => ({ status: 401, data: { errorCode: 'ERR_INVALID_CREDENTIALS' } }));
 
     await expect(api.post('/login-api', { email: 'a@b.com', password: 'x' })).rejects.toBeDefined();
 
+    expect(refreshAccessTokenMock).not.toHaveBeenCalled();
     expect(handleSessionExpiredMock).not.toHaveBeenCalled();
   });
 
   it('non-401 errors keep the session', async () => {
-    stubAdapter(500);
+    getAuthTokenMock.mockReturnValue(makeToken({ sub: '1' }));
+    stubAdapter(() => ({ status: 500, data: {} }));
 
     await expect(api.get('/api/v1/protected')).rejects.toBeDefined();
 
+    expect(refreshAccessTokenMock).not.toHaveBeenCalled();
     expect(handleSessionExpiredMock).not.toHaveBeenCalled();
   });
+});
 
+describe('api — dead-token local rejection (FE-008, unchanged)', () => {
   it('an expired token is rejected locally without a network call', async () => {
-    const adapter = stubAdapter(200);
+    const adapter = stubAdapter(() => ({ status: 200 }));
     getAuthTokenMock.mockReturnValue(
       makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 })
     );
@@ -98,19 +200,19 @@ describe('api — session lifecycle (FE-008)', () => {
       code: 'SESSION_EXPIRED',
     });
 
-    expect(adapter.calls).toBe(0);
+    expect(adapter.calls).toHaveLength(0);
     expect(handleSessionExpiredMock).toHaveBeenCalledTimes(1);
   });
 
   it('a malformed token is rejected locally as unauthenticated', async () => {
-    const adapter = stubAdapter(200);
+    const adapter = stubAdapter(() => ({ status: 200 }));
     getAuthTokenMock.mockReturnValue('garbage');
 
     await expect(api.get('/api/v1/protected')).rejects.toMatchObject({
       code: 'SESSION_EXPIRED',
     });
 
-    expect(adapter.calls).toBe(0);
+    expect(adapter.calls).toHaveLength(0);
     expect(handleSessionExpiredMock).toHaveBeenCalledTimes(1);
   });
 });

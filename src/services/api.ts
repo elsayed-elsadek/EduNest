@@ -1,5 +1,7 @@
 import axios from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken, handleSessionExpired } from '../store/authStore';
+import { refreshAccessToken } from './authRefresh';
 import { isTokenValid } from '../utils/jwt';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
@@ -65,7 +67,7 @@ api.interceptors.request.use((config) => {
 // Response interceptor — errors are surfaced by the calling UI code.
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     // Ignore canceled requests (normal cleanup when component unmounts) and the
     // local SESSION_EXPIRED rejection (its redirect is already running).
     if (error.code === 'ERR_CANCELED' || error.code === 'SESSION_EXPIRED') {
@@ -79,9 +81,34 @@ api.interceptors.response.use(
     // and is a no-op in production.
     logger.error(`API Error ${status} (${code}) on ${url}:`, error.message);
 
-    // FE-008: a 401 on a protected endpoint means the session is no longer
-    // valid — clear it exactly once (guarded) and redirect to /login?reason=expired.
-    if (status === 401 && !isPublicAuthRequest(error.config?.url)) {
+    const original = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
+    const isProtected401 = status === 401 && !isPublicAuthRequest(original?.url);
+
+    if (isProtected401 && original && !original._retry) {
+      // FE-027: a 401 on a protected endpoint means the access token is no
+      // longer accepted — attempt ONE silent refresh (single-flight, shared by
+      // all concurrent 401s) and replay the original request with the rotated
+      // token. When the refresh itself fails (401/429/ambiguous network drop)
+      // refreshAccessToken() has already ended the session exactly once.
+      original._retry = true;
+      try {
+        const failedAccessToken =
+          typeof original.headers?.Authorization === 'string'
+            ? original.headers.Authorization.replace(/^Bearer\s+/i, '')
+            : undefined;
+        const newToken = await refreshAccessToken(failedAccessToken);
+        original.headers.Authorization = `Bearer ${newToken}`;
+        return api(original);
+      } catch (refreshError) {
+        return Promise.reject(refreshError ?? error);
+      }
+    }
+
+    if (isProtected401) {
+      // FE-008: refresh was already attempted (or the request is a replay) —
+      // clear the session exactly once (guarded) → /login?reason=expired.
       handleSessionExpired();
     }
 

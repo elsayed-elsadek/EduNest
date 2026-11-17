@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import { isTokenValid } from '../utils/jwt';
+import { API_BASE_URL } from '../config/env';
 
 /**
  * FE-008 — Session & token lifecycle
@@ -30,6 +31,7 @@ const AUTH_STORAGE_KEYS = [
 
 export interface AuthState {
   token: string;
+  refreshToken: string;
   isAuthenticated: boolean;
   userName: string;
   userEmail: string;
@@ -40,11 +42,13 @@ export interface AuthState {
   rememberMe: boolean;
   setAuth: (payload: {
     token: string;
+    refreshToken?: string;
     userName?: string;
     userEmail?: string;
     userRole?: string;
     userAvatar?: string;
   }) => void;
+  setTokenPair: (token: string, refreshToken: string) => void;
   updateProfile: (payload: {
     userName?: string;
     userAvatar?: string;
@@ -57,6 +61,7 @@ export interface AuthState {
 /** Initial (logged-out) auth state — also used as the reset payload on expiry. */
 const LOGGED_OUT_STATE = {
   token: '',
+  refreshToken: '',
   isAuthenticated: false,
   userName: '',
   userEmail: '',
@@ -142,19 +147,25 @@ export function resetSessionExpiredGuard(): void {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...LOGGED_OUT_STATE,
       isHydrated: false,
       setAuth: (payload) =>
         set((state) => ({
           ...state,
           token: payload.token,
+          refreshToken: payload.refreshToken ?? state.refreshToken,
           isAuthenticated: !!payload.token,
           userName: payload.userName ?? state.userName,
           userEmail: payload.userEmail ?? state.userEmail,
           userRole: payload.userRole ?? state.userRole,
           userAvatar: payload.userAvatar ?? state.userAvatar,
         })),
+      // FE-027: persists the rotated pair after every successful refresh.
+      // Rotation is single-use — the OLD refresh token is dead the moment this
+      // runs, so both values must land in storage together, atomically.
+      setTokenPair: (token, refreshToken) =>
+        set({ token, refreshToken, isAuthenticated: !!token }),
       updateProfile: (payload) =>
         set((state) => ({
           ...state,
@@ -166,11 +177,28 @@ export const useAuthStore = create<AuthState>()(
       setRememberMe: (email, remember) =>
         set({ lastEmail: email, rememberMe: remember }),
       logout: () => {
+        // BLK-04: the backend cannot revoke already-issued access JWTs, so the
+        // client is the mitigation — revoke the refresh session server-side
+        // (best-effort, idempotent per contract) then wipe locally at once.
+        const { refreshToken } = get();
+        try {
+          if (refreshToken) {
+            void fetch(`${API_BASE_URL}/login-api/logout`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refreshToken }),
+              keepalive: true, // survives the hard redirect below
+            }).catch(() => undefined);
+          }
+        } catch {
+          // best-effort — never block logout on the revoke call
+        }
         // Resetting the store first lets the persist middleware write the
         // emptied state; wiping the keys afterwards removes it entirely, so
         // only auth keys are touched (theme and other preferences survive).
         set(LOGGED_OUT_STATE);
         clearAuthStorage();
+        notifyAuthPeers({ type: 'LOGOUT' });
         // Hard redirect to clear all React state/cache
         window.location.href = '/login';
       },
@@ -231,4 +259,85 @@ export function getAuthToken(): string {
     // ignore
   }
   return '';
+}
+
+/**
+ * FE-027 — reads the persisted auth pair straight from web storage, bypassing
+ * this tab's in-memory state. This is the shared state peer tabs re-read after
+ * acquiring the refresh lock (remember-me-on sessions live in `localStorage`,
+ * which is shared across tabs).
+ */
+export function getStoredAuth(): { token: string; refreshToken: string } {
+  if (typeof window === 'undefined') return { token: '', refreshToken: '' };
+  try {
+    const raw =
+      window.sessionStorage.getItem(AUTH_STORAGE) ?? window.localStorage.getItem(AUTH_STORAGE);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { state?: { token?: string; refreshToken?: string } };
+      return {
+        token: parsed?.state?.token ?? '',
+        refreshToken: parsed?.state?.refreshToken ?? '',
+      };
+    }
+  } catch {
+    // ignore
+  }
+  return { token: '', refreshToken: '' };
+}
+
+/** FE-027 — cross-tab auth events broadcast over a shared channel. */
+export type AuthSyncEvent = { type: 'TOKEN_REFRESHED' } | { type: 'LOGOUT' };
+
+const authChannel: BroadcastChannel | null =
+  typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined'
+    ? new BroadcastChannel('edunest_auth_sync')
+    : null;
+
+export function notifyAuthPeers(event: AuthSyncEvent): void {
+  try {
+    authChannel?.postMessage(event);
+  } catch {
+    // best-effort — a closed channel must never break the auth flow
+  }
+}
+
+/**
+ * Re-reads the persisted pair into this tab's in-memory state. Called when a
+ * peer tab broadcasts TOKEN_REFRESHED (it already rotated and persisted the new
+ * pair) or when a `storage` event reports a change.
+ */
+function syncFromStorage(): void {
+  const stored = getStoredAuth();
+  const current = useAuthStore.getState();
+  if (!stored.token) {
+    // Peer tab logged out or its session expired.
+    if (current.token) useAuthStore.setState(LOGGED_OUT_STATE);
+    return;
+  }
+  if (stored.token === current.token && stored.refreshToken === current.refreshToken) return;
+  useAuthStore.setState({
+    token: stored.token,
+    refreshToken: stored.refreshToken,
+    isAuthenticated: !!stored.token,
+  });
+}
+
+if (typeof window !== 'undefined') {
+  if (authChannel) {
+    authChannel.onmessage = (event: MessageEvent<AuthSyncEvent>) => {
+      if (event.data?.type === 'TOKEN_REFRESHED') {
+        syncFromStorage();
+      } else if (event.data?.type === 'LOGOUT') {
+        // A peer tab revoked the session — end ours too, without a redirect
+        // loop (ProtectedRoute lands the user on /login on its own).
+        useAuthStore.setState(LOGGED_OUT_STATE);
+        clearAuthStorage();
+      }
+    };
+  }
+  // `storage` events only fire in OTHER tabs — the cheapest cross-tab sync for
+  // remember-me-on sessions (sessionStorage sessions are per-tab by design).
+  window.addEventListener('storage', (event) => {
+    if (event.key === AUTH_STORAGE) syncFromStorage();
+  });
 }

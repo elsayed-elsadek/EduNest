@@ -70,6 +70,14 @@ export const useLogin = () => {
       const apiResponse = responseObj?.apiResponse as Record<string, unknown> | undefined;
       
       const jwt = apiResponse?.jwt as string | undefined;
+      // FE-027: the refresh token ships with the login pair (EB-91) — it is the
+      // single-use key for silent renewal and logout revocation.
+      const refreshToken = apiResponse?.refreshToken as string | undefined;
+      // FE-027: body `Role` is a bare enum (STUDENT|MENTOR|ADMIN) — normalize it
+      // to the `ROLE_*` shape the JWT authorities use, as a fallback when the
+      // token itself carries no readable role.
+      const backendRole =
+        typeof apiResponse?.Role === "string" ? `ROLE_${apiResponse.Role.toUpperCase()}` : "";
       const statusMessage = apiResponse?.status as string | undefined || "Logged in successfully!";
 
       if (jwt && isTokenValid(jwt)) {
@@ -95,12 +103,13 @@ export const useLogin = () => {
                          (user?.email ? String(user.email) : formData.email) ||
                          formData.email;
 
-        // Set authentication data
+        // Set authentication data (token pair per EB-91)
         useAuthStore.getState().setAuth({
           token: jwt,
+          refreshToken: refreshToken ?? "",
           userName: userName || userEmail.split('@')[0],
           userEmail: userEmail,
-          userRole: userRole,
+          userRole: userRole || backendRole,
         });
 
         // Fetch profile image for students
