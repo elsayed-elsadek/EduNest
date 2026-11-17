@@ -198,7 +198,14 @@ class WebSocketService {
       logger.warn('Cannot send message — WebSocket not connected');
       return;
     }
-    this.client.publish({ destination: `/app/chat/${roomId}`, body: content });
+    // EF-1: the room-chat SEND endpoint binds a `ChatMessageRequest` DTO —
+    // the frame body MUST be a JSON object `{"content": "..."}`. A raw string
+    // body fails to bind and is rejected server-side (error via
+    // /user/queue/errors, message not stored).
+    this.client.publish({
+      destination: `/app/chat/${roomId}`,
+      body: JSON.stringify({ content }),
+    });
   }
 
   sendPrivateMessage(recipientEmail: string, content: string): void {
