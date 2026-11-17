@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import DOMPurify from 'dompurify';
 import { isSafeExternalUrl, openExternalUrl } from '../safeExternalUrl';
 import { sanitizeHtml } from '../sanitizeHtml';
 
@@ -40,6 +41,32 @@ describe('sanitizeHtml', () => {
     expect(container.querySelector('table td')?.textContent).toBe('Cell');
     expect(container.querySelector('a')?.getAttribute('href')).toBe('https://example.com');
     expect(container.querySelector('a')?.getAttribute('rel')).toContain('noopener');
+  });
+
+  it('strips a data:text/html image source (scripted data URIs are never a document src)', () => {
+    const clean = sanitizeHtml(
+      '<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">',
+      'document',
+    );
+    const container = document.createElement('div');
+    container.innerHTML = clean;
+
+    // legitimate embedded images (data:image/png;base64,...) survive — only
+    // non-image / non-http(s) sources are removed
+    expect(container.querySelector('img')?.hasAttribute('src')).toBe(false);
+  });
+
+  it('falls back to escaped plain text when the sanitizer itself throws (EF-58)', () => {
+    const unsafe = '<img src=x onerror="alert(1)"> Hello & <b>world</b>';
+    const sanitizeSpy = vi.spyOn(DOMPurify, 'sanitize').mockImplementation(() => {
+      throw new Error('sanitizer exploded');
+    });
+
+    const clean = sanitizeHtml(unsafe, 'document');
+
+    expect(sanitizeSpy).toHaveBeenCalledTimes(1);
+    // never raw HTML: the payload comes out as inert text, content preserved
+    expect(clean).toBe('&lt;img src=x onerror=&quot;alert(1)&quot;&gt; Hello &amp; &lt;b&gt;world&lt;/b&gt;');
   });
 });
 

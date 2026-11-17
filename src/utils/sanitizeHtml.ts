@@ -15,6 +15,7 @@
  * a regression obvious.
  */
 import DOMPurify from 'dompurify';
+import logger from './logger';
 
 export type SanitizeProfile = 'chat' | 'document';
 
@@ -134,15 +135,24 @@ export function sanitizeHtml(html: string, profile: SanitizeProfile = 'chat'): s
 
   registerHooks();
 
-  return DOMPurify.sanitize(html, {
-    ...PROFILE_CONFIG[profile],
-    ALLOW_DATA_ATTR: false,
-    ALLOW_ARIA_ATTR: false,
-    KEEP_CONTENT: true,
-    FORBID_TAGS: [
-      'script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button',
-      'textarea', 'select', 'option', 'svg', 'math', 'link', 'meta', 'base',
-    ],
-    FORBID_ATTR: ['style', 'srcset', 'formaction', 'xlink:href'],
-  }) as string;
+  try {
+    return DOMPurify.sanitize(html, {
+      ...PROFILE_CONFIG[profile],
+      ALLOW_DATA_ATTR: false,
+      ALLOW_ARIA_ATTR: false,
+      KEEP_CONTENT: true,
+      FORBID_TAGS: [
+        'script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button',
+        'textarea', 'select', 'option', 'svg', 'math', 'link', 'meta', 'base',
+      ],
+      FORBID_ATTR: ['style', 'srcset', 'formaction', 'xlink:href'],
+    }) as string;
+  } catch (error) {
+    // EF-58 failure policy: if the sanitizer itself ever throws, degrade to
+    // escaped plain text — untrusted content must NEVER reach a sink raw.
+    // (The production-readiness plan requires "sanitizer throws → fall back
+    // to plain text, never raw HTML".)
+    logger.warn(`HTML sanitisation failed (${profile} profile) — rendering escaped plain text`, error);
+    return escapeHtml(html);
+  }
 }

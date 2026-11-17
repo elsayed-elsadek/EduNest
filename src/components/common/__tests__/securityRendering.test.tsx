@@ -45,6 +45,20 @@ describe('chatbot rendering', () => {
     expect(container.querySelector('a')?.getAttribute('href')).toBe('https://example.com');
     expect(container.querySelector('pre code')?.textContent).toBe('const safe = true;\n');
   });
+
+  it('TC-H04-03: a javascript: markdown link never becomes an executable href', () => {
+    const { container } = render(createElement(MessageBubble, {
+      role: 'bot',
+      text: 'See [this](javascript:alert(1)) and [that](data:text/html,<script>alert(2)</script>)',
+      chatbotName: 'EduBot',
+    }));
+
+    // no link with a dangerous scheme — the text renders inert instead
+    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
+    expect(container.querySelector('a[href^="data:"]')).toBeNull();
+    expect(container.querySelector('a[href]')).toBeNull();
+    expect(container.textContent).toContain('this');
+  });
 });
 
 describe('DOCX preview rendering', () => {
