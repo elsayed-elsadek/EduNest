@@ -53,10 +53,9 @@ class WebSocketService {
       // Native WebSocket only — SockJS fallback transports cannot authenticate
       // against the current backend (BLK-20).
       webSocketFactory: () => new WebSocket(WS_ENDPOINT),
-      // Raw JWT WITHOUT a Bearer prefix — the STOMP CONNECT interceptor binds
-      // the native header directly; a `Bearer ` prefix fails validation and
-      // terminates the session (Handbook §9.1).
-      connectHeaders:   { Authorization: token },
+      // EF-24: backend-confirmed contract — HTTP and STOMP CONNECT both use
+      // `Authorization: Bearer <jwt>`.
+      connectHeaders:   { Authorization: `Bearer ${token}` },
       reconnectDelay:   5000,
 
       onConnect: () => {

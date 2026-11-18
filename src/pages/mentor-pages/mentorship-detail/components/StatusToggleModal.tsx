@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { fetchWithTimeout } from '../../../../utils/fetchWithTimeout';
-import { API_BASE_URL } from '../../../../config/env';
+import api from '../../../../services/api';
+import { showApiError } from '../../../../utils/showApiError';
 
 
 interface StatusToggleModalProps {
@@ -31,25 +31,15 @@ const StatusToggleModal: React.FC<StatusToggleModalProps> = ({
   const handleToggle = async () => {
     setLoading(true);
     try {
-      const response = await fetchWithTimeout(`${API_BASE_URL}/api/v1/mentorship/${mentorshipId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || `HTTP ${response.status}`);
-      }
+      // EF-24: shared client supplies the confirmed Bearer contract, timeout,
+      // and existing silent-refresh behavior.
+      await api.patch(`/api/v1/mentorship/${mentorshipId}`, { status: newStatus });
 
       toast.success(`Mentorship ${actionText.toLowerCase()}d successfully!`);
       onStatusUpdated(newStatus);
       onClose();
     } catch (error) {
-      const msg = (error as Error).message || `Failed to ${actionText.toLowerCase()} mentorship`;
-      toast.error(msg);
+      showApiError(error);
     } finally {
       setLoading(false);
     }
