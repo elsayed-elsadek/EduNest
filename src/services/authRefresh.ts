@@ -19,6 +19,7 @@ import { getStoredAuth, handleSessionExpired, notifyAuthPeers, useAuthStore } fr
 import { isTokenValid } from '../utils/jwt';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
+import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
 const REFRESH_ENDPOINT = `${API_BASE_URL}/login-api/refresh`;
 const REFRESH_LOCK = 'edunest_auth_refresh_lock';
@@ -58,7 +59,9 @@ async function executeRefresh(observedRefreshToken: string): Promise<string> {
 
   let response: Response;
   try {
-    response = await fetch(REFRESH_ENDPOINT, {
+    // Keep refresh outside the axios interceptor to avoid recursive refresh;
+    // the shared fetch wrapper still supplies the standard timeout/abort path.
+    response = await fetchWithTimeout(REFRESH_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: currentRefreshToken }),

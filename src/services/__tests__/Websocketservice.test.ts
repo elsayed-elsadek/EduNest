@@ -115,12 +115,11 @@ describe('wsService — STOMP over native WebSocket', () => {
     return client as FakeClientShape;
   }
 
-  it('connects with the RAW JWT in the STOMP Authorization header — no Bearer prefix', () => {
+  it('connects with the backend-confirmed Bearer scheme in the STOMP Authorization header (EF-24)', () => {
     wsService.connect('raw.jwt.token');
 
     const client = lastClient();
-    expect(client.options.connectHeaders).toEqual({ Authorization: 'raw.jwt.token' });
-    expect(JSON.stringify(client.options.connectHeaders)).not.toContain('Bearer');
+    expect(client.options.connectHeaders).toEqual({ Authorization: 'Bearer raw.jwt.token' });
   });
 
   it('creates a native WebSocket at /ws/websocket (not SockJS)', () => {

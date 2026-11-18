@@ -183,6 +183,8 @@ export const useAuthStore = create<AuthState>()(
         const { refreshToken } = get();
         try {
           if (refreshToken) {
+            // Intentional raw-fetch exception: keepalive lets revocation
+            // survive the hard redirect; the request is best-effort by design.
             void fetch(`${API_BASE_URL}/login-api/logout`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
