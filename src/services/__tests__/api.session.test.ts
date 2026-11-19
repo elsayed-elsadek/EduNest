@@ -1,8 +1,8 @@
 /**
  * FE-027 — session lifecycle of the shared axios instance:
  * a 401 on a protected endpoint triggers ONE silent refresh and replays the
- * request; a refresh failure rejects without an infinite loop; dead tokens are
- * still rejected locally before hitting the wire.
+ * request; a refresh failure rejects without an infinite loop; expired access
+ * tokens are refreshed before a protected request is sent.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { InternalAxiosRequestConfig } from 'axios';
@@ -189,19 +189,54 @@ describe('api — silent refresh on 401 (FE-027)', () => {
   });
 });
 
-describe('api — dead-token local rejection (FE-008, unchanged)', () => {
-  it('an expired token is rejected locally without a network call', async () => {
-    const adapter = stubAdapter(() => ({ status: 200 }));
-    getAuthTokenMock.mockReturnValue(
-      makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 })
+describe('api — request-driven refresh before access-token expiry (FE-008)', () => {
+  it('refreshes an expired access token before sending the protected request', async () => {
+    const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
+    const newToken = makeToken({ sub: 'refreshed', exp: Math.floor(Date.now() / 1000) + 3600 });
+    getAuthTokenMock.mockReturnValueOnce(expiredToken).mockReturnValue(newToken);
+    refreshAccessTokenMock.mockResolvedValue(newToken);
+    const adapter = stubAdapter(() => ({ status: 200, data: { ok: true } }));
+
+    const result = await api.get('/api/v1/protected');
+
+    expect(result.status).toBe(200);
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(refreshAccessTokenMock).toHaveBeenCalledWith(expiredToken);
+    expect(adapter.calls).toEqual([
+      { url: '/api/v1/protected', auth: `Bearer ${newToken}` },
+    ]);
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+  });
+
+  it('refreshes shortly before expiry when a protected request is made', async () => {
+    const nearExpiryToken = makeToken({ exp: Math.floor(Date.now() / 1000) + 30 });
+    const newToken = makeToken({ sub: 'refreshed', exp: Math.floor(Date.now() / 1000) + 3600 });
+    getAuthTokenMock.mockReturnValueOnce(nearExpiryToken).mockReturnValue(newToken);
+    refreshAccessTokenMock.mockResolvedValue(newToken);
+    const adapter = stubAdapter(() => ({ status: 200, data: { ok: true } }));
+
+    await api.get('/api/v1/protected');
+
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(refreshAccessTokenMock).toHaveBeenCalledWith(nearExpiryToken);
+    expect(adapter.calls[0].auth).toBe(`Bearer ${newToken}`);
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+  });
+
+  it('a failed refresh rejects the protected request and preserves the refresh failure path', async () => {
+    const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
+    getAuthTokenMock.mockReturnValue(expiredToken);
+    refreshAccessTokenMock.mockRejectedValue(
+      Object.assign(new Error('Refresh token rejected'), { code: 'SESSION_EXPIRED' })
     );
+    const adapter = stubAdapter(() => ({ status: 200, data: { ok: true } }));
 
-    await expect(api.get('/api/v1/protected')).rejects.toMatchObject({
-      code: 'SESSION_EXPIRED',
-    });
+    await expect(api.get('/api/v1/protected')).rejects.toMatchObject({ code: 'SESSION_EXPIRED' });
 
+    expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
     expect(adapter.calls).toHaveLength(0);
-    expect(handleSessionExpiredMock).toHaveBeenCalledTimes(1);
+    // authRefresh owns ending the session on a failed refresh.
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
   });
 
   it('a malformed token is rejected locally as unauthenticated', async () => {
