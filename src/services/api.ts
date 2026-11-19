@@ -3,7 +3,7 @@ import type { InternalAxiosRequestConfig } from 'axios';
 import { getAuthToken, handleSessionExpired } from '../store/authStore';
 import { refreshAccessToken } from './authRefresh';
 import { parseApiError, type NormalizedApiError } from './errors';
-import { isTokenValid } from '../utils/jwt';
+import { getTokenExpiration, isTokenValid } from '../utils/jwt';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
 
@@ -15,6 +15,11 @@ const api = axios.create({
   // Add timeout to prevent hanging requests
   timeout: 15000,
 });
+
+// Refresh shortly before expiry when a protected request is about to be sent.
+// This is request-driven (not a background timer), so idle sessions are not
+// kept alive without user activity.
+const ACCESS_TOKEN_REFRESH_WINDOW_MS = 60_000;
 
 // Public auth paths that don't require token
 const PUBLIC_AUTH_PATHS = [
@@ -36,12 +41,12 @@ function isPublicAuthRequest(url: string | undefined): boolean {
 }
 
 // Add authorization token only for requests that need it
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   if (isPublicAuthRequest(config.url)) {
     return config;
   }
 
-  const token = getAuthToken();
+  let token = getAuthToken();
 
   if (!token) {
     return config;
@@ -51,8 +56,24 @@ api.interceptors.request.use((config) => {
   // allowCredentials=false, so protected REST requests authenticate via
   // `Authorization: Bearer <jwt>` — a raw token is rejected.
   //
-  // FE-008: a token we already know is expired or malformed is treated as
-  // unauthenticated — end the session locally instead of guaranteeing a 401.
+  const expiresAt = getTokenExpiration(token);
+
+  // A malformed token cannot be refreshed safely. A well-formed expired token
+  // can: use the stored refresh token before sending any protected request.
+  if (!isTokenValid(token) && expiresAt === null) {
+    handleSessionExpired();
+    return Promise.reject(
+      Object.assign(new Error('Session expired'), { code: 'SESSION_EXPIRED' })
+    );
+  }
+
+  if (expiresAt !== null && expiresAt <= Date.now() + ACCESS_TOKEN_REFRESH_WINDOW_MS) {
+    // FE-008: refresh just in time on user activity, before sending an expired
+    // access token. refreshAccessToken is single-flight and cross-tab locked.
+    token = await refreshAccessToken(token);
+  }
+
+  // Guard against a malformed/expired replacement from the refresh path.
   if (!isTokenValid(token)) {
     handleSessionExpired();
     return Promise.reject(
