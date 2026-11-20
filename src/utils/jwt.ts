@@ -92,6 +92,17 @@ export function isTokenValid(token: string): boolean {
 }
 
 /**
+ * Whether an access token should no longer be presented to the backend.
+ * Missing or malformed expiry data is treated as expired by this strict helper.
+ * @param token JWT to inspect
+ * @param clockSkewMs Refresh safety window in milliseconds (defaults to 30s)
+ */
+export function isAccessTokenExpired(token: string, clockSkewMs = EXPIRY_SKEW_MS): boolean {
+  const expiresAt = getTokenExpiration(token);
+  return expiresAt === null || expiresAt <= Date.now() + clockSkewMs;
+}
+
+/**
  * Extracts the first name from a JWT token
  * @param token The JWT token string
  * @returns The first name or empty string if not found

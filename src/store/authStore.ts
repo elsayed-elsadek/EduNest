@@ -23,10 +23,6 @@ const LEGACY_TOKEN_KEY = 'token';
 const AUTH_STORAGE_KEYS = [
   AUTH_STORAGE,
   LEGACY_TOKEN_KEY,
-  'restoreEmail',
-  'registrationEmail',
-  'registrationType',
-  'resetEmail',
 ] as const;
 
 export interface AuthState {
@@ -38,6 +34,7 @@ export interface AuthState {
   userRole: string;
   userAvatar: string;
   isHydrated: boolean;
+  authInit: 'hydrating' | 'ready' | 'recovering' | 'throttled' | 'failed';
   lastEmail: string;
   rememberMe: boolean;
   setAuth: (payload: {
@@ -47,6 +44,8 @@ export interface AuthState {
     userEmail?: string;
     userRole?: string;
     userAvatar?: string;
+    rememberMe?: boolean;
+    lastEmail?: string;
   }) => void;
   setTokenPair: (token: string, refreshToken: string) => void;
   updateProfile: (payload: {
@@ -54,6 +53,8 @@ export interface AuthState {
     userAvatar?: string;
   }) => void;
   setHydrated: (value: boolean) => void;
+  setAuthInit: (value: AuthState['authInit']) => void;
+  clearAuth: () => void;
   setRememberMe: (email: string, remember: boolean) => void;
   logout: () => void;
 }
@@ -69,6 +70,7 @@ const LOGGED_OUT_STATE = {
   userAvatar: '',
   lastEmail: '',
   rememberMe: false,
+  authInit: 'failed' as const,
 };
 
 /** Removes every auth-related key from both storages; unrelated keys survive. */
@@ -89,22 +91,47 @@ const sessionAwareStorage: StateStorage = {
   getItem: (name) => {
     if (typeof window === 'undefined') return null;
     // Session-only logins live in sessionStorage; "remember me" ones in localStorage.
-    return window.sessionStorage.getItem(name) ?? window.localStorage.getItem(name);
+    // New records carry a home marker so stale copies in the wrong storage are
+    // discarded rather than accidentally restoring a session.
+    for (const [home, storage] of [
+      ['session', window.sessionStorage],
+      ['local', window.localStorage],
+    ] as const) {
+      const raw = storage.getItem(name);
+      if (!raw) continue;
+      try {
+        const parsed = JSON.parse(raw) as { state?: { storageHome?: string } };
+        const marker = parsed?.state?.storageHome;
+        if ((marker === 'session' || marker === 'local') && marker !== home) {
+          storage.removeItem(name);
+          continue;
+        }
+      } catch {
+        // Let Zustand handle malformed persisted payloads as usual.
+      }
+      return raw;
+    }
+    return null;
   },
   setItem: (name, value) => {
     if (typeof window === 'undefined') return;
     let remember = false;
+    let persistedValue = value;
     try {
-      const parsed = JSON.parse(value) as { state?: { rememberMe?: boolean } };
+      const parsed = JSON.parse(value) as { state?: { rememberMe?: boolean; storageHome?: string } };
       remember = parsed?.state?.rememberMe === true;
+      if (parsed.state) {
+        parsed.state.storageHome = remember ? 'local' : 'session';
+        persistedValue = JSON.stringify(parsed);
+      }
     } catch {
       // Unparseable payload — keep it out of persistent storage.
     }
     if (remember) {
-      window.localStorage.setItem(name, value);
+      window.localStorage.setItem(name, persistedValue);
       window.sessionStorage.removeItem(name);
     } else {
-      window.sessionStorage.setItem(name, value);
+      window.sessionStorage.setItem(name, persistedValue);
       window.localStorage.removeItem(name);
     }
   },
@@ -160,12 +187,15 @@ export const useAuthStore = create<AuthState>()(
           userEmail: payload.userEmail ?? state.userEmail,
           userRole: payload.userRole ?? state.userRole,
           userAvatar: payload.userAvatar ?? state.userAvatar,
+          rememberMe: payload.rememberMe ?? state.rememberMe,
+          lastEmail: payload.lastEmail ?? state.lastEmail,
+          authInit: 'ready',
         })),
       // FE-027: persists the rotated pair after every successful refresh.
       // Rotation is single-use — the OLD refresh token is dead the moment this
       // runs, so both values must land in storage together, atomically.
       setTokenPair: (token, refreshToken) =>
-        set({ token, refreshToken, isAuthenticated: !!token }),
+        set({ token, refreshToken, isAuthenticated: !!token, authInit: 'ready' }),
       updateProfile: (payload) =>
         set((state) => ({
           ...state,
@@ -174,6 +204,12 @@ export const useAuthStore = create<AuthState>()(
         })),
       setHydrated: (value) =>
         set({ isHydrated: value }),
+      setAuthInit: (value) =>
+        set({ authInit: value }),
+      clearAuth: () => {
+        set({ ...LOGGED_OUT_STATE, isHydrated: true });
+        clearAuthStorage();
+      },
       setRememberMe: (email, remember) =>
         set({ lastEmail: email, rememberMe: remember }),
       logout: () => {
@@ -198,7 +234,7 @@ export const useAuthStore = create<AuthState>()(
         // Resetting the store first lets the persist middleware write the
         // emptied state; wiping the keys afterwards removes it entirely, so
         // only auth keys are touched (theme and other preferences survive).
-        set(LOGGED_OUT_STATE);
+        set({ ...LOGGED_OUT_STATE, isHydrated: true });
         clearAuthStorage();
         notifyAuthPeers({ type: 'LOGOUT' });
         // Hard redirect to clear all React state/cache
@@ -231,18 +267,22 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// FE-008 — hydration validation (TC-AUTH-06). With synchronous storage the
-// persisted state is already merged by the time create() returns, so an
-// expired or malformed token can be rejected immediately: the session is
-// wiped and the store starts unauthenticated.
+// FE-008 — decide whether the hydrated session is ready, needs refresh
+// recovery, or must be cleared. Keep expired sessions with a refresh token so
+// the auth-session bootstrap can rotate them instead of logging out locally.
 if (typeof window !== 'undefined') {
-  const { token } = useAuthStore.getState();
-  if (token && !isTokenValid(token)) {
-    useAuthStore.setState(LOGGED_OUT_STATE);
-    clearAuthStorage();
+  const { token, refreshToken } = useAuthStore.getState();
+  if (!token) {
+    useAuthStore.setState({ isHydrated: true, authInit: 'ready' });
+  } else if (!isTokenValid(token)) {
+    if (refreshToken) {
+      useAuthStore.setState({ isHydrated: true, isAuthenticated: true, authInit: 'recovering' });
+    } else {
+      useAuthStore.getState().clearAuth();
+    }
+  } else {
+    useAuthStore.setState({ isHydrated: true, authInit: 'ready' });
   }
-  // Mark as hydrated after rehydration completes.
-  useAuthStore.setState({ isHydrated: true });
 }
 
 /** للاستخدام خارج الـ React (مثل الـ API interceptor) — يقرأ من الـ store أو من الـ auth blob المحفوظ */
@@ -285,6 +325,12 @@ export function getStoredAuth(): { token: string; refreshToken: string } {
     // ignore
   }
   return { token: '', refreshToken: '' };
+}
+
+/** Reads the current refresh token from the store, with persisted storage fallback. */
+export function getRefreshToken(): string {
+  const fromStore = useAuthStore.getState().refreshToken;
+  return fromStore || getStoredAuth().refreshToken;
 }
 
 /** FE-027 — cross-tab auth events broadcast over a shared channel. */

@@ -129,8 +129,8 @@ describe('logout (FE-008)', () => {
     expect(useAuthStore.getState().token).toBe('');
     expect(window.localStorage.getItem('auth-storage')).toBeNull();
     expect(window.sessionStorage.getItem('auth-storage')).toBeNull();
-    expect(window.localStorage.getItem('registrationEmail')).toBeNull();
-    // Unrelated preferences survive (AC: theme survives logout).
+    expect(window.localStorage.getItem('registrationEmail')).toBe('someone@example.com');
+    // Pre-auth form data and unrelated preferences are not auth-session state.
     expect(window.localStorage.getItem('theme')).toBe('dark');
   });
 

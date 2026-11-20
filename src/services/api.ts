@@ -37,6 +37,8 @@ const PUBLIC_AUTH_PATHS = [
 function isPublicAuthRequest(url: string | undefined): boolean {
   if (!url) return false;
   const path = url.replace(API_BASE_URL, '').split('?')[0].replace(/^\//, '');
+  // Logout-all is an authenticated operation, unlike login/logout/refresh.
+  if (path === 'login-api/logout-all') return false;
   return PUBLIC_AUTH_PATHS.some((p) => path === p || path.startsWith(p + '/'));
 }
 

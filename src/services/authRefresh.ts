@@ -23,6 +23,8 @@ import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
 const REFRESH_ENDPOINT = `${API_BASE_URL}/login-api/refresh`;
 const REFRESH_LOCK = 'edunest_auth_refresh_lock';
+/** Refresh can take longer than ordinary API calls, but must remain bounded. */
+const REFRESH_TIMEOUT_MS = 30_000;
 
 /** In-flight refresh promise — guarantees ONE refresh per tab regardless of how many 401s race. */
 let refreshPromise: Promise<string> | null = null;
@@ -65,7 +67,7 @@ async function executeRefresh(observedRefreshToken: string): Promise<string> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken: currentRefreshToken }),
-    });
+    }, REFRESH_TIMEOUT_MS);
   } catch (error) {
     // AMBIGUOUS FAILURE (Handbook §3 CRITICAL): the request may have reached
     // the backend and rotated the token before the connection dropped. The old
