@@ -18,10 +18,10 @@ import { ApiValidationError, parseApiError } from '../errors';
 import { showApiError } from '../../utils/showApiError';
 
 /** Fabricates an axios-like rejection without any real network. */
-function axiosError(status: number | undefined, data: unknown, code = 'ERR_BAD_REQUEST') {
+function axiosError(status: number | undefined, data: unknown, code = 'ERR_BAD_REQUEST', headers?: unknown) {
   return Object.assign(new Error('Request failed with status code'), {
     code,
-    response: status === undefined ? undefined : { status, data },
+    response: status === undefined ? undefined : { status, data, headers },
     config: {},
   });
 }
@@ -35,6 +35,36 @@ afterEach(() => {
 });
 
 describe('parseApiError — unified envelope (EB-12, verified live)', () => {
+  it.each([
+    ['ERR_RATE_LIMITED', 60],
+    ['ERR_ACCOUNT_LOCKED', 300],
+  ])('uses the %s fallback when Retry-After is absent', (errorCode, fallback) => {
+    const parsed = parseApiError(axiosError(429, {
+      errorCode,
+      error: 'Too Many Requests',
+      message: 'Wait before retrying.',
+    }));
+    expect(parsed).toMatchObject({ errorCode, status: 429, retryAfterSeconds: fallback, error: 'Too Many Requests' });
+  });
+
+  it.each(['30', 0, '0'])('accepts valid Retry-After seconds: %s', (header) => {
+    const parsed = parseApiError(axiosError(429, { errorCode: 'ERR_RATE_LIMITED', message: 'Wait.' }, 'ERR_BAD_REQUEST', { 'retry-after': header }));
+    expect(parsed.retryAfterSeconds).toBe(Number(header));
+  });
+
+  it.each(['', '-1', '1.5', 'Wed, 21 Oct 2030 07:28:00 GMT', '3s', Number.NaN])(
+    'uses code-specific fallback for invalid Retry-After: %s',
+    (header) => {
+      const parsed = parseApiError(axiosError(429, { errorCode: 'ERR_ACCOUNT_LOCKED', message: 'Wait.' }, 'ERR_BAD_REQUEST', { 'Retry-After': header }));
+      expect(parsed.retryAfterSeconds).toBe(300);
+    },
+  );
+
+  it('does not add retry metadata to non-429 errors', () => {
+    const parsed = parseApiError(axiosError(403, { errorCode: 'ERR_ACCOUNT_LOCKED', message: 'Denied.' }, 'ERR_BAD_REQUEST', { 'Retry-After': '7' }));
+    expect(parsed.retryAfterSeconds).toBeUndefined();
+  });
+
   it('parses a full 403 ERR_FORBIDDEN envelope', () => {
     const parsed = parseApiError(
       axiosError(403, {

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useRestoreForm } from "../../hooks/useRestoreForm";
+import { formatCooldownMessage } from '../../utils/authCooldown';
 
 const RestoreAccount: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const RestoreAccount: React.FC = () => {
     formData,
     errors,
     loading,
+    cooldown,
+    cooldownErrorCode,
     handleInputChange,
     sendOtpHandler,
   } = useRestoreForm();
@@ -22,7 +25,9 @@ const RestoreAccount: React.FC = () => {
   }, [handleInputChange]);
 
   const handleSendOtp = async () => {
-    await sendOtpHandler();
+    if (cooldown.isActive || loading) return;
+    const sent = await sendOtpHandler();
+    if (!sent) return;
     // toast.success("OTP sent to your email. Check your inbox!");
     // After OTP is sent, navigate to the confirm restore page
     const emailToPass = formData.email || localStorage.getItem("restoreEmail") || "";
@@ -76,16 +81,21 @@ const RestoreAccount: React.FC = () => {
                 : "border-gray-300 focus:ring-primary"
               }`}
           />
-          {errors.email && (
+        {errors.email && (
             <p className="text-red-600 text-xs mt-1">{errors.email}</p>
-          )}
+        )}
+        {cooldown.isActive && (
+          <p role="status" className="text-sm text-red-700">
+            {formatCooldownMessage(cooldownErrorCode, cooldown.remainingSeconds)}
+          </p>
+        )}
         </div>
 
         {/* Submit Button */}
         <button
           type="button"
           onClick={handleSendOtp}
-          disabled={loading}
+          disabled={loading || cooldown.isActive}
           className="flex items-center justify-center w-full h-[55px] rounded-xl gap-2 px-12
             bg-[linear-gradient(90deg,rgba(21,77,113,1)_18%,rgba(51,161,224,1)_100%)]
             text-white font-semibold transition-all duration-200 hover:scale-[1.02]

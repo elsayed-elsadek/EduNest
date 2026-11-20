@@ -9,6 +9,8 @@ import {
   extractBackendMessage,
 } from "../../services/authService";
 import logger from '../../utils/logger';
+import { useCooldown } from '../../hooks/useCooldown';
+import { formatCooldownMessage, startCooldownFromError } from '../../utils/authCooldown';
 
 
 const CheckEmail: React.FC = () => {
@@ -22,6 +24,9 @@ const CheckEmail: React.FC = () => {
   const [timerActive, setTimerActive] = useState(true);
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const cooldown = useCooldown();
+  const [cooldownErrorCode, setCooldownErrorCode] = useState('ERR_RATE_LIMITED');
+  const [hasCooldown, setHasCooldown] = useState(false);
 
   const isComplete = code.every((c) => c !== "");
   const timerDisplay = `00:${timer.toString().padStart(2, "0")}`;
@@ -75,7 +80,7 @@ const CheckEmail: React.FC = () => {
   };
 
   const handleConfirm = async () => {
-    if (!email || !isComplete) return;
+    if (!email || !isComplete || cooldown.isActive || loading) return;
 
     setLoading(true);
     setErrorMessage("");
@@ -95,12 +100,19 @@ const CheckEmail: React.FC = () => {
       // الانتقال إلى صفحة تغيير الباسورد — token يمر عبر state فقط
       navigate("/reset-password", { state: { email, resetToken, capturedAt: Date.now() } });
     } catch (error: unknown) {
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        setHasCooldown(true);
+      }
       const backendMessage = extractBackendMessage(
         error,
         "Something went wrong while verifying the code."
       );
 
-      setErrorMessage(backendMessage);
+      setErrorMessage(normalized.status === 429 && normalized.retryAfterSeconds !== undefined
+        ? formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds)
+        : normalized.message || backendMessage);
       // Log the message only — never the raw error (its request body holds the OTP).
       logger.error("Verify OTP error:", backendMessage);
     } finally {
@@ -109,7 +121,7 @@ const CheckEmail: React.FC = () => {
   };
 
   const handleResendAndResetTimer = async () => {
-    if (!email || timerActive) return;
+    if (!email || (!hasCooldown && timerActive) || cooldown.isActive || loading) return;
 
     setTimer(60);
     setTimerActive(true);
@@ -119,14 +131,22 @@ const CheckEmail: React.FC = () => {
 
     try {
       await forgetPassword(email);
+      setHasCooldown(false);
       setSuccessMessage("A new code has been sent to your email.");
     } catch (error: unknown) {
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        setHasCooldown(true);
+      }
       const backendMessage = extractBackendMessage(
         error,
         "Something went wrong while resending the code."
       );
 
-      setErrorMessage(backendMessage);
+      setErrorMessage(normalized.status === 429 && normalized.retryAfterSeconds !== undefined
+        ? formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds)
+        : normalized.message || backendMessage);
       logger.error("Resend code error:", backendMessage);
     }
   };
@@ -161,26 +181,26 @@ const CheckEmail: React.FC = () => {
         </div>
 
         {/* Timer */}
-        <div className="text-black text-base font-medium">
-          {timerDisplay}
+        <div className="text-black text-base font-medium" role={cooldown.isActive ? 'status' : undefined}>
+          {cooldown.isActive ? formatCooldownMessage(cooldownErrorCode, cooldown.remainingSeconds) : timerDisplay}
         </div>
 
         {/* Confirm Button */}
         <ConfirmButton
           loading={loading}
           onClick={handleConfirm}
-          disabled={!isComplete}
+          disabled={!isComplete || cooldown.isActive}
         />
 
         {/* Resend Link */}
-        <ResendLink onClick={handleResendAndResetTimer} disabled={timerActive} timer={timer} />
+        <ResendLink onClick={handleResendAndResetTimer} disabled={(!hasCooldown && timerActive) || cooldown.isActive} timer={cooldown.isActive ? cooldown.remainingSeconds : timer} />
 
         {/* Success Message */}
         {successMessage && (
           <p className="text-green-600 mt-2">{successMessage}</p>
         )}
         {/* Error Message */}
-        {errorMessage && (
+        {errorMessage && !cooldown.isActive && (
           <p className="text-red-600 mt-2">{errorMessage}</p>
         )}
       </div>

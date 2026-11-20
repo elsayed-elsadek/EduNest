@@ -3,12 +3,17 @@ import { verifyOtp, sendOtp } from "../services/authService";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../store/authStore";
 import { getFirstNameFromToken } from "../utils/jwt";
+import { useCooldown } from './useCooldown';
+import { getCooldownMessage, startCooldownFromError } from '../utils/authCooldown';
 
 export const useVerifyForm = () => {
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [cooldownErrorCode, setCooldownErrorCode] = useState('ERR_RATE_LIMITED');
+  const [hasCooldown, setHasCooldown] = useState(false);
+  const cooldown = useCooldown();
 
   // Get email from localStorage
   const email = localStorage.getItem("registrationEmail") || "";
@@ -22,6 +27,7 @@ export const useVerifyForm = () => {
   const isComplete = code.every((c) => c !== "");
 
   const handleSubmit = async () => {
+    if (cooldown.isActive || loading) return false;
     if (!isComplete || !email) {
       toast.error("Please enter the complete code");
       return;
@@ -58,29 +64,46 @@ export const useVerifyForm = () => {
 
       return response;
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage = err.response?.data?.message || "Invalid verification code";
-      toast.error(errorMessage);
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        setHasCooldown(true);
+      }
+      const message = normalized.status === 429 && normalized.retryAfterSeconds !== undefined
+        ? getCooldownMessage(normalized, normalized.retryAfterSeconds)
+        : normalized.message || "Invalid verification code";
+      toast.error(message);
       setSuccessMessage("");
-      setErrorMessage(errorMessage); // set error message here
+      setErrorMessage(message);
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = async () => {
+  const handleResend = async (): Promise<boolean> => {
+    if (cooldown.isActive) return false;
     if (!email) {
       toast.error("Email not found");
-      return;
+      return false;
     }
 
     try {
       await sendOtp(email);
       toast.success("Verification code resent to your email!");
+      return true;
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage = err.response?.data?.message || "Failed to resend code";
-      toast.error(errorMessage);
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        setHasCooldown(true);
+      }
+      const message = normalized.status === 429 && normalized.retryAfterSeconds !== undefined
+        ? getCooldownMessage(normalized, normalized.retryAfterSeconds)
+        : normalized.message || "Failed to resend code";
+      toast.error(message);
+      setErrorMessage(message);
+      return false;
     }
   };
 
@@ -93,5 +116,10 @@ export const useVerifyForm = () => {
     handleSubmit,
     handleResend,
     isComplete,
+    cooldown,
+    cooldownErrorCode,
+    setCooldownErrorCode,
+    hasCooldown,
+    setHasCooldown,
   };
 };

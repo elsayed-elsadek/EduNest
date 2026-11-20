@@ -42,6 +42,8 @@ export const KNOWN_ERROR_CODES = [
   'ERR_ALREADY_VERIFIED',
   'ERR_CONSTRAINT_VIOLATION',
   'ERR_INTERNAL_SYSTEM',
+  'ERR_RATE_LIMITED',
+  'ERR_ACCOUNT_LOCKED',
   // Locally-generated codes (never from the backend envelope)
   'ERR_NETWORK',
   'ERR_UNKNOWN',
@@ -62,6 +64,10 @@ export interface NormalizedApiError {
   message: string;
   /** HTTP status, or 0 when no response arrived (network drop / timeout). */
   status: number;
+  /** Backend's envelope `error` label, when supplied. */
+  error?: string;
+  /** Retry-After delta-seconds or the code-specific fallback for auth 429s. */
+  retryAfterSeconds?: number;
   /** Field-level validation errors (400 ERR_VALIDATION); empty otherwise. */
   fields: Record<string, string>;
   /** Correlation id — present only on 500 responses. */
@@ -93,9 +99,34 @@ function genericMessageFor(status: number): string {
 
 /** Axios error shape, typed defensively — the parser must never assume. */
 interface AxiosLikeError {
-  response?: { status?: number; data?: unknown };
+  response?: { status?: number; data?: unknown; headers?: unknown };
   code?: string;
   message?: string;
+}
+
+function getRetryAfterSeconds(headers: unknown): number | undefined {
+  if (!headers || typeof headers !== 'object') return undefined;
+  let value: unknown;
+  const headerBag = headers as { get?: (name: string) => unknown; [key: string]: unknown };
+  if (typeof headerBag.get === 'function') value = headerBag.get('Retry-After');
+  if (value === undefined) {
+    const key = Object.keys(headerBag).find((candidate) => candidate.toLowerCase() === 'retry-after');
+    if (key) value = headerBag[key];
+  }
+  if (Array.isArray(value)) value = value[0];
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) return value;
+  if (typeof value === 'string' && /^\d+$/.test(value.trim())) {
+    const seconds = Number(value.trim());
+    if (Number.isSafeInteger(seconds)) return seconds;
+  }
+  return undefined;
+}
+
+function getRateLimitSeconds(errorCode: string, headers: unknown): number | undefined {
+  if (errorCode !== 'ERR_RATE_LIMITED' && errorCode !== 'ERR_ACCOUNT_LOCKED') return undefined;
+  const parsed = getRetryAfterSeconds(headers);
+  if (parsed !== undefined) return parsed;
+  return errorCode === 'ERR_RATE_LIMITED' ? 60 : 300;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -182,7 +213,19 @@ export function parseApiError(error: unknown): NormalizedApiError {
       // showApiError additionally renders it for 5xx contexts only.
       const refId =
         status >= 500 && typeof data.refId === 'string' && data.refId ? data.refId : undefined;
-      return { errorCode: data.errorCode, known, message, status, fields, refId };
+      const envelopeError = typeof data.error === 'string' ? data.error : undefined;
+      return {
+        errorCode: data.errorCode,
+        known,
+        message,
+        status,
+        fields,
+        refId,
+        error: envelopeError,
+        retryAfterSeconds: status === 429
+          ? getRateLimitSeconds(data.errorCode, axiosError.response?.headers)
+          : undefined,
+      };
     }
 
     // ── 2. Legacy shapes (pre-EB-12 dialects still seen in the wild) ────────

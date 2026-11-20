@@ -4,6 +4,8 @@ import { sendRestoreOtp, confirmRestore } from '../services/authService';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { showApiError } from '../utils/showApiError';
+import { useCooldown } from './useCooldown';
+import { formatCooldownMessage, startCooldownFromError } from '../utils/authCooldown';
 
 interface RestoreFormData {
   email: string;
@@ -22,6 +24,8 @@ export const useRestoreForm = () => {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [restoreEmail, setRestoreEmail] = useState('');
+  const cooldown = useCooldown();
+  const [cooldownErrorCode, setCooldownErrorCode] = useState('ERR_RATE_LIMITED');
 
   // ✅ Validate Email
   const validateEmail = (): boolean => {
@@ -60,7 +64,8 @@ export const useRestoreForm = () => {
 
   //  Send OTP
   const sendOtpHandler = async () => {
-    if (!validateEmail()) return;
+    if (cooldown.isActive || loading) return false;
+    if (!validateEmail()) return false;
 
     setLoading(true);
     try {
@@ -73,10 +78,18 @@ export const useRestoreForm = () => {
       localStorage.setItem('restoreEmail', formData.email);
 
       setStep('otp');
+      return true;
     } catch (error) {
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        toast.error(formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds ?? 60));
+        return false;
+      }
       // EF-2: unified envelope message (clean, with refId on 5xx) instead of
       // ad-hoc body probing.
       showApiError(error);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -84,6 +97,7 @@ export const useRestoreForm = () => {
 
   //  Confirm OTP
   const confirmHandler = async () => {
+    if (cooldown.isActive || loading) return;
     if (!validateOtp()) return;
 
     if (!restoreEmail) {
@@ -100,10 +114,14 @@ export const useRestoreForm = () => {
       localStorage.removeItem('restoreEmail');
       navigate('/login');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const msg =
-        error.response?.data?.message || 'Invalid or expired OTP';
-      toast.error(msg);
+    } catch (error: unknown) {
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        toast.error(formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds ?? 60));
+      } else {
+        toast.error(normalized.message || 'Invalid or expired OTP');
+      }
     } finally {
       setLoading(false);
     }
@@ -111,6 +129,7 @@ export const useRestoreForm = () => {
 
   //  Resend OTP
   const resendOtp = async () => {
+    if (cooldown.isActive || loading) return;
     if (!restoreEmail) return;
 
     setLoading(true);
@@ -118,10 +137,14 @@ export const useRestoreForm = () => {
       await sendRestoreOtp(restoreEmail);
       toast.success('OTP resent successfully');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || 'Failed to resend OTP'
-      );
+    } catch (error: unknown) {
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        toast.error(formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds ?? 60));
+      } else {
+        toast.error(normalized.message || 'Failed to resend OTP');
+      }
     } finally {
       setLoading(false);
     }
@@ -137,6 +160,8 @@ export const useRestoreForm = () => {
     formData,
     errors,
     loading,
+    cooldown,
+    cooldownErrorCode,
     step,
     restoreEmail,
     handleInputChange,
