@@ -313,7 +313,7 @@ describe('useLogin submit', () => {
     expect(result.current.loading).toBe(false);
   });
 
-  it('redirects a deleted account to the restore page', async () => {
+  it('does not infer account deletion from response message text', async () => {
     loginUserMock.mockRejectedValue({
       response: { data: { errorMessages: { error: 'Account is deleted' } } },
     });
@@ -324,11 +324,12 @@ describe('useLogin submit', () => {
       await submit(result);
     });
 
-    expect(window.localStorage.getItem('restoreEmail')).toBe('sara@example.com');
-    expect(navigateMock).toHaveBeenCalledWith('/restore-account');
+    expect(window.localStorage.getItem('restoreEmail')).toBeNull();
+    expect(navigateMock).not.toHaveBeenCalled();
+    expect(result.current.authError).toBe('Account is deleted');
   });
 
-  it('requests a fresh OTP for an unverified account', async () => {
+  it('does not infer verification status or issue OTP from response message text', async () => {
     loginUserMock.mockRejectedValue({
       response: { data: { message: 'Email not verified, please request a new OTP' } },
     });
@@ -340,12 +341,13 @@ describe('useLogin submit', () => {
       await submit(result);
     });
 
-    expect(sendOtpMock).toHaveBeenCalledWith('sara@example.com');
-    expect(window.localStorage.getItem('registrationEmail')).toBe('sara@example.com');
-    expect(navigateMock).toHaveBeenCalledWith('/verify');
+    expect(sendOtpMock).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem('registrationEmail')).toBeNull();
+    expect(navigateMock).not.toHaveBeenCalled();
+    expect(result.current.authError).toBe('Email not verified, please request a new OTP');
   });
 
-  it('shows an error when the OTP resend fails', async () => {
+  it('shows a login error without probing verification or attempting an OTP resend', async () => {
     loginUserMock.mockRejectedValue({
       response: { data: { message: 'unverified account' } },
     });
@@ -357,8 +359,34 @@ describe('useLogin submit', () => {
       await submit(result);
     });
 
-    expect(toastMock.error).toHaveBeenCalledWith('Failed to send the code. Please try again.');
+    expect(sendOtpMock).not.toHaveBeenCalled();
+    expect(result.current.authError).toBe('unverified account');
     expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it('shows the exact generic message for ERR_INVALID_CREDENTIALS', async () => {
+    loginUserMock.mockRejectedValue({
+      response: { status: 401, data: { errorCode: 'ERR_INVALID_CREDENTIALS', message: 'Account is deleted' } },
+    });
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+
+    await act(async () => { await submit(result); });
+
+    expect(result.current.authError).toBe('Invalid email or password.');
+    expect(navigateMock).not.toHaveBeenCalled();
+    expect(sendOtpMock).not.toHaveBeenCalled();
+  });
+
+  it('blocks both button-driven and direct submissions during a login cooldown', async () => {
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+    act(() => result.current.cooldown.start(5));
+
+    await act(async () => { await submit(result); });
+
+    expect(result.current.cooldown.isActive).toBe(true);
+    expect(loginUserMock).not.toHaveBeenCalled();
   });
 
   it('surfaces the backend error message for any other failure', async () => {
@@ -372,7 +400,7 @@ describe('useLogin submit', () => {
       await submit(result);
     });
 
-    expect(toastMock.error).toHaveBeenCalledWith('Server down');
+    expect(result.current.authError).toBe('Server down');
     expect(navigateMock).not.toHaveBeenCalled();
   });
 });

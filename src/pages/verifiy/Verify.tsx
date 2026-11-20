@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CodeInput } from "../../components/verify-com/CodeInput";
 import { ConfirmButton } from "../../components/verify-com/ConfirmButton";
 import { ResendLink } from "../../components/verify-com/ResendLink";
@@ -7,9 +7,11 @@ import { useVerifyForm } from "../../hooks/useVerifyForm";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { formatCooldownMessage } from '../../utils/authCooldown';
 
 export const Verify: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState<string>("");
   const [timer, setTimer] = useState<number>(120);
   const [timerActive, setTimerActive] = useState(true);
@@ -23,7 +25,21 @@ export const Verify: React.FC = () => {
     handleSubmit,
     handleResend,
     isComplete,
+    cooldown,
+    cooldownErrorCode,
+    setCooldownErrorCode,
+    hasCooldown,
+    setHasCooldown,
   } = useVerifyForm();
+
+  useEffect(() => {
+    const state = location.state as { cooldownSeconds?: number; cooldownErrorCode?: string } | null;
+    if (typeof state?.cooldownSeconds === 'number') {
+      cooldown.start(state.cooldownSeconds);
+      if (state.cooldownErrorCode) setCooldownErrorCode(state.cooldownErrorCode);
+      setHasCooldown(true);
+    }
+  }, [location.state, cooldown.start, setCooldownErrorCode, setHasCooldown]);
 
   useEffect(() => {
     // Get email from localStorage (يبقى محفوظ حتى بعد الـ refresh)
@@ -51,6 +67,7 @@ export const Verify: React.FC = () => {
   }, [timerActive, timer]);
 
   const handleConfirm = async () => {
+    if (cooldown.isActive) return;
     const response = await handleSubmit();
     if (response) {
       setTimeout(() => {
@@ -61,9 +78,13 @@ export const Verify: React.FC = () => {
 
   // New resend handler: resets timer
   const handleResendAndResetTimer = async () => {
-    await handleResend();
-    setTimer(120);
-    setTimerActive(true);
+    if ((!hasCooldown && timerActive) || cooldown.isActive) return;
+    const sent = await handleResend();
+    if (sent) {
+      setHasCooldown(false);
+      setTimer(120);
+      setTimerActive(true);
+    }
   };
 
   // Helper for timer format
@@ -97,26 +118,26 @@ export const Verify: React.FC = () => {
         </div>
 
         {/* Timer */}
-        <div className="text-black text-base font-medium">
-          {timerDisplay}
+        <div className="text-black text-base font-medium" role={cooldown.isActive ? 'status' : undefined}>
+          {cooldown.isActive ? formatCooldownMessage(cooldownErrorCode, cooldown.remainingSeconds) : timerDisplay}
         </div>
 
         {/* Confirm Button */}
         <ConfirmButton
           loading={loading}
           onClick={handleConfirm}
-          disabled={!isComplete}
+          disabled={!isComplete || cooldown.isActive}
         />
 
         {/* Resend Link */}
-        <ResendLink onClick={handleResendAndResetTimer} disabled={timerActive} timer={timer} />
+        <ResendLink onClick={handleResendAndResetTimer} disabled={(!hasCooldown && timerActive) || cooldown.isActive} timer={cooldown.isActive ? cooldown.remainingSeconds : timer} />
 
         {/* Success Message */}
         {successMessage && (
           <p className="text-green-600 mt-2">{successMessage}</p>
         )}
         {/* Error Message */}
-        {errorMessage && (
+        {errorMessage && !cooldown.isActive && (
           <p className="text-red-600 mt-2">{errorMessage}</p>
         )}
       </div>

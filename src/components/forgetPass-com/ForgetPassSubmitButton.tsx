@@ -2,13 +2,14 @@ import React from "react";
 
 interface Props {
   loading: boolean;
+  disabled?: boolean;
 }
 
-export const ForgetPassSubmitButton: React.FC<Props> = ({ loading }) => {
+export const ForgetPassSubmitButton: React.FC<Props> = ({ loading, disabled = false }) => {
   return (
     <button
       type="submit"
-      disabled={loading}
+      disabled={loading || disabled}
       className={`
         flex items-center justify-center
         w-full

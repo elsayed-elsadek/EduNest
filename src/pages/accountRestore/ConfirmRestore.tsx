@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { confirmRestore, sendRestoreOtp } from "../../services/authService";
 import toast from "react-hot-toast";
+import { useCooldown } from '../../hooks/useCooldown';
+import { formatCooldownMessage, startCooldownFromError } from '../../utils/authCooldown';
 
 const ConfirmRestore: React.FC = () => {
   const location = useLocation();
@@ -15,6 +17,9 @@ const ConfirmRestore: React.FC = () => {
   const [timer, setTimer] = useState(60);
   const [timerActive, setTimerActive] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const cooldown = useCooldown();
+  const [cooldownErrorCode, setCooldownErrorCode] = useState('ERR_RATE_LIMITED');
+  const [hasCooldown, setHasCooldown] = useState(false);
 
   const isComplete = code.every((c) => c !== "");
   const timerDisplay = `00:${timer.toString().padStart(2, "0")}`;
@@ -71,7 +76,7 @@ const ConfirmRestore: React.FC = () => {
   };
 
   const handleConfirm = async () => {
-    if (!email || !isComplete) return;
+    if (!email || !isComplete || cooldown.isActive || loading) return;
 
     setLoading(true);
     setErrorMessage("");
@@ -84,12 +89,14 @@ const ConfirmRestore: React.FC = () => {
       toast.success("Account restored successfully! You can now log in.");
       navigate("/login");
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string; errorMessages?: { error?: string } } }; message?: string };
-      const msg =
-        err?.response?.data?.errorMessages?.error ||
-        err?.response?.data?.message ||
-        err?.message ||
-        "Invalid or expired OTP. Please try again.";
+      const normalized = startCooldownFromError(error, cooldown.start);
+      const msg = normalized.status === 429 && normalized.retryAfterSeconds !== undefined
+        ? formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds)
+        : normalized.message || "Invalid or expired OTP. Please try again.";
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        setHasCooldown(true);
+      }
       setErrorMessage(msg);
     } finally {
       setLoading(false);
@@ -97,7 +104,7 @@ const ConfirmRestore: React.FC = () => {
   };
 
   const handleResend = async () => {
-    if (!email || timerActive) return;
+    if (!email || (!hasCooldown && timerActive) || cooldown.isActive || loading) return;
 
     setTimer(60);
     setTimerActive(true);
@@ -106,13 +113,17 @@ const ConfirmRestore: React.FC = () => {
 
     try {
       await sendRestoreOtp(email);
+      setHasCooldown(false);
       toast.success("A new restore code has been sent to your email.");
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } }; message?: string };
-      const msg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to resend code. Please try again.";
+      const normalized = startCooldownFromError(error, cooldown.start);
+      const msg = normalized.status === 429 && normalized.retryAfterSeconds !== undefined
+        ? formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds)
+        : normalized.message || "Failed to resend code. Please try again.";
+      if (normalized.status === 429) {
+        setCooldownErrorCode(normalized.errorCode);
+        setHasCooldown(true);
+      }
       setErrorMessage(msg);
     }
   };
@@ -177,7 +188,7 @@ const ConfirmRestore: React.FC = () => {
         </p>
 
         {/* Error Message */}
-        {errorMessage && (
+        {errorMessage && !cooldown.isActive && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-sm text-red-600 w-full max-w-xs">
             <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -185,12 +196,17 @@ const ConfirmRestore: React.FC = () => {
             {errorMessage}
           </div>
         )}
+        {cooldown.isActive && (
+          <p role="status" className="text-sm text-red-700">
+            {formatCooldownMessage(cooldownErrorCode, cooldown.remainingSeconds)}
+          </p>
+        )}
 
         {/* Confirm Button */}
         <button
           type="button"
           onClick={handleConfirm}
-          disabled={!isComplete || loading}
+          disabled={!isComplete || loading || cooldown.isActive}
           className="w-full max-w-xs h-[50px] rounded-xl
             bg-[linear-gradient(90deg,rgba(21,77,113,1)_18%,rgba(51,161,224,1)_100%)]
             text-white font-semibold text-sm flex items-center justify-center gap-2
@@ -214,12 +230,14 @@ const ConfirmRestore: React.FC = () => {
         <button
           type="button"
           onClick={handleResend}
-          disabled={timerActive}
+          disabled={(!hasCooldown && timerActive) || cooldown.isActive || loading}
           className="text-sm font-medium transition-colors
             disabled:text-gray-400 disabled:cursor-not-allowed
             enabled:text-blue-600 enabled:hover:underline"
         >
-          {timerActive
+          {cooldown.isActive
+            ? `Resend code in ${cooldown.remainingSeconds}s`
+            : timerActive && !hasCooldown
             ? `Resend code in ${timer}s`
             : "Resend restore code"}
         </button>

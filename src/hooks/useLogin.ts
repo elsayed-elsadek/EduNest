@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { LoginFormData, FormErrors } from "../types/auth";
-import { loginUser, sendOtp } from "../services/authService";
+import { loginUser } from "../services/authService";
 import { getStudentProfile } from "../services/student-roleService/Studentprofileservice";
 import { getAssetUrl } from "../config/env";
 import toast from "react-hot-toast";
@@ -9,6 +9,8 @@ import { useAuthStore } from "../store/authStore";
 import { getFirstNameFromToken, getFirstNameFromUser, getRoleFromToken, getUserFromToken, isTokenValid } from "../utils/jwt";
 import logger from "../utils/logger";
 import { getDashboardPath, getSafeRedirectPath } from "../routes/routeUtils";
+import { useCooldown } from './useCooldown';
+import { getCooldownMessage, startCooldownFromError } from '../utils/authCooldown';
 
 export const useLogin = () => {
 
@@ -23,10 +25,14 @@ export const useLogin = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [cooldownErrorCode, setCooldownErrorCode] = useState('ERR_RATE_LIMITED');
+  const cooldown = useCooldown();
 
   const handleInputChange = (field: keyof LoginFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+    setAuthError('');
   };
 
   const validate = (): boolean => {
@@ -41,8 +47,10 @@ export const useLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown.isActive || loading) return;
     if (!validate()) return;
 
+    setAuthError('');
     setLoading(true);
     try {
       const data = await loginUser(formData.email, formData.password);
@@ -130,52 +138,16 @@ export const useLogin = () => {
         toast.error(statusMessage || "Login failed. Please check your credentials.");
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      const errorData = error.response?.data;
-      const rawMsg = errorData?.errorMessages?.error 
-        || errorData?.errorMessages?.['Email Error']
-        || errorData?.message 
-        || (errorData?.errorMessages && Object.values(errorData.errorMessages)[0]);
-      const errorText = (typeof rawMsg === 'string' ? rawMsg : String(rawMsg || '')).toLowerCase();
-
-      // حساب محذوف (soft delete) → توجيه لصفحة استرجاع الحساب
-      const isDeletedAccount =
-        errorText.includes('deleted') ||
-        errorText.includes('account is deleted') ||
-        errorText.includes('account deleted');
-
-      if (isDeletedAccount) {
-        localStorage.setItem("restoreEmail", formData.email);
-        toast("Your account is deleted. Redirecting to account restore...", {
-          icon: "⚠️",
-          duration: 3000,
-        });
-        navigate("/restore-account");
-        return;
+    } catch (error: unknown) {
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.status === 429 && normalized.retryAfterSeconds !== undefined) {
+        setCooldownErrorCode(normalized.errorCode);
+        setAuthError(getCooldownMessage(normalized, normalized.retryAfterSeconds));
+      } else if (normalized.errorCode === 'ERR_INVALID_CREDENTIALS') {
+        setAuthError('Invalid email or password.');
+      } else {
+        setAuthError(normalized.message || 'Something went wrong. Please try again.');
       }
-
-      // حساب موجود لكن غير مفعّل → توجيه لصفحة OTP لإكمال التفعيل
-      const isUnverifiedAccount =
-        errorText.includes('not verified') ||
-        errorText.includes('unverified') ||
-        errorText.includes('request a new otp') ||
-        errorText.includes('request new otp');
-
-      if (isUnverifiedAccount) {
-        try {
-          localStorage.setItem("registrationEmail", formData.email);
-          await sendOtp(formData.email);
-          toast.success("A new verification code has been sent to your email. Complete verification to continue.");
-          navigate("/verify");
-        } catch (otpErr) {
-          logger.error("Failed to resend the verification code", otpErr);
-          toast.error("Failed to send the code. Please try again.");
-        }
-        return;
-      }
-
-      const backendMessage = rawMsg || "Something went wrong";
-      toast.error(backendMessage);
       logger.error("Login failed", error);
     } finally {
       setLoading(false);
@@ -186,6 +158,9 @@ export const useLogin = () => {
     formData,
     errors,
     loading,
+    authError,
+    cooldownErrorCode,
+    cooldown,
     showPassword,
     setShowPassword,
     handleInputChange,

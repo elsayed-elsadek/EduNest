@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useForgetPassForm } from "../../hooks/useForgetPassForm";
+import { formatCooldownMessage } from '../../utils/authCooldown';
 import {
   ForgetPassHeader,
   ForgetPassEmailInput,
@@ -24,7 +25,13 @@ const ForgetPass: React.FC = () => {
           error={form.errors.email}
         />
 
-        <ForgetPassSubmitButton loading={form.loading} />
+        {form.requestError && !form.cooldown.isActive && <p role="alert" className="text-sm text-red-700">{form.requestError}</p>}
+        {form.cooldown.isActive && (
+          <p role="status" className="text-sm text-red-700">
+            {formatCooldownMessage(form.cooldownErrorCode, form.cooldown.remainingSeconds)}
+          </p>
+        )}
+        <ForgetPassSubmitButton loading={form.loading} disabled={form.cooldown.isActive} />
 
         <div className="flex items-center justify-center gap-1 text-sm text-gray-600">
           <span>Remember your password?</span>

@@ -253,6 +253,25 @@ describe('api — request-driven refresh before access-token expiry (FE-008)', (
 });
 
 describe('api — unified error contract (EF-2)', () => {
+  it('preserves auth 429 normalization and Retry-After without retrying the request', async () => {
+    const state = stubAdapter(() => ({
+      status: 429,
+      data: { status: 429, error: 'Too Many Requests', errorCode: 'ERR_RATE_LIMITED', message: 'Slow down.' },
+      headers: { 'Retry-After': '47' },
+    }));
+
+    const rejection = await api.post('/login-api', { email: 'a@b.com' }).catch((error) => error);
+
+    expect(state.calls).toHaveLength(1);
+    expect(rejection.normalized).toMatchObject({
+      errorCode: 'ERR_RATE_LIMITED',
+      message: 'Slow down.',
+      status: 429,
+      error: 'Too Many Requests',
+      retryAfterSeconds: 47,
+    });
+  });
+
   it('a 401 ERR_UNAUTHENTICATED envelope on a protected path still triggers ONE refresh, no logout', async () => {
     const oldToken = makeToken({ sub: 'old' });
     const newToken = makeToken({ sub: 'new' });

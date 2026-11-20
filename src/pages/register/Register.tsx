@@ -14,14 +14,19 @@ import {
 } from "../../components/register-com";
 import { registerStudent, registerMentor, sendOtp } from "../../services/authService";
 import toast from "react-hot-toast";
+import { useCooldown } from '../../hooks/useCooldown';
+import { formatCooldownMessage, startCooldownFromError } from '../../utils/authCooldown';
 
 const Register: React.FC = () => {
   const form = useRegisterForm();
   const navigate = useNavigate();
+  const cooldown = useCooldown();
+  const [cooldownErrorCode, setCooldownErrorCode] = React.useState('ERR_RATE_LIMITED');
 
   // Handle form submission based on user type (student or mentor)
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown.isActive || form.loading) return;
     form.setLoading(true);
     form.clearErrors();
 
@@ -43,6 +48,7 @@ const Register: React.FC = () => {
       toast.success(res.message || 'Registration Successful');
       
       // Send OTP to email
+      let verificationCooldown: { seconds: number; errorCode: string } | undefined;
       try {
         // Store email and user type for verification page
         localStorage.setItem("registrationEmail", form.formData.email);
@@ -50,15 +56,28 @@ const Register: React.FC = () => {
         
         const otpRes = await sendOtp(form.formData.email) as { message?: string };
         toast.success(otpRes.message || 'OTP sent to your email');
-      } catch {
+      } catch (otpError) {
         // Continue to verify page even if OTP fails
+        const normalized = startCooldownFromError(otpError, (seconds) => {
+          verificationCooldown = { seconds, errorCode: 'ERR_RATE_LIMITED' };
+        });
+        if (normalized.status === 429 && normalized.retryAfterSeconds !== undefined) {
+          verificationCooldown = { seconds: normalized.retryAfterSeconds, errorCode: normalized.errorCode };
+        }
       }
       
-      navigate("/verify");
+      navigate("/verify", verificationCooldown ? { state: { cooldownSeconds: verificationCooldown.seconds, cooldownErrorCode: verificationCooldown.errorCode } } : undefined);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const errorStatus = err.response?.status;
       const errorData = err.response?.data;
+
+      const normalized = startCooldownFromError(err, cooldown.start);
+      if (normalized.status === 429 && normalized.retryAfterSeconds !== undefined) {
+        setCooldownErrorCode(normalized.errorCode);
+        form.setGeneralError(formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds));
+        return;
+      }
 
       // Extract error message from any potential source
       const rawMsg = errorData?.errorMessages?.['Email Error'] 
@@ -114,13 +133,18 @@ const Register: React.FC = () => {
         <FormHeader />
         
         {/* General Error Message */}
-        {form.errors.general && (
+        {form.errors.general && !cooldown.isActive && (
           <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3 flex items-baseline gap-2">
             <span className="text-red-600 font-semibold text-lg mt-0.5">⚠</span>
             <div className="flex-1">
               <p className="text-red-700 text-sm font-medium">{form.errors.general}</p>
             </div>
           </div>
+        )}
+        {cooldown.isActive && (
+          <p role="status" className="text-sm text-red-700">
+            {formatCooldownMessage(cooldownErrorCode, cooldown.remainingSeconds)}
+          </p>
         )}
         
         <JoinAsToggle joinAs={form.joinAs} setJoinAs={form.setJoinAs} />
@@ -245,7 +269,7 @@ const Register: React.FC = () => {
         <SubmitButton
           loading={form.loading}
           label="Register"
-          disabled={!form.agreeTerms}
+          disabled={!form.agreeTerms || cooldown.isActive}
         />
 
         {/* Already have an account */}

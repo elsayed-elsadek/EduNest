@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { BasicLayout } from "../../components/layout/BasicLayout";
 import { useLogin } from "../../hooks/useLogin";
 import { useAuthStore } from "../../store/authStore";
+import { formatCooldownMessage } from '../../utils/authCooldown';
 
 
 const Login: React.FC = () => {
@@ -11,6 +12,9 @@ const Login: React.FC = () => {
     formData,
     errors,
     loading,
+    authError,
+    cooldownErrorCode,
+    cooldown,
     showPassword,
     setShowPassword,
     handleInputChange,
@@ -50,6 +54,13 @@ const Login: React.FC = () => {
             className="w-full rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
           >
             Your session has expired. Please log in again to continue.
+          </div>
+        )}
+        {authError && (
+          <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {cooldown.isActive
+              ? formatCooldownMessage(cooldownErrorCode, cooldown.remainingSeconds)
+              : authError}
           </div>
         )}
 
@@ -132,7 +143,7 @@ const Login: React.FC = () => {
         {/* Submit Button with Original Gradient and Animation */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || cooldown.isActive}
           className="flex items-center justify-center w-full h-[55px] rounded-xl gap-2 px-12 bg-[linear-gradient(90deg,rgba(21,77,113,1)_18%,rgba(51,161,224,1)_100%)] text-white font-semibold transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
