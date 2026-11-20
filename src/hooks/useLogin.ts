@@ -4,34 +4,16 @@ import { loginUser, sendOtp } from "../services/authService";
 import { getStudentProfile } from "../services/student-roleService/Studentprofileservice";
 import { getAssetUrl } from "../config/env";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { getFirstNameFromToken, getFirstNameFromUser, getRoleFromToken, getUserFromToken, isTokenValid } from "../utils/jwt";
 import logger from "../utils/logger";
-
-/**
- * Determines the dashboard path based on user role
- * @param role The user role from JWT token
- * @returns The appropriate dashboard path
- */
-const getDashboardPath = (role: string): string => {
-  switch (role) {
-    case 'ROLE_MENTOR':
-      return '/mentor/dashboard';
-    case 'ROLE_STUDENT':
-      return '/student/dashboard';
-    case 'ROLE_ADMIN':
-      return '/admin/dashboard';
-    default:
-      // Default fallback for unknown roles
-      logger.warn('Unknown role - redirecting to mentor dashboard');
-      return '/mentor/dashboard';
-  }
-};
+import { getDashboardPath, getSafeRedirectPath } from "../routes/routeUtils";
 
 export const useLogin = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -133,9 +115,12 @@ export const useLogin = () => {
           useAuthStore.getState().setRememberMe('', false);
         }
 
-        // Role-based redirection
-        const redirectPath = getDashboardPath(userRole);
-        navigate(redirectPath);
+        // Return to a validated same-origin deep link after login; otherwise
+        // use the single canonical dashboard mapping for the authenticated role.
+        const from = (location.state as { from?: unknown } | null)?.from;
+        const redirectPath =
+          getSafeRedirectPath(from) ?? getDashboardPath(userRole) ?? '/unauthorized';
+        navigate(redirectPath, { replace: true });
 
       } else if (jwt) {
         // FE-008: never authenticate the session with a malformed or expired token.

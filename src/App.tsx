@@ -7,6 +7,7 @@ import './index.css';
 import { useAuthStore } from './store/authStore';
 import { isTokenValid } from './utils/jwt';
 import { ProtectedRoute } from './routes';
+import { getDashboardPath } from './routes/routeUtils';
 import { queryClient } from './lib/queryClient';
 import AdminDashboard from './pages/admin-pages/AdminDashboard/AdminDashboard';
 import AdminPayment from './pages/admin-pages/AdminPayment/AdminPayment';
@@ -23,6 +24,7 @@ const Home = lazy(() => import('./pages/Home'));
 const BecomeMentor = lazy(() => import('./pages/BecomeMentor'));
 const GetStarted = lazy(() => import('./pages/GetStarted'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const Unauthorized = lazy(() => import('./pages/Unauthorized'));
 const Login = lazy(() => import('./pages/Login/Login'));
 const Register = lazy(() => import('./pages/register/Register'));
 const Success = lazy(() => import('./pages/success-register/success'));
@@ -109,24 +111,6 @@ const PageLoader = () => (
   </div>
 );
 
-/**
- * Determines the dashboard path based on user role
- * @param role The user role
- * @returns The appropriate dashboard path
- */
-const getDashboardPath = (role: string): string => {
-  switch (role) {
-    case 'ROLE_MENTOR':
-      return '/mentor/dashboard';
-    case 'ROLE_STUDENT':
-      return '/student/dashboard';
-    case 'ROLE_ADMIN':
-      return '/admin/dashboard';
-    default:
-      return '/mentor/dashboard';
-  }
-};
-
 // Auth pages that hand an already-authenticated visitor to their dashboard (FE-008)
 const AUTH_PAGE_PATHS = [
   '/login',
@@ -146,21 +130,24 @@ const AUTH_PAGE_PATHS = [
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
   // FE-008: only hand already-authenticated users (valid token + remember me)
   // to their role dashboard when they open an auth page — never hijack public
   // pages on every load.
   useEffect(() => {
+    if (!isHydrated) return;
     const { token, rememberMe, lastEmail, userRole } = useAuthStore.getState();
+
     const onAuthPage = AUTH_PAGE_PATHS.some(
       (path) => location.pathname === path || location.pathname.startsWith(`${path}/`),
     );
 
     if (token && isTokenValid(token) && rememberMe && lastEmail && onAuthPage) {
       const dashboardPath = getDashboardPath(userRole);
-      navigate(dashboardPath, { replace: true });
+      navigate(dashboardPath ?? '/unauthorized', { replace: true });
     }
-  }, [location.pathname, navigate]);
+  }, [isHydrated, location.pathname, navigate]);
 
   // Only show navbar on home page
   const showNavbar = location.pathname === '/';
@@ -188,7 +175,6 @@ function App() {
             <Route path="leaderboard" element={<MentorshipLeaderboard />} />
           </Route>
           <Route path="/mentor-profile/:mentorEmail" element={<MentorProfilePage />} />
-          <Route path="*" element={<NotFound />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<Verify />} />
@@ -200,6 +186,7 @@ function App() {
           <Route path="/reset-success" element={<ResetSuccess />} />
           <Route path="/restore-account" element={<RestoreAccount />} />
           <Route path="/confirm-restore" element={<ConfirmRestore />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
           
           {/* Protected Mentor Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_MENTOR']} />}>
@@ -251,6 +238,9 @@ function App() {
 
             </Route>
           </Route>
+
+          {/* Fallback must stay last: every declared page has an explicit URL. */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
         </ErrorBoundary>
       </Suspense>

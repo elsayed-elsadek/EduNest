@@ -7,17 +7,25 @@ import { API_BASE_URL } from '../../config/env';
 import { loginUser, sendOtp } from '../../services/authService';
 import { getStudentProfile } from '../../services/student-roleService/Studentprofileservice';
 
-const { navigateMock, toastMock } = vi.hoisted(() => {
+const { navigateMock, locationMock, toastMock } = vi.hoisted(() => {
   const toast = Object.assign(vi.fn(), {
     success: vi.fn(),
     error: vi.fn(),
   });
-  return { navigateMock: vi.fn(), toastMock: toast };
+  return {
+    navigateMock: vi.fn(),
+    locationMock: { pathname: '/login', search: '', hash: '', state: null as unknown },
+    toastMock: toast,
+  };
 });
 
 vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router-dom')>();
-  return { ...actual, useNavigate: () => navigateMock };
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+    useLocation: () => locationMock,
+  };
 });
 
 vi.mock('react-hot-toast', () => ({ default: toastMock }));
@@ -80,6 +88,10 @@ beforeEach(() => {
     isHydrated: true,
   });
   vi.clearAllMocks();
+  locationMock.pathname = '/login';
+  locationMock.search = '';
+  locationMock.hash = '';
+  locationMock.state = null;
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 });
@@ -166,7 +178,7 @@ describe('useLogin submit', () => {
     expect(state.isAuthenticated).toBe(true);
     expect(state.userRole).toBe('ROLE_MENTOR');
     expect(state.userName).toBe('Sara Ali');
-    expect(navigateMock).toHaveBeenCalledWith('/mentor/dashboard');
+    expect(navigateMock).toHaveBeenCalledWith('/mentor/dashboard', { replace: true });
     expect(toastMock.success).toHaveBeenCalledWith('Welcome back');
     expect(result.current.loading).toBe(false);
   });
@@ -193,7 +205,7 @@ describe('useLogin submit', () => {
 
     const apiOrigin = new URL(API_BASE_URL).origin;
     expect(useAuthStore.getState().userAvatar).toBe(`${apiOrigin}/uploads/sara.png`);
-    expect(navigateMock).toHaveBeenCalledWith('/student/dashboard');
+    expect(navigateMock).toHaveBeenCalledWith('/student/dashboard', { replace: true });
   });
 
   it('still logs in when the optional profile image request fails', async () => {
@@ -211,7 +223,7 @@ describe('useLogin submit', () => {
     });
 
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
-    expect(navigateMock).toHaveBeenCalledWith('/student/dashboard');
+    expect(navigateMock).toHaveBeenCalledWith('/student/dashboard', { replace: true });
   });
 
   it('remembers the e-mail when "remember me" is checked', async () => {
@@ -232,7 +244,7 @@ describe('useLogin submit', () => {
     expect(useAuthStore.getState().lastEmail).toBe('sara@example.com');
   });
 
-  it('falls back to the mentor dashboard for an unknown role', async () => {
+  it('sends an unknown role to the unauthorized page', async () => {
     loginUserMock.mockResolvedValue({ apiResponse: { jwt: makeToken({ sub: '1' }) } });
     const { result } = renderHook(() => useLogin());
     fillCredentials(result);
@@ -241,7 +253,37 @@ describe('useLogin submit', () => {
       await submit(result);
     });
 
-    expect(navigateMock).toHaveBeenCalledWith('/mentor/dashboard');
+    expect(navigateMock).toHaveBeenCalledWith('/unauthorized', { replace: true });
+  });
+
+  it('returns to a safe internal deep link after a successful login', async () => {
+    locationMock.state = { from: { pathname: '/student/learning', search: '?page=2' } };
+    loginUserMock.mockResolvedValue({
+      apiResponse: { jwt: makeToken({ sub: '1', role: 'ROLE_STUDENT' }) },
+    });
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+
+    await act(async () => {
+      await submit(result);
+    });
+
+    expect(navigateMock).toHaveBeenCalledWith('/student/learning?page=2', { replace: true });
+  });
+
+  it('ignores an external post-login redirect and uses the role dashboard', async () => {
+    locationMock.state = { from: { pathname: '//evil.example/steal' } };
+    loginUserMock.mockResolvedValue({
+      apiResponse: { jwt: makeToken({ sub: '1', role: 'ROLE_STUDENT' }) },
+    });
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+
+    await act(async () => {
+      await submit(result);
+    });
+
+    expect(navigateMock).toHaveBeenCalledWith('/student/dashboard', { replace: true });
   });
 
   it('reports a failed login when the API returns no token', async () => {

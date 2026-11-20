@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { isTokenValid } from '../utils/jwt';
+import { getDashboardPath } from './routeUtils';
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
@@ -30,35 +31,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // FE-008: an expired or malformed token must be treated as unauthenticated —
   // land on /login with a "session expired" reason instead of rendering content.
   if (requireAuth && token && !isTokenValid(token)) {
-    return <Navigate to="/login?reason=expired" replace />;
+    return <Navigate to="/login?reason=expired" state={{ from: location }} replace />;
   }
 
   // Check role-based access
   if (allowedRoles && allowedRoles.length > 0) {
     if (!userRole || !allowedRoles.includes(userRole)) {
-      // Redirect to appropriate dashboard based on user role
-      const redirectPath = getDefaultDashboardPath(userRole);
+      // Client-side role checks are UX only; API authorization remains
+      // authoritative. Unknown or missing roles have no dashboard to redirect to.
+      const redirectPath = getDashboardPath(userRole) ?? '/unauthorized';
       return <Navigate to={redirectPath} replace />;
     }
   }
 
   return <Outlet />;
-};
-
-/**
- * Gets the default dashboard path for a user role
- */
-const getDefaultDashboardPath = (role: string): string => {
-  switch (role) {
-    case 'ROLE_MENTOR':
-      return '/mentor/dashboard';
-    case 'ROLE_STUDENT':
-      return '/student/dashboard';
-    case 'ROLE_ADMIN':
-      return '/admin/dashboard';
-    default:
-      return '/login';
-  }
 };
 
 export default ProtectedRoute;
