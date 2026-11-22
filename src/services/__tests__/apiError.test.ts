@@ -118,6 +118,20 @@ describe('parseApiError — unified envelope (EB-12, verified live)', () => {
     expect(parsed.fields).toEqual({ name: 'Name is required', email: 'Invalid email' });
   });
 
+  it.each([
+    ['comma-separated string', 'email, firstName'],
+    ['stringified array', JSON.stringify(['email', 'firstName'])],
+  ])('preserves ERR_UNKNOWN_FIELD diagnostics when allowedFields is a %s', (_label, allowedFields) => {
+    const parsed = parseApiError(axiosError(400, {
+      errorCode: 'ERR_UNKNOWN_FIELD',
+      message: 'Field is not allowed.',
+      fields: { invalidField: 'unexpected', allowedFields },
+    }));
+
+    expect(parsed.errorCode).toBe('ERR_UNKNOWN_FIELD');
+    expect(parsed.fields).toEqual({ invalidField: 'unexpected', allowedFields });
+  });
+
   it('ERR_VALIDATION without a fields object → empty fields, message intact, no crash', () => {
     const parsed = parseApiError(
       axiosError(400, {
@@ -312,6 +326,32 @@ describe('showApiError — presentation only', () => {
     toastMock.mockClear();
     showApiError(axiosError(400, { errorCode: 'ERR_VALIDATION', message: 'Bad input.', refId: 'x' }));
     expect(toastMock).toHaveBeenCalledWith('Bad input.');
+  });
+
+  it.each([
+    ['email, firstName', 'email, firstName'],
+    [JSON.stringify(['email', 'firstName']), 'email, firstName'],
+  ])('shows safe ERR_UNKNOWN_FIELD diagnostics for allowedFields=%s', (allowedFields, expectedAllowed) => {
+    showApiError(axiosError(400, {
+      errorCode: 'ERR_UNKNOWN_FIELD',
+      message: 'Backend detail that should not replace field diagnostics.',
+      fields: { invalidField: 'extraProperty', allowedFields },
+    }));
+    expect(toastMock).toHaveBeenCalledWith(
+      `Request contains an undeclared field: extraProperty. Allowed fields: ${expectedAllowed}.`,
+    );
+  });
+
+  it('does not expose values when showing unknown-field diagnostics', () => {
+    showApiError(axiosError(400, {
+      errorCode: 'ERR_UNKNOWN_FIELD',
+      fields: { invalidField: 'extraProperty', allowedFields: ['email', 'password'] },
+      submittedValue: 'secret-value',
+    }));
+    expect(toastMock).toHaveBeenCalledWith(
+      'Request contains an undeclared field: extraProperty. Allowed fields: email, password.',
+    );
+    expect(toastMock.mock.calls.flat().join(' ')).not.toContain('secret-value');
   });
 
   it('stays silent for canceled requests and session-expiry rejections (auth owns those)', () => {

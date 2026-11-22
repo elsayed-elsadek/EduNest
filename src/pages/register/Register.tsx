@@ -91,6 +91,21 @@ const Register: React.FC = () => {
         return;
       }
 
+      if (normalized.errorCode === 'ERR_VALIDATION') {
+        const registrationFields = new Set([
+          'firstName', 'lastName', 'email', 'phoneNumber', 'password', 'confirmPassword',
+          ...(form.joinAs === 'student' ? ['educationalLevel'] : []),
+        ]);
+        const fieldErrors = Object.fromEntries(
+          Object.entries(normalized.fields).filter(([field]) => registrationFields.has(field)),
+        );
+        if (Object.keys(fieldErrors).length > 0) {
+          form.setFieldErrors(fieldErrors);
+          toast.error(normalized.message);
+          return;
+        }
+      }
+
       // Extract error message from any potential source
       const rawMsg = errorData?.errorMessages?.['Email Error'] 
         || errorData?.message 

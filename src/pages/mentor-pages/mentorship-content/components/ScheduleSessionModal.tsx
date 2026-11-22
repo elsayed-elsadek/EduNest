@@ -6,7 +6,7 @@ import type { ContentItem } from '../types';
 import logger from '../../../../utils/logger';
 
 interface ScheduleSessionModalProps {
-  weekId: number | null;
+  weekId: string | null;
   editingItem?: ContentItem | null;
   onClose: () => void;
   onSuccess: (title: string, id?: number | string) => void;
@@ -55,7 +55,7 @@ const ScheduleSessionModal: FC<ScheduleSessionModalProps> = ({ weekId, editingIt
         await createLiveSession({
           title: title.trim(),
           date: date.toString(),
-          weekId: Number(weekId),
+           weekId,
           time: {
             hour: Number(hour),
             minute: Number(minute),

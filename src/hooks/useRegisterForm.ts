@@ -40,6 +40,10 @@ export const useRegisterForm = () => {
     setErrors((prev) => ({ ...prev, email: message }));
   };
 
+  const setFieldErrors = (fieldErrors: Partial<FormErrors>) => {
+    setErrors((prev) => ({ ...prev, ...fieldErrors }));
+  };
+
   const clearErrors = () => {
     setErrors({});
   };
@@ -90,6 +94,7 @@ export const useRegisterForm = () => {
     handleInputChange,
     setGeneralError,
     setEmailError,
+    setFieldErrors,
     clearErrors,
     validate, 
   };

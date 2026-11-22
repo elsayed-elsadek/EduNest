@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../../../services/api';
+import { updateMentorshipStatus } from '../../../../services/mentorshipsContent/mentorship';
 import { showApiError } from '../../../../utils/showApiError';
 
 
@@ -31,9 +31,7 @@ const StatusToggleModal: React.FC<StatusToggleModalProps> = ({
   const handleToggle = async () => {
     setLoading(true);
     try {
-      // EF-24: shared client supplies the confirmed Bearer contract, timeout,
-      // and existing silent-refresh behavior.
-      await api.patch(`/api/v1/mentorship/${mentorshipId}`, { status: newStatus });
+      await updateMentorshipStatus(mentorshipId, newStatus as 'ACTIVE' | 'DRAFT');
 
       toast.success(`Mentorship ${actionText.toLowerCase()}d successfully!`);
       onStatusUpdated(newStatus);

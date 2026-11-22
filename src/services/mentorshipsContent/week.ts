@@ -2,12 +2,12 @@ import api from '../api';
 import { handleRequest } from './utils';
 
 export interface CreateWeekPayload {
-    mentorshipId: number;
+    mentorshipId: string;
     title: string;
 }
 
 export interface WeekResponse {
-    id: number;
+    id: string;
     title?: string;
     [key: string]: unknown;
 }
@@ -19,17 +19,17 @@ export const createWeek = async (payload: CreateWeekPayload): Promise<WeekRespon
         const res = (data.apiResponse as Record<string, unknown>).week ?? data.apiResponse;
         return res as WeekResponse;
     }
-    if (data && typeof data.id === 'number') return data as WeekResponse;
+    if (data && typeof data.id === 'string') return data as WeekResponse;
     return raw as WeekResponse;
 };
 
 /** Delete a week (module) by its ID */
-export const deleteWeek = async (id: number): Promise<void> => {
+export const deleteWeek = async (id: string): Promise<void> => {
     await handleRequest(api.delete<unknown>(`api/v1/week/${id}`));
 };
 
 /** Update a week (module) title */
-export const updateWeekTitle = async (id: number, title: string): Promise<WeekResponse> => {
+export const updateWeekTitle = async (id: string, title: string): Promise<WeekResponse> => {
     const raw = await handleRequest(api.patch<unknown>(`api/v1/week/${id}`, { title }));
     const data = raw as Record<string, unknown>;
     if (data?.apiResponse && typeof data.apiResponse === 'object') {
@@ -37,12 +37,12 @@ export const updateWeekTitle = async (id: number, title: string): Promise<WeekRe
         const week = (apiRes.week as Record<string, unknown> | undefined) ?? apiRes;
         return week as WeekResponse;
     }
-    if (data && typeof data.id === 'number') return data as WeekResponse;
+    if (data && typeof data.id === 'string') return data as WeekResponse;
     return raw as WeekResponse;
 };
 
 /** Get all weeks for a specific mentorship */
-export const getWeeksByMentorship = async (mentorshipId: number): Promise<WeekResponse[]> => {
+export const getWeeksByMentorship = async (mentorshipId: string): Promise<WeekResponse[]> => {
     // Backend docs: GET /api/v1/week/{mentorshipId}/weeks
     const url = `api/v1/week/${mentorshipId}/weeks`;
 
@@ -85,7 +85,7 @@ export interface WeekContentItem {
     [key: string]: unknown;
 }
 
-export const getWeekContents = async (weekId: number): Promise<WeekContentItem[]> => {
+export const getWeekContents = async (weekId: string): Promise<WeekContentItem[]> => {
     // Backend docs: GET /api/v1/week/{weekId}/contents
     const raw = await handleRequest(api.get<unknown>(`api/v1/week/${weekId}/contents`));
 

@@ -24,7 +24,7 @@ export const createProject = async (
         title: payload.title,
         goal: payload.goal,
         brief: payload.brief,
-        descriptionUrl: payload.descriptionUrl?.trim() || null,
+        ...(payload.descriptionUrl?.trim() ? { descriptionUrl: payload.descriptionUrl.trim() } : {}),
         startAt: payload.startAt,
         endAt: payload.endAt,
         points: Number(payload.points),
@@ -38,15 +38,11 @@ export const createProject = async (
     formData.append("req", jsonBlob);
 
     if (attachmentFile) {
-        formData.append("attachment", attachmentFile);
+        formData.append("file", attachmentFile);
     }
 
     const raw = await handleRequest(
-        api.post<unknown>('api/v1/project', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
+        api.post<unknown>('api/v1/project', formData)
     );
 
     const data = raw as Record<string, unknown>;
@@ -76,7 +72,8 @@ export interface UpdateProjectPayload {
 
 export const updateProject = async (
     id: number,
-    payload: UpdateProjectPayload
+    payload: UpdateProjectPayload,
+    attachmentFile?: File
 ): Promise<unknown> => {
     const formData = new FormData();
 
@@ -104,13 +101,9 @@ export const updateProject = async (
 
     formData.append("req", jsonBlob);
 
-    const raw = await handleRequest(
-        api.patch<unknown>(`api/v1/project/${id}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-    );
+    if (attachmentFile) formData.append('file', attachmentFile);
+
+    const raw = await handleRequest(api.patch<unknown>(`api/v1/project/${id}`, formData));
 
     const data = raw as Record<string, unknown>;
     if (data?.apiResponse && typeof data.apiResponse === 'object') {

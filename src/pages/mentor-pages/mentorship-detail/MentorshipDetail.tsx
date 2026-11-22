@@ -110,7 +110,7 @@ const MentorshipDetail: FC = () => {
       try {
         setContentLoading(true);
 
-        const fetchedWeeks = await getWeeksByMentorship(Number(mentorshipId));
+        const fetchedWeeks = await getWeeksByMentorship(mentorshipId);
 
         const weeksData: WeekData[] = await Promise.all(
           fetchedWeeks.map(async (week) => {

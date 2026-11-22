@@ -157,11 +157,7 @@ export const updateProject = async (
   id: string | number,
   formData: FormData
 ): Promise<ApiResponse<EmptyApiResponse>> => {
-  const response = await api.patch(`${BASE_URL}/${id}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await api.patch(`${BASE_URL}/${id}`, formData);
   return response.data;
 };
 
@@ -170,11 +166,7 @@ export const updateProject = async (
  * Create project with optional file attachment
  */
 export const createProject = async (formData: FormData): Promise<ApiResponse<EmptyApiResponse>> => {
-  const response = await api.post(`${BASE_URL}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await api.post(`${BASE_URL}`, formData);
   return response.data;
 };
 
