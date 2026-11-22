@@ -22,6 +22,34 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const cooldown = useCooldown();
   const [cooldownErrorCode, setCooldownErrorCode] = React.useState('ERR_RATE_LIMITED');
+  const [showOtpRetry, setShowOtpRetry] = React.useState(false);
+
+  const requestVerificationOtp = async (successMessage: string): Promise<boolean> => {
+    localStorage.setItem("registrationEmail", form.formData.email);
+    localStorage.setItem("registrationType", form.joinAs);
+    try {
+      const otpRes = await sendOtp(form.formData.email) as { message?: string };
+      toast.success(otpRes.message || successMessage);
+      setShowOtpRetry(false);
+      return true;
+    } catch (error: unknown) {
+      setShowOtpRetry(true);
+      const normalized = startCooldownFromError(error, cooldown.start);
+      if (normalized.fields.email) form.setEmailError(normalized.fields.email);
+      if (normalized.status === 429 && normalized.retryAfterSeconds !== undefined) {
+        setCooldownErrorCode(normalized.errorCode);
+        form.setGeneralError(formatCooldownMessage(normalized.errorCode, normalized.retryAfterSeconds));
+      } else if (!normalized.fields.email) {
+        form.setGeneralError(normalized.message || 'Failed to send the verification code.');
+      }
+      return false;
+    }
+  };
+
+  const handleRetryOtp = async () => {
+    if (cooldown.isActive || form.loading) return;
+    if (await requestVerificationOtp('OTP sent to your email')) navigate("/verify");
+  };
 
   // Handle form submission based on user type (student or mentor)
   const handleRegister = async (e: React.FormEvent) => {
@@ -48,25 +76,9 @@ const Register: React.FC = () => {
       toast.success(res.message || 'Registration Successful');
       
       // Send OTP to email
-      let verificationCooldown: { seconds: number; errorCode: string } | undefined;
-      try {
-        // Store email and user type for verification page
-        localStorage.setItem("registrationEmail", form.formData.email);
-        localStorage.setItem("registrationType", form.joinAs);
-        
-        const otpRes = await sendOtp(form.formData.email) as { message?: string };
-        toast.success(otpRes.message || 'OTP sent to your email');
-      } catch (otpError) {
-        // Continue to verify page even if OTP fails
-        const normalized = startCooldownFromError(otpError, (seconds) => {
-          verificationCooldown = { seconds, errorCode: 'ERR_RATE_LIMITED' };
-        });
-        if (normalized.status === 429 && normalized.retryAfterSeconds !== undefined) {
-          verificationCooldown = { seconds: normalized.retryAfterSeconds, errorCode: normalized.errorCode };
-        }
-      }
+      if (!(await requestVerificationOtp('OTP sent to your email'))) return;
       
-      navigate("/verify", verificationCooldown ? { state: { cooldownSeconds: verificationCooldown.seconds, cooldownErrorCode: verificationCooldown.errorCode } } : undefined);
+      navigate("/verify");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const errorStatus = err.response?.status;
@@ -93,15 +105,9 @@ const Register: React.FC = () => {
         errorText.includes('request new otp');
       
       if (isUnverifiedAccount) {
-        try {
-          localStorage.setItem("registrationEmail", form.formData.email);
-          localStorage.setItem("registrationType", form.joinAs);
-          const otpRes = await sendOtp(form.formData.email) as { message?: string };
-          toast.success(otpRes.message || 'A new verification code has been sent to your email');
-        } catch {
-          toast.error('Failed to send the code. Please try again.');
+        if (await requestVerificationOtp('A new verification code has been sent to your email')) {
+          navigate("/verify");
         }
-        navigate("/verify");
         return;
       }
       
@@ -168,6 +174,11 @@ const Register: React.FC = () => {
           onChange={(v) => form.handleInputChange("email", v)}
           error={form.errors.email}
         />
+        {showOtpRetry && (
+          <button type="button" onClick={handleRetryOtp} disabled={cooldown.isActive} className="text-sm text-[#19587f] underline disabled:opacity-50">
+            Retry sending verification code
+          </button>
+        )}
 
         <PhoneInput
           value={form.formData.phoneNumber || ""}

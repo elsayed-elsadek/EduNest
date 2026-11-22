@@ -64,3 +64,60 @@ describe('Register rate limits', () => {
     expect(registerStudentMock).toHaveBeenCalledTimes(1);
   });
 });
+
+async function submitValidRegistration() {
+  registerStudentMock.mockResolvedValue({ message: 'Registered.' });
+  const { container } = render(<MemoryRouter><Register /></MemoryRouter>);
+  const inputs = screen.getAllByRole('textbox');
+  fireEvent.change(inputs[0], { target: { value: 'Sara' } });
+  fireEvent.change(inputs[1], { target: { value: 'Ali' } });
+  fireEvent.change(inputs[2], { target: { value: 'sara@example.com' } });
+  fireEvent.change(inputs[3], { target: { value: '01012345678' } });
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret1' } });
+  fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'secret1' } });
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'FRESH' } });
+  fireEvent.click(screen.getAllByRole('checkbox')[0]);
+  const form = container.querySelector('form');
+  if (!form) throw new Error('Registration form not rendered');
+  await act(async () => { fireEvent.submit(form); });
+}
+
+describe('Register Send OTP contract', () => {
+  it('shows fields.email inline and stays on Register when Send OTP validation fails', async () => {
+    sendOtpMock.mockRejectedValue({
+      response: {
+        status: 400,
+        data: { errorCode: 'ERR_VALIDATION', message: 'Validation failed.', fields: { email: 'Email cannot receive a code.' } },
+      },
+    });
+
+    await submitValidRegistration();
+
+    expect(await screen.findByText('Email cannot receive a code.')).toBeTruthy();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it('navigates to Verify after Send OTP succeeds', async () => {
+    sendOtpMock.mockResolvedValue({ message: 'Code sent.' });
+
+    await submitValidRegistration();
+
+    expect(sendOtpMock).toHaveBeenCalledWith('sara@example.com');
+    expect(navigateMock).toHaveBeenCalledWith('/verify');
+  });
+
+  it('keeps the registration page and honors Retry-After when Send OTP is rate limited', async () => {
+    sendOtpMock.mockRejectedValue({
+      response: {
+        status: 429,
+        data: { errorCode: 'ERR_RATE_LIMITED', message: 'Slow down.' },
+        headers: { 'Retry-After': '17' },
+      },
+    });
+
+    await submitValidRegistration();
+
+    expect(navigateMock).not.toHaveBeenCalled();
+    expect((await screen.findByRole('status')).textContent).toBe('You can try again in 0:17');
+  });
+});

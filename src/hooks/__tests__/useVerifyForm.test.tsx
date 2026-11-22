@@ -42,4 +42,39 @@ describe('useVerifyForm cooldown behavior', () => {
     expect(verifyOtpMock).toHaveBeenCalledTimes(1);
     expect(sendOtpMock).not.toHaveBeenCalled();
   });
+
+  it('maps the normalized OTP validation field and clears it when the code changes', async () => {
+    verifyOtpMock.mockRejectedValue({
+      response: {
+        status: 400,
+        data: { errorCode: 'ERR_VALIDATION', message: 'Invalid code.', fields: { otp: 'Code must be numeric.' } },
+      },
+    });
+    const { result } = renderHook(() => useVerifyForm());
+    for (const index of [0, 1, 2, 3, 4, 5]) {
+      act(() => result.current.handleChange(index, '1'));
+    }
+
+    await act(async () => { await result.current.handleSubmit(); });
+
+    expect(result.current.otpError).toBe('Code must be numeric.');
+    expect(result.current.errorMessage).toBe('');
+    act(() => result.current.handleChange(0, '2'));
+    expect(result.current.otpError).toBe('');
+  });
+
+  it('safely displays a generic validation message if the OTP field is missing', async () => {
+    verifyOtpMock.mockRejectedValue({
+      response: { status: 400, data: { errorCode: 'ERR_VALIDATION', message: 'Invalid request.', fields: { unexpected: 'Other error.' } } },
+    });
+    const { result } = renderHook(() => useVerifyForm());
+    for (const index of [0, 1, 2, 3, 4, 5]) {
+      act(() => result.current.handleChange(index, '1'));
+    }
+
+    await act(async () => { await result.current.handleSubmit(); });
+
+    expect(result.current.otpError).toBe('');
+    expect(result.current.errorMessage).toBe('Invalid request.');
+  });
 });

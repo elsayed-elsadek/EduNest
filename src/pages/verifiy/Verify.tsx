@@ -21,6 +21,7 @@ export const Verify: React.FC = () => {
     loading,
     successMessage,
     errorMessage,
+    otpError,
     handleChange,
     handleSubmit,
     handleResend,
@@ -39,7 +40,7 @@ export const Verify: React.FC = () => {
       if (state.cooldownErrorCode) setCooldownErrorCode(state.cooldownErrorCode);
       setHasCooldown(true);
     }
-  }, [location.state, cooldown.start, setCooldownErrorCode, setHasCooldown]);
+  }, [location.state, cooldown.start, setCooldownErrorCode, setHasCooldown, cooldown]);
 
   useEffect(() => {
     // Get email from localStorage (يبقى محفوظ حتى بعد الـ refresh)
@@ -116,6 +117,7 @@ export const Verify: React.FC = () => {
             />
           ))}
         </div>
+        {otpError && <p role="alert" className="text-red-600 text-sm mt-1">{otpError}</p>}
 
         {/* Timer */}
         <div className="text-black text-base font-medium" role={cooldown.isActive ? 'status' : undefined}>
