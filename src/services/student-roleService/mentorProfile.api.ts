@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../api';
 import { queryClient } from '../../lib/queryClient';
 import { useCallback } from 'react';
-import type { ReactNode } from 'react';
 import { getAssetUrl } from '../../config/env';
 
 const normalizeImageUrl = (value?: string | null): string | null => {
@@ -29,16 +28,13 @@ export interface MentorProfileMentorship {
 }
 
 export interface MentorProfileReview {
-  reviewerTitle: ReactNode;
   id: number;
-  reviewerName: string;
-  reviewerEmail?: string;
-  reviewerImageUrl: string | null;
+  userName: string;
   rating: number;
-  comment: string;
+  feedBack: string;
   mentorshipId: number;
   mentorshipTitle: string;
-  createdAt: string | null; 
+  createdAt: string | null;
 }
 
 export interface PageMetadata {
@@ -97,15 +93,12 @@ const mapMentorship = (item: Record<string, unknown>): MentorProfileMentorship =
 
 const mapReview = (item: Record<string, unknown>): MentorProfileReview => ({
   id: Number(item.id ?? 0),
-  reviewerName: String(item.userName ?? 'Anonymous'),
-  reviewerEmail: String(item.userEmail ?? ''),
-  reviewerImageUrl: normalizeImageUrl(String(item.userProfileImageUrl ?? '')),
+  userName: String(item.userName ?? 'Anonymous'),
   rating: Number(item.rating ?? 0),
-  comment: String(item.feedBack ?? ''),
+  feedBack: String(item.feedBack ?? ''),
   mentorshipId: Number(item.mentorshipId ?? 0),
   mentorshipTitle: String(item.mentorshipTitle ?? ''),
-  createdAt: item.createdAt ? String(item.createdAt) : null, 
-  reviewerTitle: undefined,
+  createdAt: item.createdAt ? String(item.createdAt) : null,
 });
 
 const mapMentorProfile = (payload: Record<string, unknown>) => {

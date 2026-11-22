@@ -1,6 +1,5 @@
 
 import { Star, MessageCircleWarning, User, BookOpen } from 'lucide-react';
-import { getImageUrl } from '../../../../utils/imageUtils';
 import type { MentorProfileReview } from '../../../../services/student-roleService/mentorProfile.api';
 import Pagination from '../../../../components/student-components/mentorships/Pagination';
 
@@ -73,7 +72,6 @@ const ReviewsSection = ({
           </div>
         ) : (
           reviews.map((rev) => {
-            const reviewerImageUrl = getImageUrl(rev.reviewerImageUrl ?? undefined);
             return (
               <div
                 key={rev.id}
@@ -84,21 +82,10 @@ const ReviewsSection = ({
                   {/* Reviewer Info */}
                   <div className="flex gap-4 items-center">
                     <div className="w-12 h-12 rounded-full bg-slate-100 overflow-hidden flex items-center justify-center shrink-0">
-                      {reviewerImageUrl ? (
-                        <img
-                          src={reviewerImageUrl}
-                          alt={rev.reviewerName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <User className="w-6 h-6 text-slate-400" />
-                      )}
+                      <User className="w-6 h-6 text-slate-400" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-slate-900">{rev.reviewerName}</h4>
+                      <h4 className="font-semibold text-slate-900">{rev.userName}</h4>
                       {/* ✅ Date */}
                       {rev.createdAt && (
                         <p className="text-xs text-slate-400 font-medium mt-0.5">
@@ -143,7 +130,7 @@ const ReviewsSection = ({
 
                 {/* ✅ Review Text — left aligned */}
                 <p className="text-slate-600 leading-relaxed font-normal text-left">
-                  "{rev.comment}"
+                  "{rev.feedBack}"
                 </p>
 
 
