@@ -6,12 +6,12 @@ export interface ContentItem {
   id?: number | string;
   isDraft?: boolean;
   /** weekId is stored so we can build a globally-unique composite key: weekId-type-id */
-  weekId?: number;
+  weekId?: number | string;
   lectureUrl?: string;
 }
 
 export interface ModuleState {
-  id: number | null;
+  id: number | string | null;
   title: string;
   items: ContentItem[];
   expanded: boolean;

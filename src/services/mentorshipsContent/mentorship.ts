@@ -18,7 +18,7 @@ export interface UpdateMentorshipStatusResponse {
  * Uses the endpoint: POST /api/v1/mentorship/update-status/{id}
  */
 export const updateMentorshipStatus = async (
-    mentorshipId: number,
+    mentorshipId: number | string,
     status: MentorshipStatus
 ): Promise<UpdateMentorshipStatusResponse> => {
     const body: UpdateMentorshipStatusPayload = { status };

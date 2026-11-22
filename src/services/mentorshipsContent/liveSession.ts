@@ -9,28 +9,34 @@ export interface LiveSessionTime {
 }
 
 export interface CreateLiveSessionPayload {
-    weekId: number;
+    weekId: string;
     title: string;
     date: string; // YYYY-MM-DD
     time: LiveSessionTime;
+}
+
+function toScheduledAt(date: string, time: LiveSessionTime | string): string {
+    let timeString: string;
+    if (typeof time === 'string') {
+        const [hour = '', minute = '', second = '00'] = time.split(':');
+        timeString = `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:${second.padStart(2, '0')}`;
+    } else {
+        const hh = String(time.hour).padStart(2, '0');
+        const mm = String(time.minute).padStart(2, '0');
+        const ss = String(time.second ?? 0).padStart(2, '0');
+        timeString = `${hh}:${mm}:${ss}`;
+    }
+    return `${date}T${timeString}`;
 }
 
 /**
  * دالة إنشاء جلسة بث مباشر
  */
 export const createLiveSession = async (payload: CreateLiveSessionPayload): Promise<unknown> => {
-    // padStart(2, '0') تضمن أن الساعة 1 تظهر 01
-    const hh = String(payload.time.hour).padStart(2, '0');
-    const mm = String(payload.time.minute).padStart(2, '0');
-    const ss = String(payload.time.second ?? 0).padStart(2, '0');
-
-    const timeString = `${hh}:${mm}:${ss}`;
-
     const body = {
         title: payload.title,
-        date: payload.date,
-        weekId: Number(payload.weekId),
-        time: timeString, // إرسال الوقت كنص "01:20:10"
+        scheduledAt: toScheduledAt(payload.date, payload.time),
+        weekId: payload.weekId,
     };
 
     const raw = await handleRequest(api.post<unknown>('api/v1/liveSession/create', body));
@@ -67,7 +73,7 @@ export interface LiveSessionsResponse {
 
 /** Get all live sessions for a specific mentorship */
 export const getAllLiveSessionsForMentorship = async (
-    mentorshipId: number,
+    mentorshipId: string,
     page: number = 0,
     size: number = 5
 ): Promise<MentorshipPaginatedItems<LiveSession>> => {
@@ -86,17 +92,16 @@ export interface UpdateLiveSessionPayload {
     title?: string;
     date?: string;
     time?: LiveSessionTime | string; // Can be object or time string "HH:mm:ss"
+    scheduledAt?: string;
 }
 
-export const updateLiveSession = async (sessionId: number, payload: UpdateLiveSessionPayload): Promise<unknown> => {
-    // Handle time conversion if needed
-    let body = payload;
-    if (payload.time && typeof payload.time === 'object') {
-        const time = payload.time as LiveSessionTime;
-        const hh = String(time.hour).padStart(2, '0');
-        const mm = String(time.minute).padStart(2, '0');
-        const ss = String(time.second ?? 0).padStart(2, '0');
-        body = { ...payload, time: `${hh}:${mm}:${ss}` };
+export const updateLiveSession = async (sessionId: number | string, payload: UpdateLiveSessionPayload): Promise<unknown> => {
+    const body: { title?: string; scheduledAt?: string } = {};
+    if (payload.title !== undefined) body.title = payload.title;
+    if (payload.scheduledAt !== undefined) {
+        body.scheduledAt = payload.scheduledAt;
+    } else if (payload.date !== undefined && payload.time !== undefined) {
+        body.scheduledAt = toScheduledAt(payload.date, payload.time);
     }
 
     const raw = await handleRequest(api.patch<unknown>(`api/v1/liveSession/update/${sessionId}`, body));

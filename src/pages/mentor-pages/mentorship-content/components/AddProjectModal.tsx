@@ -50,7 +50,7 @@ const AddProjectModal: FC<AddProjectModalProps> = ({ weekId, editingItem, onClos
           endAt: formatDateTimeLocal(endAt),
           points: points || 0,
         };
-        await updateProject(Number(editingItem.id), payload);
+        await updateProject(Number(editingItem.id), payload, attachmentFile || undefined);
         toast.success('Project updated successfully');
         onSuccess(title.trim(), editingItem.id);
       } else {

@@ -14,9 +14,37 @@
 import toast from 'react-hot-toast';
 import { parseApiError } from '../services/errors';
 
+function allowedFieldNames(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.filter((item): item is string => typeof item === 'string');
+  } catch {
+    // The backend currently sends a comma-separated string; retain support for it.
+  }
+  return value.split(',').map((field) => field.trim()).filter(Boolean);
+}
+
+function safeFieldName(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_.-]/g, '').slice(0, 100);
+}
+
 export function showApiError(error: unknown): void {
   const parsed = parseApiError(error);
   if (parsed.errorCode === 'ERR_CANCELED' || parsed.errorCode === 'SESSION_EXPIRED') return;
+
+  if (parsed.errorCode === 'ERR_UNKNOWN_FIELD') {
+    const invalidField = parsed.fields.invalidField;
+    const safeInvalidField = invalidField ? safeFieldName(invalidField) : '';
+    const allowedFields = allowedFieldNames(parsed.fields.allowedFields)
+      .map(safeFieldName)
+      .filter(Boolean);
+    if (safeInvalidField) {
+      const allowed = allowedFields.length ? ` Allowed fields: ${allowedFields.join(', ')}.` : '';
+      toast.error(`Request contains an undeclared field: ${safeInvalidField}.${allowed}`);
+      return;
+    }
+  }
 
   const reference = parsed.status >= 500 && parsed.refId ? ` (Reference: ${parsed.refId})` : '';
   toast.error(`${parsed.message}${reference}`);

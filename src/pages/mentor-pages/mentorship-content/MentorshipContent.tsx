@@ -48,7 +48,7 @@ const CONTENT_BUTTONS = [
 
 const MentorshipContent: FC = () => {
   const { id: mentorshipIdParam } = useParams<{ id: string }>();
-  const mentorshipId = mentorshipIdParam ? Number(mentorshipIdParam) : 0;
+  const mentorshipId = mentorshipIdParam;
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
 
@@ -137,11 +137,11 @@ const MentorshipContent: FC = () => {
     return undefined;
   }, []);
 
-  const buildItemKey = (weekId: number | null, type: ContentType, id?: number | string, fallbackIdx?: number): string =>
+  const buildItemKey = (weekId: number | string | null, type: ContentType, id?: number | string, fallbackIdx?: number): string =>
     `${weekId ?? 'new'}-${type}-${id ?? fallbackIdx ?? 'noid'}`;
 
   const mapWeekContentsToItems = useCallback(
-    (contents: WeekContentItem[], weekId: number | null): ContentItem[] =>
+    (contents: WeekContentItem[], weekId: number | string | null): ContentItem[] =>
       contents.map((c) => {
         const computedType = resolveContentType(c);
 
@@ -158,7 +158,7 @@ const MentorshipContent: FC = () => {
 
   // Load existing weeks and content
   useEffect(() => {
-    if (!mentorshipId || mentorshipId <= 0) return;
+    if (!mentorshipId) return;
 
     const fetchWeeksAndContent = async () => {
       setLoading(true);
@@ -277,7 +277,7 @@ const MentorshipContent: FC = () => {
         toast.success(`"${item.title}" deleted successfully`);
       } else if (deleteTarget.type === 'module') {
         const module = modules[deleteTarget.moduleIdx!];
-        if (!module || !module.id) {
+        if (!module || typeof module.id !== 'string') {
           toast.error('Invalid module');
           return;
         }
@@ -304,7 +304,7 @@ const MentorshipContent: FC = () => {
 
   const handleSaveModuleTitle = async (index: number) => {
     const module = modules[index];
-    if (!module || !editingModuleTitle.trim() || !module.id) {
+    if (!module || !editingModuleTitle.trim() || typeof module.id !== 'string') {
       toast.error('Module title cannot be empty');
       return;
     }
@@ -342,7 +342,7 @@ const MentorshipContent: FC = () => {
   };
 
   const handleAddModule = async () => {
-    if (!mentorshipId || mentorshipId <= 0) {
+    if (!mentorshipId) {
       toast.error('Invalid mentorship ID');
       return;
     }
@@ -403,7 +403,7 @@ const title = `Week ${modules.length + 1}`;
     });
   };
 
-  if (!mentorshipId || mentorshipId <= 0) {
+  if (!mentorshipId) {
     return (
       <DashLayout pageTitle="Create Content">
         <div className="p-6 text-center text-gray-500 dark:text-gray-400">Invalid mentorship ID.</div>
@@ -592,7 +592,7 @@ const title = `Week ${modules.length + 1}`;
       {/* Modals Mounting */}
       {modal === 'lecture' && (
         <AddLectureModal
-          weekId={modules[moduleIndexForModal]?.id ?? 0}
+           weekId={typeof modules[moduleIndexForModal]?.id === 'number' ? modules[moduleIndexForModal].id as number : null}
           editingItem={editingItem}
           onClose={closeModal}
           onSuccess={(title, id) => handleModalSuccess(title, id, 'lecture')}
@@ -600,7 +600,7 @@ const title = `Week ${modules.length + 1}`;
       )}
       {modal === 'quiz' && (
         <AddQuizModal
-          weekId={modules[moduleIndexForModal]?.id ?? 0}
+           weekId={typeof modules[moduleIndexForModal]?.id === 'number' ? modules[moduleIndexForModal].id as number : null}
           editingItem={editingItem}
           onClose={closeModal}
           onSuccess={(title, id) => handleModalSuccess(title, id, 'quiz')}
@@ -608,7 +608,7 @@ const title = `Week ${modules.length + 1}`;
       )}
       {modal === 'project' && (
         <AddProjectModal
-          weekId={modules[moduleIndexForModal]?.id ?? 0}
+           weekId={typeof modules[moduleIndexForModal]?.id === 'number' ? modules[moduleIndexForModal].id as number : null}
           editingItem={editingItem}
           onClose={closeModal}
           onSuccess={(title, id) => handleModalSuccess(title, id, 'project')}
@@ -616,7 +616,7 @@ const title = `Week ${modules.length + 1}`;
       )}
       {modal === 'session' && (
         <ScheduleSessionModal
-          weekId={modules[moduleIndexForModal]?.id ?? 0}
+           weekId={typeof modules[moduleIndexForModal]?.id === 'string' ? modules[moduleIndexForModal].id : null}
           editingItem={editingItem}
           onClose={closeModal}
           onSuccess={(title, id) => handleModalSuccess(title, id, 'session')}
@@ -624,7 +624,7 @@ const title = `Week ${modules.length + 1}`;
       )}
       {modal === 'assignment' && (
         <AddAssignmentModal
-          weekId={modules[moduleIndexForModal]?.id ?? null}
+           weekId={typeof modules[moduleIndexForModal]?.id === 'number' ? modules[moduleIndexForModal].id as number : null}
           editingItem={editingItem}
           onClose={closeModal}
           onSuccess={(item) => handleModalSuccess(item.title, item.id, 'assignment')}

@@ -65,6 +65,38 @@ describe('Register rate limits', () => {
   });
 });
 
+describe('Register ERR_VALIDATION field mapping', () => {
+  it('maps verified registration DTO fields inline without sending UI-only fields', async () => {
+    registerStudentMock.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          errorCode: 'ERR_VALIDATION',
+          message: 'Validation failed.',
+          fields: { phoneNumber: 'Use a valid phone number.', unknownBackendField: 'Ignore this field.' },
+        },
+      },
+    });
+    const { container } = render(<MemoryRouter><Register /></MemoryRouter>);
+    const inputs = screen.getAllByRole('textbox');
+    fireEvent.change(inputs[0], { target: { value: 'Sara' } });
+    fireEvent.change(inputs[1], { target: { value: 'Ali' } });
+    fireEvent.change(inputs[2], { target: { value: 'sara@example.com' } });
+    fireEvent.change(inputs[3], { target: { value: '01012345678' } });
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'secret1' } });
+    fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'secret1' } });
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'FRESH' } });
+    fireEvent.click(screen.getAllByRole('checkbox')[0]);
+
+    const form = container.querySelector('form');
+    if (!form) throw new Error('Registration form not rendered');
+    await act(async () => { fireEvent.submit(form); });
+
+    expect(await screen.findByText('Use a valid phone number.')).toBeTruthy();
+    expect(screen.queryByText('Ignore this field.')).toBeNull();
+  });
+});
+
 async function submitValidRegistration() {
   registerStudentMock.mockResolvedValue({ message: 'Registered.' });
   const { container } = render(<MemoryRouter><Register /></MemoryRouter>);

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useRateMentorship } from '../../../../services/student-roleService/mentorshipReviews.api';
 import { getResponseMessage } from '../../../../services/student-roleService/apiResponseHelpers';
 import { StarPicker } from './StarPicker';
+import { parseApiError } from '../../../../services/errors';
 
 const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
@@ -16,6 +17,7 @@ export const WriteReviewModal = ({
 }) => {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const { mutate, isPending, isError, error } = useRateMentorship();
 
@@ -34,8 +36,14 @@ export const WriteReviewModal = ({
           setTimeout(() => onClose(), 1500);
         },
         onError: (err) => {
-          const message = err instanceof Error ? err.message : 'Unable to submit your review. Please try again.';
-          toast.error(message);
+          const normalized = parseApiError(err);
+          if (normalized.errorCode === 'ERR_VALIDATION') {
+            const verifiedFields = new Set(['rating', 'feedback']);
+            setFieldErrors(Object.fromEntries(
+              Object.entries(normalized.fields).filter(([field]) => verifiedFields.has(field)),
+            ));
+          }
+          toast.error(normalized.message);
         },
       }
     );
@@ -73,7 +81,14 @@ export const WriteReviewModal = ({
             Your rating
           </p>
 
-          <StarPicker value={rating} onChange={setRating} />
+          <StarPicker
+            value={rating}
+            onChange={(value) => {
+              setRating(value);
+              setFieldErrors((current) => ({ ...current, rating: '' }));
+            }}
+          />
+          {fieldErrors.rating && <p className="text-sm text-red-600" role="alert">{fieldErrors.rating}</p>}
 
           {rating > 0 && <p className="text-sm text-slate-500 dark:text-slate-400">{ratingLabels[rating]}</p>}
         </div>
@@ -85,16 +100,20 @@ export const WriteReviewModal = ({
 
           <textarea
             value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
+            onChange={(e) => {
+              setFeedback(e.target.value);
+              setFieldErrors((current) => ({ ...current, feedback: '' }));
+            }}
             rows={4}
             placeholder="Share your experience with this mentorship..."
             className="w-full resize-none rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-5 py-4 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 outline-none transition focus:border-[var(--primary-500)] focus:ring-2 focus:ring-[var(--primary-500)]/20"
           />
+          {fieldErrors.feedback && <p className="text-sm text-red-600" role="alert">{fieldErrors.feedback}</p>}
         </div>
 
         {isError && (
           <p className="mt-3 rounded-xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-            {error instanceof Error ? error.message : 'Something went wrong. Please try again.'}
+            {parseApiError(error).message}
           </p>
         )}
 

@@ -2,9 +2,10 @@
 import React, { useState, memo } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { Mail, MapPin, Phone } from 'lucide-react';
-import axios from 'axios';
 import { sendContact, type ContactData } from "../../services/contactService";
 import toast from 'react-hot-toast';
+import { parseApiError } from '../../services/errors';
+import { showApiError } from '../../utils/showApiError';
 
 const ContactUsSection: React.FC = memo(() => {
   const [form, setForm] = useState<ContactData>({
@@ -36,10 +37,10 @@ const ContactUsSection: React.FC = memo(() => {
     setLoading(true);
 
     const dataToSend = {
-      name: form.name.trim() || null,
-      email: form.email.trim() || null,
-      phone: form.phone.trim() || null,
-      message: form.message.trim() || null
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      message: form.message.trim()
     };
 
  
@@ -56,20 +57,20 @@ const ContactUsSection: React.FC = memo(() => {
   setForm({ name: "", email: "", phone: "", message: "" });
 
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        const apiResponse = err.response?.data;
-        
-        if (apiResponse?.errorMessages) {
-          setFieldErrors(apiResponse.errorMessages);
-          toast.error("Please check the input fields.", { position: "top-right" });
-        } 
-        else {
-          const generalError = apiResponse?.message || "Something went wrong. Please try again later";
-          toast.error(generalError, { position: "top-right" });
+      const normalized = parseApiError(err);
+      if (normalized.errorCode === 'ERR_VALIDATION') {
+        const contactFields = new Set(['name', 'email', 'phone', 'message']);
+        const fieldErrors = Object.fromEntries(
+          Object.entries(normalized.fields).filter(([field]) => contactFields.has(field)),
+        );
+        if (Object.keys(fieldErrors).length > 0) {
+          setFieldErrors(fieldErrors);
+          toast.error('Please check the input fields.', { position: 'top-right' });
+          return;
         }
-      } else {
-        toast.error("Unable to connect to the server. Please check your internet connection.");
       }
+      if (normalized.errorCode === 'ERR_UNKNOWN_FIELD') showApiError(err);
+      else toast.error(normalized.message || 'Something went wrong. Please try again later', { position: 'top-right' });
     } finally {
       setLoading(false);
     }

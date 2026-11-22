@@ -41,7 +41,7 @@ const MentorshipSessions: FC = () => {
                 setLoading(true);
                 setError(null);
 
-                const data = await getAllLiveSessionsForMentorship(Number(mentorshipId), page, size);
+                const data = await getAllLiveSessionsForMentorship(mentorshipId, page, size);
                 setSessionsData(data);
             } catch (err: unknown) {
                 let message = 'Failed to load sessions';
@@ -113,7 +113,7 @@ const MentorshipSessions: FC = () => {
             setActiveSession(null);
 
             if (mentorshipId) {
-                const data = await getAllLiveSessionsForMentorship(Number(mentorshipId), page, size);
+                const data = await getAllLiveSessionsForMentorship(mentorshipId, page, size);
                 setSessionsData(data);
             }
         } catch (err: unknown) {
