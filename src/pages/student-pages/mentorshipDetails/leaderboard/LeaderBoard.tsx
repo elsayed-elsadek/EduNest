@@ -3,16 +3,19 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Filter, User, Medal } from 'lucide-react';
 import { useMentorshipLeaderboard } from '../../../../services/student-roleService/mentorshipLeaderboard.api';
-// import { getImageUrl } from '../../../../utils/imageUtils';
 import LeaderboardRow from './components/LeaderboardRow';
-import { getAssetUrl } from '../../../../config/env';
+import Pagination from '../../../../components/student-components/mentorships/Pagination';
+import type { LeaderboardStudent } from '../../../../types/student-role-types/mentorshipLeaderboardTypes';
+
+const PAGE_SIZE = 10;
 
 const LeaderBoard: FC = () => {
   const { mentorshipId } = useParams();
   const normalizedId = Number(mentorshipId ?? '');
   const hasValidId = Number.isFinite(normalizedId) && normalizedId > 0;
 
-  const { data, isLoading } = useMentorshipLeaderboard(normalizedId, hasValidId);
+  const [page, setPage] = useState(0);
+  const { data, isLoading } = useMentorshipLeaderboard(normalizedId, hasValidId, page, PAGE_SIZE);
   const [searchTerm, setSearchTerm] = useState('');
 
   if (!hasValidId) {
@@ -24,15 +27,20 @@ const LeaderBoard: FC = () => {
     );
   }
 
-  const allStudents = data?.leaderboard.content || [];
-  const topThree = allStudents.slice(0, 3);
-  const remainingStudents = allStudents.filter(student =>
-    student.studentFullName.toLowerCase().includes(searchTerm.toLowerCase())
-  ); 
+  const allStudents = data?.leaderboard.content ?? [];
+  const currentPage = data?.leaderboard.page ?? page;
+  const pageSize = data?.leaderboard.size ?? PAGE_SIZE;
+  const topThree = currentPage === 0 ? allStudents.slice(0, 3) : [];
+  const remainingStudents = allStudents
+    .map((student, index) => ({
+      student,
+      rank: currentPage * pageSize + index + 1,
+    }))
+    .filter(({ student }) =>
+      student.studentFullName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  // Helper for Podium UI - standardized fonts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const renderPodiumCard = (student: any, rank: number, isWinner = false, orderClass = '') => (
+  const renderPodiumCard = (student: LeaderboardStudent, rank: number, isWinner = false, orderClass = '') => (
     <div className={`relative flex flex-col items-center text-center transition-all duration-500 w-full max-w-[320px] ${orderClass} ${
       isWinner 
         ? 'bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-3xl border-4 border-[var(--primary-500)] shadow-2xl scale-105 p-6 sm:p-8 z-20 md:-mb-6' 
@@ -51,16 +59,9 @@ const LeaderBoard: FC = () => {
         <div className={`h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-2xl ring-4 ${
           isWinner ? 'ring-[var(--primary-500)]/50 bg-gradient-to-br from-slate-800 to-slate-900' : 'ring-slate-100 bg-slate-100'
         }`}>
-          {student.studentProfileImageUrl ? (
-            <img src={getAssetUrl(student.studentProfileImageUrl)}
-                  alt={student.studentFullName}
-                   className="h-full w-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-400">
-              <User className="w-10 h-10 sm:w-12 sm:h-12" />
-            </div>
-          )}
+          <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-400">
+            <User className="w-10 h-10 sm:w-12 sm:h-12" />
+          </div>
         </div>
       </div>
 
@@ -68,21 +69,11 @@ const LeaderBoard: FC = () => {
         <h3 className={`text-lg sm:text-xl font-bold leading-tight truncate max-w-[240px] ${isWinner ? 'text-white' : 'text-slate-900'}`}>
           {student.studentFullName}
         </h3>
-        <p className={`text-xs font-semibold mt-1 uppercase tracking-wide ${
-          isWinner ? 'text-slate-300' : 'text-slate-500'
-        }`}>
-          {student.studentLevel || 'Scholar'}
-        </p>
       </div>
 
-      <div className={`grid grid-cols-2 gap-4 pt-6 border-t w-full ${
+      <div className={`grid grid-cols-1 gap-4 pt-6 border-t w-full ${
         isWinner ? 'border-slate-700' : 'border-slate-100'
       }`}>
-        <div>
-          {/* تعديل هنا من الباك اند */}
-          <p className="text-xl sm:text-2xl font-bold truncate">{student.lastBadgeTitle || '0'}</p>
-          <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500 truncate">{student.lastBadgeCategory || 'No Badge'}</p>
-        </div>
         <div>
           <p className="text-xl sm:text-2xl font-bold truncate">{student.totalPoints.toLocaleString()}</p>
           <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Points</p>
@@ -166,23 +157,30 @@ const LeaderBoard: FC = () => {
                   <tr className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     <th className="px-4 sm:px-6 py-4 text-left font-bold">Rank</th>
                     <th className="px-4 sm:px-6 py-4 text-left font-bold">Scholar</th>
-                    <th className="px-4 sm:px-6 py-4 text-left font-bold hidden md:table-cell">Badge</th>
-                    <th className="px-4 sm:px-6 py-4 text-left font-bold hidden sm:table-cell">Category</th>
                     <th className="px-4 sm:px-6 py-4 text-right font-bold">Points</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {remainingStudents.map((student) => (
+                  {remainingStudents.map(({ student, rank }) => (
                     <LeaderboardRow 
-                      key={student.studentEmail} 
-                      student={{ ...student, rank: allStudents.findIndex(s => s.studentEmail === student.studentEmail) +1 }} 
-                      highlight={data?.currentUser?.studentEmail === student.studentEmail} 
+                      key={rank}
+                      student={student}
+                      rank={rank}
+                      highlight={data?.userRank != null && rank === data.userRank}
                     />
                   ))}
                 </tbody>
               </table>
             )}
           </div>
+          {data?.leaderboard.totalPages && data.leaderboard.totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage + 1}
+              totalPages={data.leaderboard.totalPages}
+              onPageChange={(nextPage) => setPage(nextPage - 1)}
+              isLoading={isLoading}
+            />
+          )}
         </div> 
       </div>
     </section>

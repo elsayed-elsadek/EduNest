@@ -1,13 +1,6 @@
 export interface LeaderboardStudent {
-  completedSessions: number;
   studentFullName: string;
-  studentEmail: string;
-  studentLevel: string;
-  studentProfileImageUrl: string | null;
   totalPoints: number;
-  rank: number;
-  lastBadgeTitle: string | null;
-  lastBadgeCategory: string | null;
 }
 
 export interface LeaderboardContent {
@@ -20,7 +13,8 @@ export interface LeaderboardContent {
 
 export interface MentorshipLeaderboardPayload {
   leaderboard: LeaderboardContent;
-  currentUser: LeaderboardStudent | null;
+  /** Kept opaque until the backend documents its shape; UI uses userRank. */
+  currentUser?: unknown;
   totalStudents: number;
   userRank: number | null;
 }

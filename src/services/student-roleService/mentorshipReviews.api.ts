@@ -1,20 +1,12 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api';
-import { getAssetUrl } from '../../config/env';
-
-const normalizeImageUrl = (value?: string | null): string | null => {
-  if (!value || String(value).trim() === '') return null;
-  return getAssetUrl(String(value).trim()) ?? null;
-};
 
 export interface MentorshipReview {
   reviewId: number;
-  studentEmail: string;
   rating: number;
   feedback: string;
   studentFullName: string;
-  studentProfileImageUrl: string | null;
 }
 
 export interface MentorshipReviewsPage {
@@ -46,13 +38,9 @@ export interface RateMentorshipApiResponse {
 
 const mapReview = (item: Record<string, unknown>): MentorshipReview => ({
   reviewId: Number(item.reviewId ?? item.id ?? 0),
-  studentEmail: String(item.studentEmail ?? ''),
   rating: Number(item.rating ?? 0),
   feedback: String(item.feedback ?? item.review ?? ''),
   studentFullName: String(item.studentFullName ?? item.studentName ?? 'Student'),
-  studentProfileImageUrl: normalizeImageUrl(
-    String(item.studentProfileImageUrl ?? '') || null
-  ),
 });
 
 export const fetchMentorshipReviews = async (

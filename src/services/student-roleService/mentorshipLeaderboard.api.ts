@@ -33,11 +33,13 @@ export const fetchMentorshipLeaderboard = async (
 
 export const useMentorshipLeaderboard = (
   mentorshipId: string | number,
-  enabled = true
+  enabled = true,
+  page = 0,
+  size = 10
 ) =>
   useQuery({
-    queryKey: mentorshipLeaderboardKeys.list(mentorshipId),
-    queryFn: ({ signal }) => fetchMentorshipLeaderboard(mentorshipId, 10, 0, signal),
+    queryKey: mentorshipLeaderboardKeys.list(mentorshipId, page, size),
+    queryFn: ({ signal }) => fetchMentorshipLeaderboard(mentorshipId, size, page, signal),
     enabled: enabled && !!mentorshipId,
     staleTime: 5 * 60 * 1000,
     retry: 2,
