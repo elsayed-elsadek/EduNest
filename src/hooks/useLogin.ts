@@ -38,9 +38,7 @@ export const useLogin = () => {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
     if (!formData.email) newErrors.email = "Email is required";
-    if (!formData.password || formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
+    if (!formData.password) newErrors.password = "Password is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -145,6 +143,19 @@ export const useLogin = () => {
         setAuthError(getCooldownMessage(normalized, normalized.retryAfterSeconds));
       } else if (normalized.errorCode === 'ERR_INVALID_CREDENTIALS') {
         setAuthError('Invalid email or password.');
+      } else if (normalized.errorCode === 'ERR_VALIDATION') {
+        const emailError = normalized.fields.email;
+        const passwordError = normalized.fields.password;
+        if (emailError || passwordError) {
+          setErrors((current) => ({
+            ...current,
+            ...(emailError ? { email: emailError } : {}),
+            ...(passwordError ? { password: passwordError } : {}),
+          }));
+          setAuthError('');
+        } else {
+          setAuthError(normalized.message || 'Please check your details.');
+        }
       } else {
         setAuthError(normalized.message || 'Something went wrong. Please try again.');
       }

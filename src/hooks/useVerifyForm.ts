@@ -11,6 +11,7 @@ export const useVerifyForm = () => {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [otpError, setOtpError] = useState("");
   const [cooldownErrorCode, setCooldownErrorCode] = useState('ERR_RATE_LIMITED');
   const [hasCooldown, setHasCooldown] = useState(false);
   const cooldown = useCooldown();
@@ -22,6 +23,8 @@ export const useVerifyForm = () => {
     const newCode = [...code];
     newCode[index] = value.slice(-1);
     setCode(newCode);
+    setOtpError("");
+    setErrorMessage("");
   };
 
   const isComplete = code.every((c) => c !== "");
@@ -40,6 +43,7 @@ export const useVerifyForm = () => {
 
       setSuccessMessage("Code verified successfully!");
       setErrorMessage(""); // clear error on success
+      setOtpError("");
       toast.success("Email verified successfully!");
 
       // Extract token from response if available
@@ -74,7 +78,13 @@ export const useVerifyForm = () => {
         : normalized.message || "Invalid verification code";
       toast.error(message);
       setSuccessMessage("");
-      setErrorMessage(message);
+      if (normalized.errorCode === 'ERR_VALIDATION' && normalized.fields.otp) {
+        setOtpError(normalized.fields.otp);
+        setErrorMessage("");
+      } else {
+        setOtpError("");
+        setErrorMessage(message);
+      }
       return false;
     } finally {
       setLoading(false);
@@ -112,6 +122,7 @@ export const useVerifyForm = () => {
     loading,
     successMessage,
     errorMessage,
+    otpError,
     handleChange,
     handleSubmit,
     handleResend,

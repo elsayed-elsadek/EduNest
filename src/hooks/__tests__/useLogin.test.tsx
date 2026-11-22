@@ -105,11 +105,12 @@ describe('useLogin validation', () => {
     });
 
     expect(result.current.errors.email).toBe('Email is required');
-    expect(result.current.errors.password).toBe('Password must be at least 6 characters');
+    expect(result.current.errors.password).toBe('Password is required');
     expect(loginUserMock).not.toHaveBeenCalled();
   });
 
-  it('rejects a password shorter than six characters', async () => {
+  it('submits a password shorter than six characters without client-side length validation', async () => {
+    loginUserMock.mockResolvedValue({ apiResponse: {} });
     const { result } = renderHook(() => useLogin());
     fillCredentials(result, 'sara@example.com', '123');
 
@@ -117,8 +118,8 @@ describe('useLogin validation', () => {
       await submit(result);
     });
 
-    expect(result.current.errors.password).toBe('Password must be at least 6 characters');
-    expect(loginUserMock).not.toHaveBeenCalled();
+    expect(result.current.errors.password).toBeUndefined();
+    expect(loginUserMock).toHaveBeenCalledWith('sara@example.com', '123');
   });
 
   it('accepts a valid e-mail and password and calls the API', async () => {
@@ -376,6 +377,41 @@ describe('useLogin submit', () => {
     expect(result.current.authError).toBe('Invalid email or password.');
     expect(navigateMock).not.toHaveBeenCalled();
     expect(sendOtpMock).not.toHaveBeenCalled();
+  });
+
+  it('maps 400 ERR_VALIDATION email and password fields to inline form errors', async () => {
+    loginUserMock.mockRejectedValue({
+      response: {
+        status: 400,
+        data: {
+          errorCode: 'ERR_VALIDATION',
+          message: 'Validation failed.',
+          fields: { email: 'Email is invalid.', password: 'Password is incorrect.' },
+        },
+      },
+    });
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+
+    await act(async () => { await submit(result); });
+
+    expect(result.current.errors.email).toBe('Email is invalid.');
+    expect(result.current.errors.password).toBe('Password is incorrect.');
+    expect(result.current.authError).toBe('');
+  });
+
+  it('handles missing or unexpected validation fields without throwing', async () => {
+    loginUserMock.mockRejectedValue({
+      response: { status: 400, data: { errorCode: 'ERR_VALIDATION', message: 'Invalid request.', fields: { other: 'Check this.' } } },
+    });
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+
+    await act(async () => { await submit(result); });
+
+    expect(result.current.errors.email).toBeUndefined();
+    expect(result.current.errors.password).toBeUndefined();
+    expect(result.current.authError).toBe('Invalid request.');
   });
 
   it('blocks both button-driven and direct submissions during a login cooldown', async () => {
