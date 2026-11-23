@@ -8,7 +8,7 @@ import GroupsModal from './GroupsModal';
 interface HeroSectionProps {
   mentorship?: MentorshipDetails;
   isLoading?: boolean;
-  mentorshipId?: number;
+  mentorshipId?: string;
   isEnrolled?: boolean;
 }
 

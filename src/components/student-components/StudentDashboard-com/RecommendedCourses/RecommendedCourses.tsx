@@ -30,7 +30,7 @@ const RecommendedCourses: FC<RecommendedCoursesProps> = ({ courses, onAddToCart,
           <p className="text-xs text-gray-400 mt-0.5">Hand-picked mentorships based on your interests</p>
         </div>
         <Link
-          to="/explore-mentorships"
+          to="/mentorships"
           className="text-xs font-semibold transition-colors"
           style={{ color: '#0f5e8b' }}
           onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')}

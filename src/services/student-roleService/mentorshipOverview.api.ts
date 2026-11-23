@@ -21,7 +21,7 @@ const mapMentorshipOverview = (payload: Record<string, unknown>): MentorshipOver
   const upcomingItems = (payload.upcomingItems ?? {}) as Record<string, unknown>;
 
   return {
-    id: Number(payload.id ?? 0),
+    id: String(payload.id ?? ''),
     title: String(payload.title ?? 'Untitled Mentorship'),
     subtitle: String(payload.subtitle ?? ''),
     description: String(payload.description ?? ''),
@@ -58,7 +58,7 @@ const mapMentorshipOverview = (payload: Record<string, unknown>): MentorshipOver
               title: String(item.title ?? ''),
               type,
               dueDate: String(item.dueDate ?? ''),
-              mentorshipId: Number(item.mentorshipId ?? 0),
+              mentorshipId: String(item.mentorshipId ?? ''),
               mentorshipTitle: String(item.mentorshipTitle ?? ''),
               weekId: Number(item.weekId ?? 0),
               weekTitle: String(item.weekTitle ?? ''),
@@ -111,7 +111,7 @@ export const useMentorshipOverview = (mentorshipId: string | number, enabled = t
   return useQuery({
     queryKey: mentorshipOverviewKeys.detail(mentorshipId),
     queryFn: ({ signal }) => fetchMentorshipOverview(mentorshipId, signal),
-    enabled: enabled && Number.isFinite(Number(mentorshipId)) && Number(mentorshipId) > 0,
+    enabled: enabled && !!mentorshipId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });

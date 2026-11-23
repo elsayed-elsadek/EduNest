@@ -8,7 +8,7 @@ const NAV = [
     heading: 'Platform',
     links: [
       { label: 'Home',        path: '/student/dashboard'    },
-      { label: 'Mentorships', path: '/explore-mentorships'  },
+      { label: 'Mentorships', path: '/mentorships'  },
       { label: 'My Learning', path: '/student/learning'     },
       { label: 'Messages',    path: '/student/messages'     },
     ],

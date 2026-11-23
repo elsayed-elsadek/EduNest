@@ -15,8 +15,8 @@ const MentorshipDetailsPage = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
 
-  const normalizedId = Number(mentorshipId ?? '');
-  const hasValidId = Number.isFinite(normalizedId) && normalizedId > 0;
+  const normalizedId = mentorshipId ?? '';
+  const hasValidId = normalizedId.length > 0;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

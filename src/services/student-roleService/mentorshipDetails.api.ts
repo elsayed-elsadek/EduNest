@@ -70,7 +70,7 @@ const mapMentorshipSummary = (item: Record<string, unknown>): MentorshipSummary 
   );
 
   return {
-    id: Number(item.id ?? 0),
+    id: String(item.id ?? ''),
     title: String(item.title ?? 'Untitled Mentorship'),
     subtitle: String(item.subtitle ?? ''),
     description: String(item.description ?? ''),
@@ -99,7 +99,7 @@ const mapMentorshipDetails = (payload: Record<string, unknown>): MentorshipDetai
     : [];
 
   return {
-    id: Number(payload.id ?? 0),
+    id: String(payload.id ?? ''),
     title: String(payload.title ?? 'Untitled Mentorship'),
     subtitle: String(payload.subtitle ?? ''),
     description: String(payload.description ?? ''),

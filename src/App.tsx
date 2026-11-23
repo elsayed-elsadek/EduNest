@@ -168,6 +168,7 @@ function App() {
           <Route path="/become-mentor" element={<BecomeMentor />} />
           <Route path="/start-Started" element={<GetStarted />} />
           <Route path="/mentorships" element={<ExploreMentorships />} />
+          <Route path="/explore-mentorships" element={<ExploreMentorships />} />
           <Route path="/mentorships/:mentorshipId" element={<MentorshipDetailsPage />}>
             <Route index element={<MentorshipOverview />} />
             <Route path="content" element={<MentorshipContentSection />} />
@@ -215,7 +216,6 @@ function App() {
           {/* Protected Student Routes */}
           <Route element={<ProtectedRoute allowedRoles={['ROLE_STUDENT']} />}>
             <Route path="/student/dashboard" element={<StudentDashboard />} />
-            <Route path="/explore-mentorships" element={<ExploreMentorships />} />
             <Route path="/student/learning" element={<MyLearning />} />
             <Route path="/student/learning/:mentorshipId" element={<StudentMentorshipContent />} />
             <Route path="/student/learning/:mentorshipId/overview" element={<MentorshipOverviewPage />} />

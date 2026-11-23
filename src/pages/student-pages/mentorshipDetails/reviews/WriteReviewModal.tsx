@@ -12,7 +12,7 @@ export const WriteReviewModal = ({
   mentorshipId,
   onClose,
 }: {
-  mentorshipId: number;
+  mentorshipId: string | number;
   onClose: () => void;
 }) => {
   const [rating, setRating] = useState(0);

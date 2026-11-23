@@ -29,7 +29,7 @@ const CTASection: FC = () => {
 
         <div className="flex flex-wrap justify-center gap-4">
           <Link
-          to="/explore-mentorships"
+          to="/mentorships"
             className="flex items-center gap-2 px-8 py-4 bg-yellow-400 text-gray-900 rounded-xl font-bold hover:bg-yellow-300 transition-colors shadow-lg"
           >
             Explore All Programs
