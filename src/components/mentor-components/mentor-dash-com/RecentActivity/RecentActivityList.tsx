@@ -16,10 +16,6 @@ const RecentActivityList: FC<RecentActivityListWithPaginationProps> = ({
   totalPages = 1,
   onPageChange,
 }) => {
-  const handleView = () => {
-    // TODO: Navigate to activity detail
-  };
-
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-200 dark:border-zinc-800 shadow-sm">
       {/* Header */}
@@ -39,7 +35,6 @@ const RecentActivityList: FC<RecentActivityListWithPaginationProps> = ({
             <ActivityItem
               key={activity.id}
               activity={activity}
-              onView={handleView}
             />
           ))}
         </div>
