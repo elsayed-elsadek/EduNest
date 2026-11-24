@@ -5,7 +5,6 @@ import { ACTIVITY_CONFIG, detectActivityType, getRelativeTime } from './activity
 
 interface ActivityItemProps {
   activity: StudentActivity;
-  onView?: (id: string) => void;
 }
 
 /**

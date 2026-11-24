@@ -1,11 +1,3 @@
-import mentorImgUiUx from '../assets/homePage/explore1.webp';
-import mentorImgReact from '../assets/homePage/Questions-pana.svg';
-import mentorImgMl from '../assets/homePage/aboutus3.webp';
-import mentorImgFullstack from '../assets/homePage/aboutus2.webp';
-import avatarDavid from '../assets/homePage/person1.webp';
-import avatarSarah from '../assets/homePage/person2.webp';
-import avatarKumar from '../assets/homePage/person3.webp';
-import avatarJohn from '../assets/homePage/person4.webp';
 import aboutUs1 from '../assets/homePage/about/Seminar-amico.svg';
 import aboutUs2 from '../assets/homePage/about/Studying-amico.svg';
 import aboutUs3 from '../assets/homePage/about/Remote meeting-rafiki.svg';
@@ -13,13 +5,6 @@ import blog1 from '../assets/homePage/blog/Blog post-bro.svg';
 import blog2 from '../assets/homePage/blog/Education-rafiki.svg';
 import blog3 from '../assets/homePage/blog/Programming-amico.svg';
 import blog4 from '../assets/homePage/blog/UI-UX differences-rafiki.svg';
-
-
-export const TEXTS = {
-  heroTitle: 'Learn.Mentor. Grow',
-  heroSubtitle: 'Join a community where mentors share experience and students grow with real-world guidance',
-  joinMeta: 'Join 1,000 mentors and students'
-};
 
 export const COLORS = {
   primary: 'text-[#0f5e8b]',
@@ -41,15 +26,6 @@ export const SERVICES = {
     { icon: 'Briefcase', title: 'Career Guidance', desc: 'Receive expert advice on how to advance your career and land opportunities in your chosen field.' },
   ]
 };
-
-export const MENTORSHIPS = [
-  { title: 'Mastering UI/UX Design: From Concept Prototype', image: mentorImgUiUx, rating: 4.9, reviews: 328, price: 250, instructor: 'David Hall', avatar: avatarDavid, category: 'UI/UX' },
-  { title: 'Advanced React & Next.js Patterns', image: mentorImgReact, rating: 4.8, reviews: 450, price: 299, instructor: 'Sarah Chen', avatar: avatarSarah, category: 'Frontend' },
-  { title: 'Machine Learning Fundamentals', image: mentorImgMl, rating: 4.9, reviews: 512, price: 320, instructor: 'Prof. Kumar', avatar: avatarKumar, category: 'Machine Learning' },
-  { title: 'Full Stack Web Development', image: mentorImgFullstack, rating: 4.7, reviews: 289, price: 280, instructor: 'John Doe', avatar: avatarJohn, category: 'Full Stack' },
-  { title: 'Full Stack Web Development', image: mentorImgFullstack, rating: 4.7, reviews: 289, price: 280, instructor: 'John Doe', avatar: avatarJohn, category: 'Full Stack' },
-
-];
 
 // Using string-based icon names
 export const ABOUT_STATS = [
