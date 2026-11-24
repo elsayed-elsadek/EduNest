@@ -5,7 +5,7 @@ import type { MentorshipSummary } from '../../../../types/student-role-types/stu
 interface TopMentorshipsProps {
   mentorships?: MentorshipSummary[];
   isLoading?: boolean;
-  onSelect?: (id: number) => void;
+  onSelect?: (id: string) => void;
 }
 
 const TopMentorships: FC<TopMentorshipsProps> = ({ mentorships = [], isLoading = false, onSelect }) => {

@@ -9,7 +9,7 @@ import type { MentorshipDetails } from '../../../types/student-role-types/studen
 interface MentorshipDetailsOutletContext {
   mentorship?: MentorshipDetails;
   isLoading: boolean;
-  mentorshipId: number;
+  mentorshipId: string;
   isEnrolled?: boolean;
 }
 
@@ -17,7 +17,7 @@ const OverviewSection: FC = () => {
   const { mentorship, isLoading, mentorshipId, isEnrolled } = useOutletContext<MentorshipDetailsOutletContext>();
   const navigate = useNavigate();
 
-  const handleSelectMentorship = (id: number) => {
+  const handleSelectMentorship = (id: string) => {
     if (id === mentorshipId) return;
     navigate(`/mentorships/${id}`);
   };

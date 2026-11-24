@@ -19,14 +19,16 @@ export default function DashLayout({ children, pageTitle }: DashLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const token = useAuthStore((s) => s.token);
   const userName = useAuthStore((s) => s.userName);
-  const setAuth = useAuthStore((s) => s.setAuth);
+  // Profile-only backfill must NOT go through setAuth: that would start a new
+  // auth generation and invalidate a legitimate in-flight token refresh.
+  const updateProfile = useAuthStore((s) => s.updateProfile);
 
   useEffect(() => {
     if (token && (!userName?.trim() || userName === 'Mentor')) {
       const name = getFirstNameFromToken(token);
-      if (name) setAuth({ token, userName: name });
+      if (name) updateProfile({ userName: name });
     }
-  }, [token, userName, setAuth]);
+  }, [token, userName, updateProfile]);
 
   const { unreadCount } = useNotificationsContext();
 

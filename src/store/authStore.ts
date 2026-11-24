@@ -47,7 +47,6 @@ export interface AuthState {
     rememberMe?: boolean;
     lastEmail?: string;
   }) => void;
-  setTokenPair: (token: string, refreshToken: string) => void;
   updateProfile: (payload: {
     userName?: string;
     userAvatar?: string;
@@ -55,6 +54,7 @@ export interface AuthState {
   setHydrated: (value: boolean) => void;
   setAuthInit: (value: AuthState['authInit']) => void;
   clearAuth: () => void;
+  setTokenPairIfGeneration: (token: string, refreshToken: string, generation: number) => boolean;
   setRememberMe: (email: string, remember: boolean) => void;
   logout: () => void;
 }
@@ -143,6 +143,17 @@ const sessionAwareStorage: StateStorage = {
 };
 
 let sessionExpiredHandled = false;
+let authGeneration = 0;
+
+/** Current auth-session generation; refreshes may only commit into this generation. */
+export function getAuthGeneration(): number {
+  return authGeneration;
+}
+
+/** Clears local auth without navigation or server-side logout/revocation. */
+export function clearAuthWithoutRedirect(): void {
+  useAuthStore.getState().clearAuth();
+}
 
 const defaultSessionRedirect = (path: string): void => {
   window.location.replace(path);
@@ -162,8 +173,7 @@ export function handleSessionExpired(
   if (sessionExpiredHandled) return;
   sessionExpiredHandled = true;
 
-  useAuthStore.setState(LOGGED_OUT_STATE);
-  clearAuthStorage();
+  useAuthStore.getState().clearAuth();
   redirect('/login?reason=expired');
 }
 
@@ -177,7 +187,15 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       ...LOGGED_OUT_STATE,
       isHydrated: false,
-      setAuth: (payload) =>
+      setAuth: (payload) => {
+        // A new login/session supersedes any refresh that began for the old one.
+        // Profile-only writes (same access token, no replacement refresh token)
+        // must NOT bump the generation and invalidate a legitimate refresh.
+        const { token: currentToken, refreshToken: currentRefreshToken } = get();
+        const sessionChanged =
+          payload.token !== currentToken ||
+          (payload.refreshToken !== undefined && payload.refreshToken !== currentRefreshToken);
+        if (sessionChanged) authGeneration += 1;
         set((state) => ({
           ...state,
           token: payload.token,
@@ -190,12 +208,19 @@ export const useAuthStore = create<AuthState>()(
           rememberMe: payload.rememberMe ?? state.rememberMe,
           lastEmail: payload.lastEmail ?? state.lastEmail,
           authInit: 'ready',
-        })),
+        }));
+      },
       // FE-027: persists the rotated pair after every successful refresh.
       // Rotation is single-use — the OLD refresh token is dead the moment this
       // runs, so both values must land in storage together, atomically.
-      setTokenPair: (token, refreshToken) =>
-        set({ token, refreshToken, isAuthenticated: !!token, authInit: 'ready' }),
+      // The generation guard is the ONLY path that writes a rotated pair:
+      // `setAuth` (login/peer adoption) invalidates in-flight refreshes instead
+      // of letting them overwrite the newer session.
+      setTokenPairIfGeneration: (token, refreshToken, generation) => {
+        if (generation !== authGeneration) return false;
+        set({ token, refreshToken, isAuthenticated: !!token, authInit: 'ready' });
+        return true;
+      },
       updateProfile: (payload) =>
         set((state) => ({
           ...state,
@@ -207,6 +232,7 @@ export const useAuthStore = create<AuthState>()(
       setAuthInit: (value) =>
         set({ authInit: value }),
       clearAuth: () => {
+        authGeneration += 1;
         set({ ...LOGGED_OUT_STATE, isHydrated: true });
         clearAuthStorage();
       },
@@ -234,8 +260,7 @@ export const useAuthStore = create<AuthState>()(
         // Resetting the store first lets the persist middleware write the
         // emptied state; wiping the keys afterwards removes it entirely, so
         // only auth keys are touched (theme and other preferences survive).
-        set({ ...LOGGED_OUT_STATE, isHydrated: true });
-        clearAuthStorage();
+        get().clearAuth();
         notifyAuthPeers({ type: 'LOGOUT' });
         // Hard redirect to clear all React state/cache
         window.location.href = '/login';
@@ -359,10 +384,14 @@ function syncFromStorage(): void {
   const current = useAuthStore.getState();
   if (!stored.token) {
     // Peer tab logged out or its session expired.
-    if (current.token) useAuthStore.setState(LOGGED_OUT_STATE);
+    if (current.token) useAuthStore.getState().clearAuth();
     return;
   }
   if (stored.token === current.token && stored.refreshToken === current.refreshToken) return;
+  // INT-06: a peer rotation (or a newly stored session) is a NEW auth state.
+  // Invalidate refresh work started for the previous pair so a stale result
+  // can never overwrite the adopted pair.
+  authGeneration += 1;
   useAuthStore.setState({
     token: stored.token,
     refreshToken: stored.refreshToken,
@@ -378,8 +407,7 @@ if (typeof window !== 'undefined') {
       } else if (event.data?.type === 'LOGOUT') {
         // A peer tab revoked the session — end ours too, without a redirect
         // loop (ProtectedRoute lands the user on /login on its own).
-        useAuthStore.setState(LOGGED_OUT_STATE);
-        clearAuthStorage();
+        useAuthStore.getState().clearAuth();
       }
     };
   }

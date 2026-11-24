@@ -1,5 +1,5 @@
 export interface MentorshipSummary {
-  id: number;
+  id: string;
   title: string;
   subtitle: string;
   description: string;
@@ -13,7 +13,7 @@ export interface MentorshipSummary {
 }
 
 export interface MentorshipDetails {
-  id: number;
+  id: string;
   title: string;
   subtitle: string;
   description: string;
@@ -135,7 +135,7 @@ export interface UpcomingItem {
   title: string;
   type: 'SESSION' | 'ASSIGNMENT' | 'PROJECT' | 'QUIZ';
   dueDate: string;
-  mentorshipId: number;
+  mentorshipId: string;
   mentorshipTitle: string;
   weekId: number;
   weekTitle: string;
@@ -151,7 +151,7 @@ export interface PaginatedUpcomingItems {
 }
 
 export interface MentorshipOverviewEnrolled {
-  id: number;
+  id: string;
   title: string;
   subtitle: string;
   description: string;

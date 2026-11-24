@@ -9,7 +9,7 @@ import { ReviewItem } from './reviews/ReviewItem';
 import { WriteReviewModal } from './reviews/WriteReviewModal';
 
 interface MentorshipDetailsOutletContext {
-  mentorshipId: number;
+  mentorshipId: string;
   isLoading: boolean;
 }
 

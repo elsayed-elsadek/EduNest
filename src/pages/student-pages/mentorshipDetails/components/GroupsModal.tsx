@@ -18,7 +18,7 @@ import {
 import { getAssetUrl } from '../../../../config/env';
 
 interface GroupsModalProps {
-  mentorshipId: number;
+  mentorshipId: string;
   onClose: () => void;
 }
 

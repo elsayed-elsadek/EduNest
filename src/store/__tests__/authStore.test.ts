@@ -5,6 +5,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  clearAuthWithoutRedirect,
+  getAuthGeneration,
   getAuthToken,
   handleSessionExpired,
   resetSessionExpiredGuard,
@@ -156,6 +158,56 @@ describe('logout (FE-008)', () => {
   });
 });
 
+describe('non-redirecting auth cleanup (INT-06)', () => {
+  it('clears in-memory and persisted auth without navigating', () => {
+    useAuthStore.getState().setAuth({ token: validToken, refreshToken: 'refresh-to-clear' });
+    useAuthStore.getState().setRememberMe('sara@example.com', true);
+    window.sessionStorage.setItem('auth-storage', 'stale-session-copy');
+    const currentUrl = window.location.href;
+
+    clearAuthWithoutRedirect();
+
+    expect(useAuthStore.getState()).toMatchObject({
+      token: '',
+      refreshToken: '',
+      isAuthenticated: false,
+    });
+    expect(window.localStorage.getItem('auth-storage')).toBeNull();
+    expect(window.sessionStorage.getItem('auth-storage')).toBeNull();
+    expect(window.location.href).toBe(currentUrl);
+  });
+});
+
+describe('session identity vs profile updates (INT-06)', () => {
+  it('a new token starts a new auth generation', () => {
+    const before = getAuthGeneration();
+
+    useAuthStore.getState().setAuth({ token: validToken });
+
+    expect(getAuthGeneration()).toBe(before + 1);
+  });
+
+  it('a profile-only setAuth with the same token does not change the generation', () => {
+    useAuthStore.getState().setAuth({ token: validToken, refreshToken: 'rt1' });
+    const before = getAuthGeneration();
+
+    useAuthStore.getState().setAuth({ token: validToken, userName: 'Renamed' });
+
+    expect(getAuthGeneration()).toBe(before);
+    expect(useAuthStore.getState().refreshToken).toBe('rt1');
+    expect(useAuthStore.getState().userName).toBe('Renamed');
+  });
+
+  it('updateProfile never changes the auth generation', () => {
+    useAuthStore.getState().setAuth({ token: validToken });
+    const before = getAuthGeneration();
+
+    useAuthStore.getState().updateProfile({ userName: 'N', userAvatar: 'a.png' });
+
+    expect(getAuthGeneration()).toBe(before);
+  });
+});
+
 describe('cross-tab sync (FE-027)', () => {
   it('adopts a pair rotated by a peer tab via the storage event', () => {
     const peerToken = makeToken({ sub: 'peer' });
@@ -172,11 +224,14 @@ describe('cross-tab sync (FE-027)', () => {
         version: 0,
       })
     );
+    const generationBeforeAdoption = getAuthGeneration();
     window.dispatchEvent(new StorageEvent('storage', { key: 'auth-storage' }));
 
     expect(useAuthStore.getState().token).toBe(peerToken);
     expect(useAuthStore.getState().refreshToken).toBe('rt2');
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    // Adoption is a new auth state: refresh work from the previous pair is invalid.
+    expect(getAuthGeneration()).toBe(generationBeforeAdoption + 1);
   });
 
   it('a peer logout (cleared storage) ends this tab session too', () => {

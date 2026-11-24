@@ -1,15 +1,24 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import type { ReactElement } from 'react';
 import ProtectedRoute from '../ProtectedRoute';
 import { useAuthStore } from '../../store/authStore';
 
+const { refreshAccessTokenMock } = vi.hoisted(() => ({
+  refreshAccessTokenMock: vi.fn(),
+}));
+
+vi.mock('../../services/authRefresh', () => ({
+  refreshAccessToken: refreshAccessTokenMock,
+}));
+
 interface RenderOptions {
   isHydrated?: boolean;
   isAuthenticated?: boolean;
   userRole?: string;
   token?: string;
+  refreshToken?: string;
   allowedRoles?: string[];
   requireAuth?: boolean;
   initialPath?: string;
@@ -29,11 +38,12 @@ function renderProtectedRoute({
   isAuthenticated = false,
   userRole = '',
   token = '',
+  refreshToken = '',
   allowedRoles,
   requireAuth,
   initialPath = '/protected',
 }: RenderOptions = {}) {
-  useAuthStore.setState({ isHydrated, isAuthenticated, userRole, token });
+  useAuthStore.setState({ isHydrated, isAuthenticated, userRole, token, refreshToken });
 
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
@@ -77,10 +87,12 @@ describe('ProtectedRoute', () => {
     // The persisted store starts empty; reset it before every scenario.
     useAuthStore.setState({
       token: '',
+      refreshToken: '',
       isAuthenticated: false,
       isHydrated: true,
       userRole: '',
     });
+    refreshAccessTokenMock.mockReset();
   });
 
   it('renders nothing while the auth store is still hydrating', () => {
@@ -185,28 +197,99 @@ describe('ProtectedRoute', () => {
   });
 
   describe('FE-008 — token validity', () => {
-    it('sends a user with an expired token to /login with a session-expired reason', () => {
+    it('sends a user with an expired token and no refresh token to /login with a session-expired reason', () => {
       const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
 
       renderProtectedRoute({
         isAuthenticated: true,
         userRole: 'ROLE_STUDENT',
         token: expiredToken,
+        refreshToken: '',
       });
 
       expect(screen.getByText('login page:expired from:/protected')).toBeInTheDocument();
       expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+      expect(refreshAccessTokenMock).not.toHaveBeenCalled();
     });
 
-    it('treats a malformed token as unauthenticated', () => {
+    it('silently refreshes an expired token with a stored refresh token instead of redirecting', async () => {
+      const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
+      const rotatedToken = makeToken({ exp: Math.floor(Date.now() / 1000) + 3600 });
+      refreshAccessTokenMock.mockImplementation(async () => {
+        useAuthStore.setState({ token: rotatedToken, isAuthenticated: true });
+        return rotatedToken;
+      });
+
+      renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: expiredToken,
+        refreshToken: 'rt-1',
+      });
+
+      expect(await screen.findByText('secret content')).toBeInTheDocument();
+      expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+      expect(refreshAccessTokenMock).toHaveBeenCalledWith(expiredToken);
+      expect(screen.queryByText(/login page/)).not.toBeInTheDocument();
+    });
+
+    it('renders nothing while the recovery refresh is still pending', async () => {
+      const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
+      const rotatedToken = makeToken({ exp: Math.floor(Date.now() / 1000) + 3600 });
+
+      let resolveRefresh!: (value: string) => void;
+      refreshAccessTokenMock.mockReturnValue(
+        new Promise<string>((resolve) => {
+          resolveRefresh = resolve;
+        }),
+      );
+
+      const { container } = renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: expiredToken,
+        refreshToken: 'rt-1',
+      });
+
+      // No premature "session expired" redirect while renewal is in flight.
+      expect(container).toBeEmptyDOMElement();
+      expect(screen.queryByText(/login page/)).not.toBeInTheDocument();
+
+      useAuthStore.setState({ token: rotatedToken, isAuthenticated: true });
+      resolveRefresh(rotatedToken);
+
+      expect(await screen.findByText('secret content')).toBeInTheDocument();
+    });
+
+    it('lands on /login?reason=expired when the recovery refresh fails', async () => {
+      const expiredToken = makeToken({ exp: Math.floor(Date.now() / 1000) - 3600 });
+      refreshAccessTokenMock.mockRejectedValue(
+        Object.assign(new Error('Refresh token rejected'), { code: 'SESSION_EXPIRED' }),
+      );
+
+      renderProtectedRoute({
+        isAuthenticated: true,
+        userRole: 'ROLE_STUDENT',
+        token: expiredToken,
+        refreshToken: 'rt-1',
+      });
+
+      expect(await screen.findByText('login page:expired from:/protected')).toBeInTheDocument();
+      expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+      expect(refreshAccessTokenMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a malformed token as unauthenticated without attempting recovery', () => {
       renderProtectedRoute({
         isAuthenticated: true,
         userRole: 'ROLE_STUDENT',
         token: 'garbage',
+        refreshToken: 'rt-1',
       });
 
       expect(screen.getByText('login page:expired from:/protected')).toBeInTheDocument();
       expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+      expect(refreshAccessTokenMock).not.toHaveBeenCalled();
     });
 
     it('keeps the session for a user whose token has a future expiry', () => {

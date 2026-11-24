@@ -1,5 +1,5 @@
 export interface MentorshipData {
-  id: number;
+  id: string;
   title: string;
   subtitle: string;
   description: string;
