@@ -70,9 +70,10 @@ const Login: React.FC = () => {
 
         {/* Email Field */}
         <div className="flex flex-col">
-          <label className="text-xs font-medium text-gray-700 mb-2">E-mail</label>
+          <label htmlFor="login-email" className="text-xs font-medium text-gray-700 mb-2">E-mail</label>
           <div className="relative">
             <input
+              id="login-email"
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
@@ -103,9 +104,10 @@ const Login: React.FC = () => {
 
         {/* Password Field */}
         <div className="flex flex-col">
-          <label className="text-xs font-medium text-gray-700 mb-2">Password</label>
+          <label htmlFor="login-password" className="text-xs font-medium text-gray-700 mb-2">Password</label>
           <div className="relative">
             <input
+              id="login-password"
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={(e) => handleInputChange("password", e.target.value)}

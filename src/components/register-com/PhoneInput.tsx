@@ -27,9 +27,10 @@ export const PhoneInput: React.FC<Props> = ({ value, onChange, error }) => {
 
   return (
     <div className="flex flex-col w-full">
-      <label className="text-xs font-medium text-gray-700 mb-2">Phone</label>
+      <label htmlFor="registration-phone" className="text-xs font-medium text-gray-700 mb-2">Phone</label>
 
       <input
+        id="registration-phone"
         type="tel"
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -67,10 +67,11 @@ const RestoreAccount: React.FC = () => {
 
         {/* Email Field */}
         <div className="flex flex-col">
-          <label className="text-xs font-medium text-gray-700 mb-2">
+          <label htmlFor="restore-account-email" className="text-xs font-medium text-gray-700 mb-2">
             E-mail
           </label>
           <input
+            id="restore-account-email"
             type="email"
             value={formData.email}
             onChange={(e) => handleInputChange("email", e.target.value)}

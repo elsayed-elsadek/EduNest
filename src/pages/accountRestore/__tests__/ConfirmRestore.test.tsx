@@ -50,4 +50,58 @@ describe('ConfirmRestore rate limits', () => {
     fireEvent.click(confirm);
     expect(confirmRestoreMock).toHaveBeenCalledTimes(1);
   });
+
+  it('names each restore-code field and announces a failed confirmation accessibly', async () => {
+    confirmRestoreMock.mockRejectedValue({ response: { data: { message: 'Code was rejected.' } } });
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/confirm-restore', state: { email: 'restore-test@example.invalid' } }]}>
+        <ConfirmRestore />
+      </MemoryRouter>,
+    );
+    const inputs = Array.from({ length: 6 }, (_, index) => screen.getByRole('textbox', {
+      name: `Restore code digit ${index + 1} of 6`,
+    }));
+    inputs.forEach((input, index) => fireEvent.change(input, { target: { value: String(index + 1) } }));
+
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Restore Account' })));
+
+    expect(confirmRestoreMock).toHaveBeenCalledWith('restore-test@example.invalid', '123456');
+    expect(screen.getByRole('alert')).toHaveTextContent('Code was rejected.');
+  });
+
+  it('confirms successfully and navigates to login', async () => {
+    confirmRestoreMock.mockResolvedValue(undefined);
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/confirm-restore', state: { email: 'restore-test@example.invalid' } }]}>
+        <ConfirmRestore />
+      </MemoryRouter>,
+    );
+    Array.from({ length: 6 }, (_, index) => screen.getByRole('textbox', {
+      name: `Restore code digit ${index + 1} of 6`,
+    })).forEach((input, index) => fireEvent.change(input, { target: { value: String(index + 1) } }));
+
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Restore Account' })));
+
+    expect(confirmRestoreMock).toHaveBeenCalledWith('restore-test@example.invalid', '123456');
+    expect(toastMock.success).toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Restore Account' })).toBeInTheDocument();
+  });
+
+  it('resends the code after the initial timer expires', async () => {
+    vi.useFakeTimers();
+    sendRestoreOtpMock.mockResolvedValue(undefined);
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/confirm-restore', state: { email: 'restore-test@example.invalid' } }]}>
+        <ConfirmRestore />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('button', { name: /resend code in/i })).toBeDisabled();
+    await act(async () => vi.advanceTimersByTimeAsync(60_000));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Resend restore code' })));
+
+    expect(sendRestoreOtpMock).toHaveBeenCalledWith('restore-test@example.invalid');
+    expect(toastMock.success).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 });

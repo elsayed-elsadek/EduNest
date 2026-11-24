@@ -156,6 +156,39 @@ describe('logout (FE-008)', () => {
     expect(useAuthStore.getState().refreshToken).toBe('');
     expect(window.localStorage.getItem('auth-storage')).toBeNull();
   });
+
+  it('clears the complete local session even when refresh-token revocation rejects', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError('offline'));
+    vi.stubGlobal('fetch', fetchMock);
+    useAuthStore.getState().setAuth({
+      token: validToken,
+      refreshToken: 'synthetic-refresh-token',
+      userName: 'Synthetic User',
+      userEmail: 'logout-test@example.invalid',
+      userRole: 'ROLE_STUDENT',
+      userAvatar: '/synthetic-avatar.png',
+      rememberMe: true,
+      lastEmail: 'logout-test@example.invalid',
+    });
+
+    useAuthStore.getState().logout();
+    await Promise.resolve();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState()).toMatchObject({
+      token: '',
+      refreshToken: '',
+      isAuthenticated: false,
+      userName: '',
+      userEmail: '',
+      userRole: '',
+      userAvatar: '',
+      rememberMe: false,
+      lastEmail: '',
+    });
+    expect(window.localStorage.getItem('auth-storage')).toBeNull();
+    expect(window.sessionStorage.getItem('auth-storage')).toBeNull();
+  });
 });
 
 describe('non-redirecting auth cleanup (INT-06)', () => {

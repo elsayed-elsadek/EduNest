@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import type { ReactElement } from 'react';
 import ProtectedRoute from '../ProtectedRoute';
@@ -103,6 +103,21 @@ describe('ProtectedRoute', () => {
 
   it('redirects an unauthenticated visitor to /login', () => {
     renderProtectedRoute({ isAuthenticated: false });
+
+    expect(screen.getByText('login page from:/protected')).toBeInTheDocument();
+    expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+  });
+
+  it('removes protected content and redirects when logout clears auth state', () => {
+    renderProtectedRoute({
+      isAuthenticated: true,
+      userRole: 'ROLE_STUDENT',
+      token: makeToken({ sub: 'synthetic-user' }),
+    });
+
+    expect(screen.getByText('secret content')).toBeInTheDocument();
+
+    act(() => useAuthStore.getState().clearAuth());
 
     expect(screen.getByText('login page from:/protected')).toBeInTheDocument();
     expect(screen.queryByText('secret content')).not.toBeInTheDocument();

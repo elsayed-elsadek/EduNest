@@ -8,9 +8,10 @@ interface Props {
 
 const LastNameInput: React.FC<Props> = ({ value, onChange, error }) => (
   <div className="flex flex-col w-full">
-    <label className="text-xs sm:text-sm font-semibold text-gray-800 mb-2.5">Last Name</label>
+    <label htmlFor="registration-last-name" className="text-xs sm:text-sm font-semibold text-gray-800 mb-2.5">Last Name</label>
 
     <input
+      id="registration-last-name"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className="

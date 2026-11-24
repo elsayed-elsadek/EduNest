@@ -204,11 +204,12 @@ const Register: React.FC = () => {
         {/* Educational Level - Only for Students (Styled & Brand Colorized) */}
         {form.joinAs === "student" && (
           <div className="w-full">
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+            <label htmlFor="registration-educational-level" className="block text-sm font-semibold text-gray-700 mb-1.5">
               Level
             </label>
             <div className="relative">
               <select
+                id="registration-educational-level"
                 value={form.formData.educationalLevel || ""}
                 onChange={(e) => form.handleInputChange("educationalLevel", e.target.value)}
                 className={`w-full px-4 py-3 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f5e8b] focus:border-transparent transition-all appearance-none cursor-pointer text-sm text-gray-800 ${
@@ -264,13 +265,13 @@ const Register: React.FC = () => {
             />
             <span className="text-gray-600">
               I agree with{" "}
-              <a href="#" className="text-[var(--primary-500)] hover:underline font-semibold transition-colors">
+              <button type="button" className="text-[var(--primary-500)] hover:underline font-semibold transition-colors">
                 Terms
-              </a>{" "}
+              </button>{" "}
               and{" "}
-              <a href="#" className="text-[var(--primary-500)] hover:underline font-semibold transition-colors">
+              <button type="button" className="text-[var(--primary-500)] hover:underline font-semibold transition-colors">
                 Privacy Policy
-              </a>
+              </button>
             </span>
           </label>
           {form.errors.agreeTerms && (
