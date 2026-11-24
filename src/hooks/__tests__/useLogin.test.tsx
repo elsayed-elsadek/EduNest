@@ -161,6 +161,63 @@ describe('useLogin validation', () => {
 });
 
 describe('useLogin submit', () => {
+  it.each([
+    { rememberMe: true, expectedHome: 'local' as const, absentHome: 'session' as const },
+    { rememberMe: false, expectedHome: 'session' as const, absentHome: 'local' as const },
+  ])('persists a complete login pair in $expectedHome storage and restores it after reload', async ({
+    rememberMe,
+    expectedHome,
+    absentHome,
+  }) => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    useAuthStore.getState().setAuth({
+      token: 'prior-synthetic-access-token',
+      refreshToken: 'prior-synthetic-refresh-token',
+      rememberMe: !rememberMe,
+      lastEmail: 'prior-session@example.invalid',
+    });
+    useAuthStore.getState().setRememberMe('prior-session@example.invalid', !rememberMe);
+    loginUserMock.mockResolvedValue({
+      apiResponse: {
+        jwt: makeToken({ sub: 'synthetic-user', authorities: ['ROLE_MENTOR'] }),
+        refreshToken: 'synthetic-refresh-token',
+      },
+    });
+
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result, 'session-test@example.invalid', 'synthetic-password');
+    act(() => result.current.handleInputChange('rememberMe', rememberMe));
+
+    await act(async () => submit(result));
+
+    const intendedStorage = expectedHome === 'local' ? window.localStorage : window.sessionStorage;
+    const otherStorage = absentHome === 'local' ? window.localStorage : window.sessionStorage;
+    const storedPair = intendedStorage.getItem('auth-storage');
+    expect(storedPair).toContain('synthetic-refresh-token');
+    expect(storedPair).not.toContain('prior-synthetic-access-token');
+    expect(storedPair).not.toContain('prior-synthetic-refresh-token');
+    expect(otherStorage.getItem('auth-storage')).toBeNull();
+    expect(useAuthStore.getState()).toMatchObject({
+      isAuthenticated: true,
+      rememberMe,
+      lastEmail: rememberMe ? 'session-test@example.invalid' : '',
+    });
+
+    // Re-import only the store module to simulate a fresh page load. The
+    // completed login above is the source of the persisted session.
+    vi.resetModules();
+    const { useAuthStore: rehydratedStore } = await import('../../store/authStore');
+    expect(rehydratedStore.getState()).toMatchObject({
+      token: expect.any(String),
+      refreshToken: 'synthetic-refresh-token',
+      isAuthenticated: true,
+      rememberMe,
+      authInit: 'ready',
+    });
+    expect(rehydratedStore.getState().token).toBe(JSON.parse(storedPair!).state.token);
+  });
+
   it('stores the session and redirects to the role dashboard on success', async () => {
     loginUserMock.mockResolvedValue({
       apiResponse: {
@@ -283,6 +340,24 @@ describe('useLogin submit', () => {
     await act(async () => {
       await submit(result);
     });
+
+    expect(navigateMock).toHaveBeenCalledWith('/student/dashboard', { replace: true });
+  });
+
+  it.each([
+    null,
+    '',
+    { pathname: '//evil.example/redirect' },
+    { pathname: '/student/learning', search: 'not-a-query' },
+  ])('falls back to the role dashboard for a malformed or empty return path', async (from) => {
+    locationMock.state = { from };
+    loginUserMock.mockResolvedValue({
+      apiResponse: { jwt: makeToken({ sub: 'synthetic-user', role: 'ROLE_STUDENT' }) },
+    });
+    const { result } = renderHook(() => useLogin());
+    fillCredentials(result);
+
+    await act(async () => submit(result));
 
     expect(navigateMock).toHaveBeenCalledWith('/student/dashboard', { replace: true });
   });
