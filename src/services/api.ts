@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
-import { getAuthToken, handleSessionExpired } from '../store/authStore';
+import { getAuthGeneration, getAuthToken, handleSessionExpired } from '../store/authStore';
 import { refreshAccessToken } from './authRefresh';
 import { parseApiError, type NormalizedApiError } from './errors';
 import { getTokenExpiration, isTokenValid } from '../utils/jwt';
@@ -44,6 +44,12 @@ function isPublicAuthRequest(url: string | undefined): boolean {
 
 // Add authorization token only for requests that need it
 api.interceptors.request.use(async (config) => {
+  // Record which auth session this request belongs to. The 401 handler uses it
+  // to tell a genuine current-session failure from a late response that
+  // outlived an explicit cleanup or a newer login.
+  (config as InternalAxiosRequestConfig & { _authGeneration?: number })._authGeneration =
+    getAuthGeneration();
+
   if (isPublicAuthRequest(config.url)) {
     return config;
   }
@@ -72,7 +78,19 @@ api.interceptors.request.use(async (config) => {
   if (expiresAt !== null && expiresAt <= Date.now() + ACCESS_TOKEN_REFRESH_WINDOW_MS) {
     // FE-008: refresh just in time on user activity, before sending an expired
     // access token. refreshAccessToken is single-flight and cross-tab locked.
+    const generationAtRefreshStart = getAuthGeneration();
     token = await refreshAccessToken(token);
+
+    // A refresh waiter may resume after an explicit auth clear. The auth
+    // generation is invalidated by cleanup, so never attach a token resolved
+    // for a session that no longer exists.
+    if (getAuthGeneration() !== generationAtRefreshStart) {
+      return Promise.reject(
+        Object.assign(new Error('Authentication changed during request refresh'), {
+          code: 'AUTH_STATE_CHANGED',
+        })
+      );
+    }
   }
 
   // Guard against a malformed/expired replacement from the refresh path.
@@ -106,11 +124,16 @@ api.interceptors.response.use(
     logger.error(`API Error ${status} (${code}) on ${url}:`, error.message);
 
     const original = error.config as
-      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | (InternalAxiosRequestConfig & { _retry?: boolean; _authGeneration?: number })
       | undefined;
     const isProtected401 = status === 401 && !isPublicAuthRequest(original?.url);
+    // INT-06: a request sent under a session that has since been cleared or
+    // replaced must never refresh, replay, or expire the CURRENT session.
+    const authChangedSinceSend =
+      typeof original?._authGeneration === 'number' &&
+      original._authGeneration !== getAuthGeneration();
 
-    if (isProtected401 && original && !original._retry) {
+    if (isProtected401 && original && !original._retry && !authChangedSinceSend) {
       // FE-027: a 401 on a protected endpoint means the access token is no
       // longer accepted — attempt ONE silent refresh (single-flight, shared by
       // all concurrent 401s) and replay the original request with the rotated
@@ -122,7 +145,15 @@ api.interceptors.response.use(
           typeof original.headers?.Authorization === 'string'
             ? original.headers.Authorization.replace(/^Bearer\s+/i, '')
             : undefined;
+        const generationAtRefreshStart = getAuthGeneration();
         const newToken = await refreshAccessToken(failedAccessToken);
+        // Cleanup may happen after refresh resolves but before this queued 401
+        // handler retries. Do not replay with credentials for a cleared session.
+        if (getAuthGeneration() !== generationAtRefreshStart) {
+          throw Object.assign(new Error('Authentication changed before request retry'), {
+            code: 'AUTH_STATE_CHANGED',
+          });
+        }
         original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
       } catch (refreshError) {
@@ -130,7 +161,7 @@ api.interceptors.response.use(
       }
     }
 
-    if (isProtected401) {
+    if (isProtected401 && !authChangedSinceSend) {
       // FE-008: refresh was already attempted (or the request is a replay) —
       // clear the session exactly once (guarded) → /login?reason=expired.
       handleSessionExpired();

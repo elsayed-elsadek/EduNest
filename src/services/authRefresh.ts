@@ -15,7 +15,13 @@
  * Cross-tab coordination (Option A — persisted pair): the rotated pair lands in
  * web storage, which peer tabs re-read after acquiring the Web Locks mutex.
  */
-import { getStoredAuth, handleSessionExpired, notifyAuthPeers, useAuthStore } from '../store/authStore';
+import {
+  getAuthGeneration,
+  getStoredAuth,
+  handleSessionExpired,
+  notifyAuthPeers,
+  useAuthStore,
+} from '../store/authStore';
 import { isTokenValid } from '../utils/jwt';
 import { API_BASE_URL } from '../config/env';
 import logger from '../utils/logger';
@@ -29,6 +35,13 @@ const REFRESH_TIMEOUT_MS = 30_000;
 /** In-flight refresh promise — guarantees ONE refresh per tab regardless of how many 401s race. */
 let refreshPromise: Promise<string> | null = null;
 
+/**
+ * Auth generation the in-flight refresh belongs to. A refresh created for an
+ * older session must never be joined by a newer one, and its cleanup must not
+ * clear a newer promise.
+ */
+let refreshPromiseGeneration: number | null = null;
+
 /** Web Locks API, typed defensively (not in all TS lib targets / browsers). */
 interface LocksLike {
   request: (name: string, callback: () => Promise<string>) => Promise<string>;
@@ -40,11 +53,26 @@ function getLocks(): LocksLike | undefined {
 }
 
 /**
+ * KNOWN LIMITATION (not fixed here): when the Web Locks API is unavailable,
+ * `refreshAccessToken` still single-flights within one tab, but two tabs can
+ * submit the SAME refresh token concurrently. Because the backend consumes
+ * refresh tokens single-use, that can revoke the token family. The generation
+ * guard below prevents a stale result from overwriting an adopted pair; it
+ * cannot prevent the duplicate rotation itself.
+ */
+
+/**
  * Performs the actual rotation. `observedRefreshToken` is what this caller saw
  * before serializing — if the stored token differs by now, a peer tab already
  * rotated and we must reuse its access token instead of rotating again.
  */
-async function executeRefresh(observedRefreshToken: string): Promise<string> {
+async function executeRefresh(observedRefreshToken: string, generation: number): Promise<string> {
+  if (getAuthGeneration() !== generation) {
+    throw Object.assign(new Error('Authentication changed while refresh was queued'), {
+      code: 'AUTH_STATE_CHANGED',
+    });
+  }
+
   const { refreshToken: currentRefreshToken } = getStoredAuth();
 
   if (!currentRefreshToken) {
@@ -116,7 +144,14 @@ async function executeRefresh(observedRefreshToken: string): Promise<string> {
   }
 
   // Persist the rotated pair atomically — the old refresh token is now dead.
-  useAuthStore.getState().setTokenPair(newToken, newRefreshToken);
+  const committed = useAuthStore
+    .getState()
+    .setTokenPairIfGeneration(newToken, newRefreshToken, generation);
+  if (!committed) {
+    throw Object.assign(new Error('Authentication changed while refresh was pending'), {
+      code: 'AUTH_STATE_CHANGED',
+    });
+  }
   notifyAuthPeers({ type: 'TOKEN_REFRESHED' });
 
   return newToken;
@@ -132,7 +167,16 @@ async function executeRefresh(observedRefreshToken: string): Promise<string> {
  * @throws `SESSION_EXPIRED`-coded errors after the session has been cleared
  */
 export async function refreshAccessToken(failedAccessToken?: string): Promise<string> {
-  if (refreshPromise) return refreshPromise;
+  const generation = getAuthGeneration();
+
+  if (refreshPromise) {
+    if (refreshPromiseGeneration === generation) return refreshPromise;
+    // The session changed since this promise was created (cleanup or a newer
+    // login). Never join it; let it settle and fail on its generation check.
+    void refreshPromise.catch(() => undefined);
+    refreshPromise = null;
+    refreshPromiseGeneration = null;
+  }
 
   const observed = getStoredAuth();
 
@@ -148,15 +192,23 @@ export async function refreshAccessToken(failedAccessToken?: string): Promise<st
     if (latest.token && (accessAlreadyReplaced || refreshAlreadyRotated)) {
       return latest.token;
     }
-    return executeRefresh(observed.refreshToken);
+    return executeRefresh(observed.refreshToken, generation);
   };
 
   const locks = getLocks();
   const pending = locks ? locks.request(REFRESH_LOCK, run) : run();
 
-  refreshPromise = pending.finally(() => {
-    refreshPromise = null;
+  const tracked = pending.finally(() => {
+    // Only clear the slot if it still holds THIS promise — a newer session may
+    // already have installed its own refresh.
+    if (refreshPromise === tracked) {
+      refreshPromise = null;
+      refreshPromiseGeneration = null;
+    }
   });
 
-  return refreshPromise;
+  refreshPromise = tracked;
+  refreshPromiseGeneration = generation;
+
+  return tracked;
 }

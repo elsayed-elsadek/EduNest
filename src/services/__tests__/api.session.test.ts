@@ -7,14 +7,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { InternalAxiosRequestConfig } from 'axios';
 
-const { getAuthTokenMock, handleSessionExpiredMock, refreshAccessTokenMock } = vi.hoisted(() => ({
+const { getAuthTokenMock, handleSessionExpiredMock, refreshAccessTokenMock, getAuthGenerationMock } = vi.hoisted(() => ({
   getAuthTokenMock: vi.fn(() => ''),
   handleSessionExpiredMock: vi.fn(),
   refreshAccessTokenMock: vi.fn(),
+  getAuthGenerationMock: vi.fn(() => 0),
 }));
 
 vi.mock('../../store/authStore', () => ({
   getAuthToken: () => getAuthTokenMock(),
+  getAuthGeneration: () => getAuthGenerationMock(),
   handleSessionExpired: () => handleSessionExpiredMock(),
 }));
 
@@ -80,6 +82,7 @@ const REFRESH_BODY = { apiResponse: { jwt: makeToken({ sub: 'new' }), refreshTok
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
   getAuthTokenMock.mockReset().mockReturnValue('');
+  getAuthGenerationMock.mockReset().mockReturnValue(0);
   handleSessionExpiredMock.mockClear();
   refreshAccessTokenMock.mockReset();
   api.defaults.adapter = undefined as never;

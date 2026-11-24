@@ -7,14 +7,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AxiosError } from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 
-const { getAuthTokenMock, handleSessionExpiredMock, refreshAccessTokenMock } = vi.hoisted(() => ({
+const { getAuthTokenMock, handleSessionExpiredMock, refreshAccessTokenMock, getAuthGenerationMock } = vi.hoisted(() => ({
   getAuthTokenMock: vi.fn(() => ''),
   handleSessionExpiredMock: vi.fn(),
   refreshAccessTokenMock: vi.fn(),
+  getAuthGenerationMock: vi.fn(() => 0),
 }));
 
 vi.mock('../../store/authStore', () => ({
   getAuthToken: () => getAuthTokenMock(),
+  getAuthGeneration: () => getAuthGenerationMock(),
   handleSessionExpired: (...args: unknown[]) => handleSessionExpiredMock(...args),
 }));
 
@@ -67,6 +69,7 @@ function authHeader(config: InternalAxiosRequestConfig): unknown {
 
 beforeEach(() => {
   getAuthTokenMock.mockReset().mockReturnValue('');
+  getAuthGenerationMock.mockReset().mockReturnValue(0);
   handleSessionExpiredMock.mockClear();
   refreshAccessTokenMock.mockReset();
   api.defaults.adapter = undefined as never;
@@ -107,6 +110,19 @@ describe('401 response interceptor — silent refresh + single retry', () => {
     expect(refreshAccessTokenMock).toHaveBeenCalledWith(accessToken1);
     expect(captured).toHaveLength(2);
     expect(authHeader(captured[1])).toBe(`Bearer ${accessToken2}`);
+    expect(handleSessionExpiredMock).not.toHaveBeenCalled();
+  });
+
+  it('does not refresh or expire a request sent under an older auth generation', async () => {
+    getAuthTokenMock.mockReturnValue(accessToken1);
+    // Sent under generation 0, then the 401 is handled under generation 1
+    // (an explicit cleanup or a newer login happened meanwhile).
+    getAuthGenerationMock.mockReturnValueOnce(0).mockReturnValue(1);
+    scriptAdapter([{ status: 401 }]);
+
+    await expect(api.get('/api/v1/protected')).rejects.toMatchObject({ response: { status: 401 } });
+
+    expect(refreshAccessTokenMock).not.toHaveBeenCalled();
     expect(handleSessionExpiredMock).not.toHaveBeenCalled();
   });
 
