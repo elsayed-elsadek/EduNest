@@ -26,6 +26,7 @@ export const CodeInput: React.FC<Props> = ({
   return (
     <input
       ref={inputRef}
+      aria-label={`Verification code digit ${index + 1} of ${lastIndex + 1}`}
       type="text"
       maxLength={1}
       value={value}

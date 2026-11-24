@@ -15,10 +15,11 @@ const EmailInput: React.FC<Props> = ({ value, onChange, error }) => {
   return (
     <div className="flex flex-col w-full">
       {/* label */}
-      <label className="text-xs font-medium text-gray-700 mb-2">Email</label>
+      <label htmlFor="registration-email" className="text-xs font-medium text-gray-700 mb-2">Email</label>
 
       <div className="relative">
         <input
+          id="registration-email"
           type="email"
           value={value}
           onChange={(e) => onChange(e.target.value)}
