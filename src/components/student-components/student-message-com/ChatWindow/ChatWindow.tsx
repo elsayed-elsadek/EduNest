@@ -7,6 +7,8 @@ import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 import type { Chat, Message } from '../../../../types/mentor-meaasges.types';
 
+const DIRECT_CHAT_UNAVAILABLE_MESSAGE = 'This conversation is unavailable.';
+
 interface ChatWindowProps {
   chat: Chat;
   messages: Message[];
@@ -18,6 +20,7 @@ interface ChatWindowProps {
   onDeleteMessage?: (messageId: string) => Promise<void>;
   onViewMembers?: () => void;
   isMembersOpen?: boolean;
+  unavailable?: boolean;
 }
 
 const ChatWindow: FC<ChatWindowProps> = ({
@@ -31,6 +34,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
   onDeleteMessage,
   onViewMembers,
   isMembersOpen,
+  unavailable = false,
 }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -67,6 +71,22 @@ const ChatWindow: FC<ChatWindowProps> = ({
   };
 
   const visibleMessages = messages.filter(m => !m.deleted && m.content !== '');
+
+  if (unavailable) {
+    return (
+      <div className="flex-1 flex flex-col overflow-hidden bg-white relative min-h-0">
+        <div
+          role="status"
+          className="flex-1 flex items-center justify-center px-6 py-4 bg-[#FAFAFA]"
+        >
+          <p className="text-sm text-gray-600 text-center">{DIRECT_CHAT_UNAVAILABLE_MESSAGE}</p>
+        </div>
+        <div className="flex-shrink-0">
+          <MessageInput onSend={onSendMessage} disabled />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-white relative min-h-0">

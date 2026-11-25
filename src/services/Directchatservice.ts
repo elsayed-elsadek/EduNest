@@ -1,35 +1,29 @@
 
 import api from './api';
 
-const handleRequest = async <T>(req: Promise<{ data: T }>): Promise<T> => {
-  try { return (await req).data; }
-  catch (error: unknown) {
-    const err = error as { response?: { data?: unknown }; message?: string };
-    throw err.response?.data ?? err.message;
-  }
-};
+// Let Axios rejections pass through untouched so callers keep `response.status`
+// and the `normalized` metadata attached by the api.ts response interceptor.
+const handleRequest = async <T>(req: Promise<{ data: T }>): Promise<T> =>
+  (await req).data;
 
 // GET /api/v1/conversation/all
 export const getAllConversations = () =>
   handleRequest(api.get('api/v1/conversation/all'));
 
 // GET /api/v1/conversation/{conversationId}/messages
-export const getConversationMessages = (conversationId: number, size = 20, beforeId?: number) =>
+export const getConversationMessages = (conversationId: string, size = 20, beforeId?: string) =>
   handleRequest(api.get(`api/v1/conversation/${conversationId}/messages`, {
     params: { size, ...(beforeId ? { beforeId } : {}) },
   }));
 
 // PATCH /api/v1/conversation/messages/{messageId}
-// Body: { content, recipientEmail }
-export const editMessage = (messageId: number, content: string, recipientEmail: string) =>
+// Body: { content }
+export const editMessage = (messageId: string, content: string) =>
   handleRequest(api.patch(`api/v1/conversation/messages/${messageId}`, {
     content,
-    recipientEmail,
   }));
 
 // DELETE /api/v1/conversation/messages/{messageId}
-// Body: { recipientEmail }
-export const deleteMessage = (messageId: number, recipientEmail: string) =>
-  handleRequest(api.delete(`api/v1/conversation/messages/${messageId}`, {
-    data: { recipientEmail },
-  }));
+// No request body.
+export const deleteMessage = (messageId: string) =>
+  handleRequest(api.delete(`api/v1/conversation/messages/${messageId}`));
