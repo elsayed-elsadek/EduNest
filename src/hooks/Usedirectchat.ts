@@ -9,6 +9,7 @@ import {
   editMessage,
   deleteMessage,
 } from '../services/Directchatservice';
+import { parseApiError } from '../services/errors';
 import type {
   Chat, Message,
   ConversationDto, ConversationMessageDto, ConversationRealtimeEvent,
@@ -24,6 +25,19 @@ const toUtcTs = (ts: string | undefined): string => {
   if (!ts) return '';
   if (ts.endsWith('Z') || ts.includes('+')) return ts;
   return ts + 'Z';
+};
+
+/** 403 and 404 are deliberately collapsed into one non-identifying state. */
+const isUnavailableConversationError = (error: unknown): boolean => {
+  const attached = (error as { normalized?: { status?: number; errorCode?: string } } | null)?.normalized;
+  const normalized = attached ?? parseApiError(error);
+
+  return (
+    normalized.status === 403 ||
+    normalized.status === 404 ||
+    normalized.errorCode === 'ERR_FORBIDDEN' ||
+    normalized.errorCode === 'ERR_RESOURCE_NOT_FOUND'
+  );
 };
 
 const toChat = (dto: ConversationDto): Chat => ({
@@ -67,9 +81,11 @@ export const useDirectChat = () => {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [loading,    setLoading   ] = useState(false);
   const [msgLoading, setMsgLoading] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
 
   const mountedRef    = useRef(true);
   const activeChatRef = useRef<Chat | null>(null);
+  const messagesRef   = useRef<Message[]>([]);
   const fetchConvsRef = useRef<() => Promise<void>>(() => Promise.resolve());
 
   // ← normalized myEmail used everywhere
@@ -78,6 +94,23 @@ export const useDirectChat = () => {
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  const markUnavailable = useCallback(() => {
+    if (!mountedRef.current) return;
+    setUnavailable(true);
+    setActiveChat(null);
+    activeChatRef.current = null;
+    setMessages([]);
+    messagesRef.current = [];
+    setMsgLoading(false);
+  }, []);
+
+  const clearUnavailable = useCallback(() => {
+    if (!mountedRef.current) return;
+    setUnavailable(false);
   }, []);
 
   const fetchConversations = useCallback(async () => {
@@ -100,12 +133,14 @@ export const useDirectChat = () => {
 
   const openConversation = useCallback(async (chat: Chat) => {
     if (!chat.conversationId) {
-      // Virtual chat (no conversation yet) — just clear messages
-      setActiveChat(chat);
-      activeChatRef.current = chat;
-      setMessages([]);
+      // No real conversation to open: never fabricate one from an email.
+      markUnavailable();
       return;
     }
+
+    // A new navigation attempt clears a previous unavailable state. It is
+    // cleared again on success so a failed 500 is not reported as unavailable.
+    setUnavailable(false);
     // ── Optimistically clear the unread badge immediately ──
     setChats(prev =>
       prev.map(c => c.id === chat.id ? { ...c, unreadCount: 0 } : c)
@@ -114,35 +149,76 @@ export const useDirectChat = () => {
     activeChatRef.current = chat;
     setMsgLoading(true);
     setMessages([]);
+    messagesRef.current = [];
     try {
       const res  = await getConversationMessages(chat.conversationId);
       const data = res as { apiResponse?: { messages?: ConversationMessageDto[] } };
       const list = data.apiResponse?.messages ?? [];
-      if (mountedRef.current)
-        setMessages([...list].reverse().map(toMessage));
-    } catch { /* silent */ }
-    finally { if (mountedRef.current) setMsgLoading(false); }
-  }, []);
+      if (mountedRef.current) {
+        const loaded = [...list].reverse().map(toMessage);
+        setMessages(loaded);
+        messagesRef.current = loaded;
+        setUnavailable(false);
+      }
+    } catch (error) {
+      if (isUnavailableConversationError(error) && mountedRef.current) {
+        setUnavailable(true);
+        setActiveChat(null);
+        activeChatRef.current = null;
+        setMessages([]);
+        messagesRef.current = [];
+      }
+      // All other errors keep the existing silent behavior.
+    } finally { if (mountedRef.current) setMsgLoading(false); }
+  }, [markUnavailable]);
 
   const sendMessage = useCallback((recipientEmail: string, content: string) => {
     wsService.sendPrivateMessage(recipientEmail, content);
   }, []);
 
   const handleEditMessage = useCallback(async (messageId: string, content: string): Promise<void> => {
-    setMessages(prev =>
-      prev.map(m => m.id === messageId ? { ...m, content, edited: true } : m)
-    );
-    try { await editMessage(messageId, content); }
-    catch { /* silent */ }
-    fetchConvsRef.current();
+    const previous = messagesRef.current.find(m => m.id === messageId);
+    setMessages(prev => {
+      const next = prev.map(m => m.id === messageId ? { ...m, content, edited: true } : m);
+      messagesRef.current = next;
+      return next;
+    });
+    try {
+      await editMessage(messageId, content);
+    } catch {
+      // Roll back the optimistic edit without surfacing backend details.
+      setMessages(prev => {
+        const next = previous
+          ? prev.map(m => m.id === messageId ? previous : m)
+          : prev.filter(m => m.id !== messageId);
+        messagesRef.current = next;
+        return next;
+      });
+    } finally {
+      fetchConvsRef.current();
+    }
   }, []);
 
   const handleDeleteMessage = useCallback(async (messageId: string): Promise<void> => {
-    setMessages(prev => prev.filter(m => m.id !== messageId));
+    const previousMessages = messagesRef.current;
+    const previousIndex = previousMessages.findIndex(m => m.id === messageId);
+    const previous = previousMessages[previousIndex];
+    setMessages(prev => {
+      const next = prev.filter(m => m.id !== messageId);
+      messagesRef.current = next;
+      return next;
+    });
     try {
       await deleteMessage(messageId);
     } catch {
-      /* silent */
+      // Put the original message back at its original position on failure.
+      setMessages(prev => {
+        if (prev.some(m => m.id === messageId)) return prev;
+        const next = [...prev];
+        if (previous) next.splice(Math.min(previousIndex, next.length), 0, previous);
+        messagesRef.current = next;
+        return next;
+      });
     } finally {
       fetchConvsRef.current();
     }
@@ -244,9 +320,10 @@ export const useDirectChat = () => {
   }, [isHydrated, token]);
 
   return {
-    chats, messages, activeChat, loading, msgLoading,
+    chats, messages, activeChat, loading, msgLoading, unavailable,
     openConversation, sendMessage,
     handleEditMessage, handleDeleteMessage,
+    markUnavailable, clearUnavailable,
     refetchConversations: fetchConversations,
     myEmail,   // ← already normalized
   };

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import DashLayout      from '../../../components/layout/Dash-layout';
 import ChatList        from '../../../components/mentor-components/mentor-message-com/ChatList/ChatList';
@@ -15,6 +15,8 @@ interface OpenChatState {
   openDirectChatWith?: { email: string; name: string; avatar?: string; };
 }
 
+const DIRECT_CHAT_UNAVAILABLE_MESSAGE = 'This conversation is unavailable.';
+
 const Messages = () => {
   const location = useLocation();
   const direct   = useDirectChat();
@@ -24,74 +26,49 @@ const Messages = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [showCreateRoom, setShowCreateRoom ] = useState(false);
   const [showRoomImage,  setShowRoomImage  ] = useState(false);
-
-  const virtualTargetEmailRef = useRef<string | null>(null);
+  const [directNavUnavailable, setDirectNavUnavailable] = useState(false);
 
   useEffect(() => {
     const state = location.state as OpenChatState | null;
     if (!state?.openDirectChatWith) return;
     if (direct.loading) return;
 
-    const { email, name, avatar } = state.openDirectChatWith;
-    const existing = direct.chats.find(c => c.userId === email);
+    const requestedEmail = state.openDirectChatWith.email.toLowerCase().trim();
+    const existing = direct.chats.find(
+      c => c.userId.toLowerCase().trim() === requestedEmail
+    );
 
+    setActiveTab('chats');
     if (existing) {
-      setActiveTab('chats');
+      setDirectNavUnavailable(false);
+      direct.clearUnavailable();
       setSelectedChatId(existing.id);
       direct.openConversation(existing);
-      virtualTargetEmailRef.current = null;
     } else {
-      virtualTargetEmailRef.current = email;
-      const virtualId = `direct-new-${email}`;
-      setActiveTab('chats');
-      setSelectedChatId(virtualId);
-      direct.openConversation({
-        id: virtualId, mode: 'direct', userId: email,
-        userName: name, userAvatar: avatar,
-        lastMessage: '', timestamp: '', unreadCount: 0,
-      });
+      // No existing conversation: show the same generic unavailable state.
+      // Never build a conversation object or id from the email alone.
+      setDirectNavUnavailable(true);
+      direct.markUnavailable();
+      setSelectedChatId(null);
     }
 
     window.history.replaceState({}, '');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, direct.loading]);
 
-  useEffect(() => {
-    const targetEmail = virtualTargetEmailRef.current;
-    if (!targetEmail) return;
-
-    const realConv = direct.chats.find(c => c.userId === targetEmail);
-    if (realConv) {
-      virtualTargetEmailRef.current = null;
-      setSelectedChatId(realConv.id);
-      direct.openConversation(realConv);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [direct.chats]);
-
   const chatList = activeTab === 'chats' ? direct.chats : room.rooms;
 
-  const activeItem: Chat | null = (() => {
-    if (!selectedChatId) return null;
-    const real = chatList.find(c => c.id === selectedChatId);
-    if (real) return real;
-    const state = location.state as OpenChatState | null;
-    const info = state?.openDirectChatWith;
-    if (info && selectedChatId === `direct-new-${info.email}`) {
-      return {
-        id: selectedChatId, mode: 'direct', userId: info.email,
-        userName: info.name, userAvatar: info.avatar,
-        lastMessage: '', timestamp: '', unreadCount: 0,
-      };
-    }
-    return null;
-  })();
+  const activeItem: Chat | null = selectedChatId
+    ? chatList.find(c => c.id === selectedChatId) ?? null
+    : null;
 
   const messages = activeTab === 'chats' ? direct.messages  : room.messages;
   const myEmail  = activeTab === 'chats' ? direct.myEmail   : room.myEmail;
+  const directUnavailable = activeTab === 'chats' && (directNavUnavailable || direct.unavailable);
 
   const handleSelectChat = (chatId: string) => {
-    virtualTargetEmailRef.current = null;
+    setDirectNavUnavailable(false);
+    direct.clearUnavailable();
     setSelectedChatId(chatId);
     if (activeTab === 'chats') {
       const chat = direct.chats.find(c => c.id === chatId);
@@ -105,17 +82,17 @@ const Messages = () => {
   const handleTabChange = (tab: ChatTab) => {
     setActiveTab(tab);
     setSelectedChatId(null);
-    virtualTargetEmailRef.current = null;
+    setDirectNavUnavailable(false);
+    direct.clearUnavailable();
   };
 
   const handleSendMessage = (content: string) => {
-    if (!content.trim() || !activeItem) return;
+    if (!content.trim() || !activeItem || direct.unavailable) return;
     if (activeTab === 'chats') {
+      // A real conversation id must exist before sending; email alone is not
+      // a substitute for a conversation identifier.
+      if (!activeItem.conversationId) return;
       direct.sendMessage(activeItem.userId, content);
-      if (selectedChatId?.startsWith('direct-new-')) {
-        virtualTargetEmailRef.current = activeItem.userId;
-        setTimeout(() => direct.refetchConversations(), 1500);
-      }
     } else if (activeItem.roomId) {
       room.sendMessage(activeItem.roomId, content);
     }
@@ -123,7 +100,8 @@ const Messages = () => {
 
   const handleBack = () => {
     setSelectedChatId(null);
-    virtualTargetEmailRef.current = null;
+    setDirectNavUnavailable(false);
+    direct.clearUnavailable();
   };
 
   const handleDeleteRoom = async () => {
@@ -176,7 +154,17 @@ const Messages = () => {
                   : undefined
               }
               onDeleteRoom={activeTab === 'groups' ? handleDeleteRoom : undefined}
+              unavailable={directUnavailable}
             />
+          ) : directUnavailable ? (
+            <div
+              role="status"
+              className="flex-1 flex items-center justify-center px-6 py-4 bg-[#FAFAFA]"
+            >
+              <p className="text-sm text-gray-600 text-center">
+                {DIRECT_CHAT_UNAVAILABLE_MESSAGE}
+              </p>
+            </div>
           ) : (
             <EmptyState />
           )}

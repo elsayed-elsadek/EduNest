@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../../../components/student-components/common/Navbar/Navbar';
@@ -19,6 +19,8 @@ interface OpenChatState {
   openRoomById?: { roomId: number; roomName: string; coverImage?: string };
 }
 
+const DIRECT_CHAT_UNAVAILABLE_MESSAGE = 'This conversation is unavailable.';
+
 const Messages: FC = () => {
   const location = useLocation();
   const direct = useDirectChat();
@@ -28,8 +30,8 @@ const Messages: FC = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [directNavUnavailable, setDirectNavUnavailable] = useState(false);
 
-  const virtualTargetEmailRef = useRef<string | null>(null);
   const isRoomTab = activeTab !== 'chats';
 
   useEffect(() => {
@@ -43,6 +45,8 @@ const Messages: FC = () => {
       const existing = room.rooms.find(r => r.id === roomIdStr || r.roomId === roomId);
 
       setActiveTab('groups');
+      setDirectNavUnavailable(false);
+      direct.clearUnavailable();
       if (existing) {
         setSelectedChatId(existing.id);
         room.openRoom(existing);
@@ -69,46 +73,28 @@ const Messages: FC = () => {
     if (!state?.openDirectChatWith) return;
     if (direct.loading) return;
 
-    const { email, name, avatar } = state.openDirectChatWith;
-    const existing = direct.chats.find(c => c.userId === email);
+    const requestedEmail = state.openDirectChatWith.email.toLowerCase().trim();
+    const existing = direct.chats.find(
+      c => c.userId.toLowerCase().trim() === requestedEmail
+    );
 
+    setActiveTab('chats');
     if (existing) {
-      setActiveTab('chats');
+      setDirectNavUnavailable(false);
+      direct.clearUnavailable();
       setSelectedChatId(existing.id);
       direct.openConversation(existing);
-      virtualTargetEmailRef.current = null;
     } else {
-      virtualTargetEmailRef.current = email;
-      const virtualId = `direct-new-${email}`;
-      setActiveTab('chats');
-      setSelectedChatId(virtualId);
-      direct.openConversation({
-        id: virtualId,
-        mode: 'direct',
-        userId: email,
-        userName: name,
-        userAvatar: avatar,
-        lastMessage: '',
-        timestamp: '',
-        unreadCount: 0,
-      });
+      // No existing conversation: show the same generic unavailable state.
+      // Never build a conversation object or id from the email alone.
+      setDirectNavUnavailable(true);
+      direct.markUnavailable();
+      setSelectedChatId(null);
     }
 
     window.history.replaceState({}, '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, direct.loading, room.loading]);
-
-  useEffect(() => {
-    const targetEmail = virtualTargetEmailRef.current;
-    if (!targetEmail) return;
-    const realConv = direct.chats.find(c => c.userId === targetEmail);
-    if (realConv) {
-      virtualTargetEmailRef.current = null;
-      setSelectedChatId(realConv.id);
-      direct.openConversation(realConv);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [direct.chats]);
 
   const rawChatList: Chat[] = isRoomTab ? room.rooms : direct.chats;
 
@@ -122,32 +108,17 @@ const Messages: FC = () => {
       )
     : [];
 
-  const activeItem: Chat | null = (() => {
-    if (!selectedChatId) return null;
-    const real = rawChatList.find(c => c.id === selectedChatId);
-    if (real) return real;
-    const state = location.state as OpenChatState | null;
-    const info = state?.openDirectChatWith;
-    if (info && selectedChatId === `direct-new-${info.email}`) {
-      return {
-        id: selectedChatId,
-        mode: 'direct',
-        userId: info.email,
-        userName: info.name,
-        userAvatar: info.avatar,
-        lastMessage: '',
-        timestamp: '',
-        unreadCount: 0,
-      };
-    }
-    return null;
-  })();
+  const activeItem: Chat | null = selectedChatId
+    ? rawChatList.find(c => c.id === selectedChatId) ?? null
+    : null;
 
   const messages = isRoomTab ? room.messages : direct.messages;
   const myEmail = isRoomTab ? room.myEmail : direct.myEmail;
+  const directUnavailable = !isRoomTab && (directNavUnavailable || direct.unavailable);
 
   const handleSelectChat = (chatId: string) => {
-    virtualTargetEmailRef.current = null;
+    setDirectNavUnavailable(false);
+    direct.clearUnavailable();
     setSelectedChatId(chatId);
     setShowMembers(false);
     if (!isRoomTab) {
@@ -163,17 +134,17 @@ const Messages: FC = () => {
     setActiveTab(tab);
     setSelectedChatId(null);
     setShowMembers(false);
-    virtualTargetEmailRef.current = null;
+    setDirectNavUnavailable(false);
+    direct.clearUnavailable();
   };
 
   const handleSendMessage = (content: string) => {
-    if (!content.trim() || !activeItem) return;
+    if (!content.trim() || !activeItem || direct.unavailable) return;
     if (!isRoomTab) {
+      // A real conversation id must exist before sending; email alone is not
+      // a substitute for a conversation identifier.
+      if (!activeItem.conversationId) return;
       direct.sendMessage(activeItem.userId, content);
-      if (selectedChatId?.startsWith('direct-new-')) {
-        virtualTargetEmailRef.current = activeItem.userId;
-        setTimeout(() => direct.refetchConversations(), 1500);
-      }
     } else if (activeItem.roomId) {
       room.sendMessage(activeItem.roomId, content);
     }
@@ -182,7 +153,8 @@ const Messages: FC = () => {
   const handleBack = () => {
     setSelectedChatId(null);
     setShowMembers(false);
-    virtualTargetEmailRef.current = null;
+    setDirectNavUnavailable(false);
+    direct.clearUnavailable();
   };
 
   const handleDeleteRoom = async () => {
@@ -256,6 +228,7 @@ const Messages: FC = () => {
                         : undefined
                     }
                     isMembersOpen={showMembers}
+                    unavailable={directUnavailable}
                   />
 
                   {showMembers && activeItem.roomId && (
@@ -269,6 +242,15 @@ const Messages: FC = () => {
                     />
                   )}
                 </>
+              ) : directUnavailable ? (
+                <div
+                  role="status"
+                  className="flex-1 flex items-center justify-center px-6 py-4 bg-[#FAFAFA]"
+                >
+                  <p className="text-sm text-gray-600 text-center">
+                    {DIRECT_CHAT_UNAVAILABLE_MESSAGE}
+                  </p>
+                </div>
               ) : (
                 <EmptyState />
               )}
