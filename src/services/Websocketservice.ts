@@ -53,9 +53,9 @@ class WebSocketService {
       // Native WebSocket only — SockJS fallback transports cannot authenticate
       // against the current backend (BLK-20).
       webSocketFactory: () => new WebSocket(WS_ENDPOINT),
-      // EF-24: backend-confirmed contract — HTTP and STOMP CONNECT both use
-      // `Authorization: Bearer <jwt>`.
-      connectHeaders:   { Authorization: `Bearer ${token}` },
+      // STOMP CONNECT uses the documented raw access JWT. The backend tolerates
+      // a Bearer prefix, but raw is the wire contract (WEBSOCKET.md §1.2).
+      connectHeaders:   { Authorization: token },
       reconnectDelay:   5000,
 
       onConnect: () => {
@@ -203,6 +203,7 @@ class WebSocketService {
     // /user/queue/errors, message not stored).
     this.client.publish({
       destination: `/app/chat/${roomId}`,
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ content }),
     });
   }
@@ -214,6 +215,7 @@ class WebSocketService {
     }
     this.client.publish({
       destination: '/app/chat.private',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ recipientEmail, content }),
     });
   }

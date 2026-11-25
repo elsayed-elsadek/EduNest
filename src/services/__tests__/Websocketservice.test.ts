@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+interface PublishFrame {
+  destination: string;
+  headers?: Record<string, string>;
+  body: string;
+}
+
 interface FakeClientShape {
   options: {
     onConnect?: (frame: unknown) => void;
@@ -9,14 +15,14 @@ interface FakeClientShape {
   };
   destinations: string[];
   subscribers: Array<{ destination: string; cb: (msg: { body: string }) => void }>;
-  frames: Array<{ destination: string; body: string }>;
+  frames: PublishFrame[];
   activate(): void;
   readonly connected: boolean;
   subscribe(
     destination: string,
     cb: (msg: { body: string }) => void
   ): { unsubscribe: () => void };
-  publish(frame: { destination: string; body: string }): void;
+  publish(frame: PublishFrame): void;
   deactivate(): void;
 }
 
@@ -55,7 +61,7 @@ const { FakeClient, clientInstances } = vi.hoisted((): {
       return { unsubscribe: () => {} };
     }
 
-    publish(frame: { destination: string; body: string }): void {
+    publish(frame: PublishFrame): void {
       this.frames.push(frame);
     }
 
@@ -115,11 +121,12 @@ describe('wsService — STOMP over native WebSocket', () => {
     return client as FakeClientShape;
   }
 
-  it('connects with the backend-confirmed Bearer scheme in the STOMP Authorization header (EF-24)', () => {
+  it('connects with the documented raw JWT in the STOMP Authorization header', () => {
     wsService.connect('raw.jwt.token');
 
     const client = lastClient();
-    expect(client.options.connectHeaders).toEqual({ Authorization: 'Bearer raw.jwt.token' });
+    expect(client.options.connectHeaders).toEqual({ Authorization: 'raw.jwt.token' });
+    expect(client.options.connectHeaders?.Authorization).not.toContain('Bearer');
   });
 
   it('creates a native WebSocket at /ws/websocket (not SockJS)', () => {
@@ -172,7 +179,7 @@ describe('wsService — STOMP over native WebSocket', () => {
     ]);
   });
 
-  it('publishes room SEND frames as a {"content": "..."} JSON object (EF-1)', () => {
+  it('publishes JSON SEND frames with content-type headers and unchanged destinations/bodies', () => {
     wsService.connect('raw.jwt.token');
 
     const client = lastClient();
@@ -180,13 +187,28 @@ describe('wsService — STOMP over native WebSocket', () => {
     wsService.sendToRoom('abc', 'hello room');
     expect(client.frames[0]).toEqual({
       destination: '/app/chat/abc',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ content: 'hello room' }),
     });
 
     wsService.sendPrivateMessage('mentor@test.com', 'hi there');
     expect(client.frames[1]).toEqual({
       destination: '/app/chat.private',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ recipientEmail: 'mentor@test.com', content: 'hi there' }),
+    });
+  });
+
+  it('keeps the private destination and existing payload until a post-EB-20 contract is verified', () => {
+    wsService.connect('raw.jwt.token');
+
+    const client = lastClient();
+    wsService.sendPrivateMessage('mentor@test.com', 'hi there');
+
+    expect(client.frames[0].destination).toBe('/app/chat.private');
+    expect(JSON.parse(client.frames[0].body)).toEqual({
+      recipientEmail: 'mentor@test.com',
+      content: 'hi there',
     });
   });
 
