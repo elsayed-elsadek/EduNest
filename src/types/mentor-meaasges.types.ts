@@ -1,6 +1,6 @@
 
 export interface ConversationDto {
-  conversationId:          number;
+  conversationId:          string;
   otherUserName:           string;
   otherUserEmail:          string;
   otherUserProfileImageUrl?: string | null;  // ← actual API field
@@ -10,8 +10,8 @@ export interface ConversationDto {
 }
 
 export interface ConversationMessageDto {
-  id:                    number;
-  conversationId:        number;
+  id:                    string;
+  conversationId:        string;
   senderEmail:           string;
   senderName:            string;
   senderProfileImageUrl?: string | null;   // ← actual API field
@@ -21,14 +21,14 @@ export interface ConversationMessageDto {
 
 export interface ConversationRealtimeEvent {
   type?:           'DELETE';
-  messageId?:      number;
-  id?:             number;
+  messageId?:      string;
+  id?:             string;
   content?:        string;
   senderEmail?:    string;
   senderName?:     string;
   senderProfileImageUrl?: string | null;
   sentAt?:         string;
-  conversationId?: number;
+  conversationId?: string;
 }
 
 export interface RoomMessageDto {
@@ -54,7 +54,7 @@ export interface Chat {
   timestamp:       string;
   unreadCount:     number;
   isOnline?:       boolean;
-  conversationId?: number;
+  conversationId?: string;
   roomId?:         number;
   mentorshipId?:   number;
   mentorshipName?: string;

@@ -129,22 +129,18 @@ export const useDirectChat = () => {
   }, []);
 
   const handleEditMessage = useCallback(async (messageId: string, content: string): Promise<void> => {
-    const recipientEmail = activeChatRef.current?.userId;
-    if (!recipientEmail) return;
     setMessages(prev =>
       prev.map(m => m.id === messageId ? { ...m, content, edited: true } : m)
     );
-    try { await editMessage(Number(messageId), content, recipientEmail); }
+    try { await editMessage(messageId, content); }
     catch { /* silent */ }
     fetchConvsRef.current();
   }, []);
 
   const handleDeleteMessage = useCallback(async (messageId: string): Promise<void> => {
-    const recipientEmail = activeChatRef.current?.userId;
-    if (!recipientEmail) return;
     setMessages(prev => prev.filter(m => m.id !== messageId));
     try {
-      await deleteMessage(Number(messageId), recipientEmail);
+      await deleteMessage(messageId);
     } catch {
       /* silent */
     } finally {
