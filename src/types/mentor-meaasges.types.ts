@@ -25,6 +25,7 @@ export interface ConversationRealtimeEvent {
   id?:             string;
   content?:        string;
   senderEmail?:    string;
+  recipientEmail?: string;
   senderName?:     string;
   senderProfileImageUrl?: string | null;
   sentAt?:         string;

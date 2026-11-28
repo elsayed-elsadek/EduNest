@@ -293,4 +293,41 @@ describe('INT-04 Batch 3 — useDirectChat realtime/history consistency', () => 
       'hello',
     );
   });
+
+  it('resolves a pending first message to the real conversation from the server event', async () => {
+    const { result } = renderHook(() => useDirectChat());
+
+    act(() => { result.current.beginPendingDirectChat('mentor@example.com'); });
+    getAllConversationsMock.mockResolvedValueOnce({
+      apiResponse: {
+        conversations: [{
+          conversationId: CONV_A,
+          otherUserName: 'Mentor A',
+          otherUserEmail: 'mentor@example.com',
+          lastMessage: 'hello',
+          lastMessageTime: '2026-01-01T00:00:00Z',
+          unreadCount: 0,
+        }],
+      },
+    });
+
+    await act(async () => {
+      await privateHandlers[0]({
+        id: 'msg-first',
+        conversationId: CONV_A,
+        senderEmail: 'student@example.com',
+        recipientEmail: 'mentor@example.com',
+        senderName: 'Student',
+        content: 'hello',
+        sentAt: '2026-01-01T00:00:00Z',
+      });
+    });
+
+    expect(result.current.pendingResolvedChat).toMatchObject({
+      id: `direct-${CONV_A}`,
+      conversationId: CONV_A,
+    });
+    expect(result.current.activeChat).toMatchObject({ conversationId: CONV_A });
+    expect(result.current.messages).toEqual([]);
+  });
 });

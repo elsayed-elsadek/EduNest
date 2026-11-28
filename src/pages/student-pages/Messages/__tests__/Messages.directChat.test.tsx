@@ -16,6 +16,7 @@ const {
   emptyStateMock: vi.fn(),
   directMock: {
     loading: false,
+    conversationsLoaded: true,
     chats: [] as unknown[],
     messages: [] as unknown[],
     myEmail: 'student@example.com',
@@ -27,6 +28,10 @@ const {
     markUnavailable: vi.fn(),
     clearUnavailable: vi.fn(),
     refetchConversations: vi.fn(),
+    beginPendingDirectChat: vi.fn(),
+    cancelPendingDirectChat: vi.fn(),
+    pendingResolvedChat: null as unknown,
+    clearPendingResolvedChat: vi.fn(),
   },
   roomMock: {
     loading: false,
@@ -82,36 +87,69 @@ const EXISTING_CHAT: Chat = {
 beforeEach(() => {
   locationMock.state = null;
   directMock.loading = false;
+  directMock.conversationsLoaded = true;
   directMock.chats = [];
   directMock.messages = [];
   directMock.unavailable = false;
   directMock.myEmail = 'student@example.com';
+  directMock.pendingResolvedChat = null;
   roomMock.loading = false;
   roomMock.rooms = [];
   roomMock.messages = [];
 });
 
 describe('INT-04 Batch 2 — student Messages direct navigation', () => {
-  it('shows the generic unavailable state instead of fabricating a virtual chat', () => {
+  it('opens a pending first-message chat instead of fabricating a conversation', () => {
     locationMock.state = {
       openDirectChatWith: { email: 'new@example.com', name: 'Unknown Mentor' },
     };
 
     render(<Messages />);
 
-    expect(directMock.markUnavailable).toHaveBeenCalledTimes(1);
+    expect(directMock.markUnavailable).not.toHaveBeenCalled();
+    expect(directMock.beginPendingDirectChat).toHaveBeenCalledWith('new@example.com');
     expect(directMock.openConversation).not.toHaveBeenCalled();
-    expect(screen.getByText('This conversation is unavailable.')).toBeInTheDocument();
-    expect(chatWindowMock).not.toHaveBeenCalled();
+
+    const windowProps = chatWindowMock.mock.calls.at(-1)?.[0] as {
+      chat: Chat;
+      unavailable: boolean;
+      onSendMessage: (content: string) => void;
+    };
+    expect(windowProps.chat).toEqual(expect.objectContaining({
+      userId: 'new@example.com',
+      userName: 'Unknown Mentor',
+    }));
+    expect(windowProps.chat).not.toHaveProperty('conversationId');
+    expect(windowProps.unavailable).toBe(false);
+
+    act(() => { windowProps.onSendMessage('hello mentor'); });
+    expect(directMock.sendMessage).toHaveBeenCalledWith('new@example.com', 'hello mentor');
 
     const listProps = chatListMock.mock.calls.at(-1)?.[0] as {
       chats: Chat[];
       selectedChatId: string | null;
     };
     expect(listProps.chats).toEqual([]);
-    expect(listProps.selectedChatId).toBeNull();
     expect(JSON.stringify(listProps)).not.toContain('direct-new-');
-    expect(JSON.stringify(listProps)).not.toContain('new@example.com');
+  });
+
+  it('waits for conversations to load before opening the requested chat', () => {
+    locationMock.state = {
+      openDirectChatWith: { email: 'MENTOR@EXAMPLE.COM', name: 'Existing Mentor' },
+    };
+    directMock.conversationsLoaded = false;
+
+    const { rerender } = render(<Messages />);
+
+    expect(directMock.markUnavailable).not.toHaveBeenCalled();
+    expect(directMock.openConversation).not.toHaveBeenCalled();
+
+    directMock.conversationsLoaded = true;
+    directMock.chats = [EXISTING_CHAT];
+    rerender(<Messages />);
+
+    expect(directMock.markUnavailable).not.toHaveBeenCalled();
+    expect(directMock.openConversation).toHaveBeenCalledWith(EXISTING_CHAT);
   });
 
   it('opens an existing conversation and keeps messaging functional', () => {
@@ -138,6 +176,25 @@ describe('INT-04 Batch 2 — student Messages direct navigation', () => {
 
     act(() => { windowProps.onSendMessage('hello mentor'); });
     expect(directMock.sendMessage).toHaveBeenCalledWith(EXISTING_CHAT.userId, 'hello mentor');
+  });
+
+  it('switches from the pending chat to the real conversation when the hook resolves it', async () => {
+    locationMock.state = {
+      openDirectChatWith: { email: 'new@example.com', name: 'New Mentor' },
+    };
+    directMock.conversationsLoaded = true;
+
+    const { rerender } = render(<Messages />);
+
+    await act(async () => {
+      directMock.chats = [EXISTING_CHAT];
+      directMock.pendingResolvedChat = EXISTING_CHAT;
+      rerender(<Messages />);
+    });
+
+    const windowProps = chatWindowMock.mock.calls.at(-1)?.[0] as { chat: Chat };
+    expect(windowProps.chat).toBe(EXISTING_CHAT);
+    expect(directMock.clearPendingResolvedChat).toHaveBeenCalled();
   });
 
   it('passes the hook unavailable state to ChatWindow for history failures', () => {

@@ -8,17 +8,20 @@ interface ProfileHeaderProps {
   mentorProfile: MentorProfile | null;
   fullName: string;
   isLoading: boolean;
+  routeEmail?: string;
 }
 
-const ProfileHeader = ({ mentorProfile, fullName, isLoading }: ProfileHeaderProps) => {
+const ProfileHeader = ({ mentorProfile, fullName, isLoading, routeEmail }: ProfileHeaderProps) => {
   const navigate = useNavigate();
+  // The public profile response may omit the email; the profile route carries it.
+  const chatEmail = mentorProfile?.mentorEmail?.trim() || routeEmail?.trim() || '';
 
   const handleChat = () => {
-    if (!mentorProfile?.mentorEmail) return;
+    if (!chatEmail) return;
     navigate('/student/messages', {
       state: {
         openDirectChatWith: {
-          email: mentorProfile.mentorEmail,
+          email: chatEmail,
           name: fullName,
           avatar: getAssetUrl(mentorProfile?.mentorProfileImageUrl),
         },
@@ -97,16 +100,16 @@ const ProfileHeader = ({ mentorProfile, fullName, isLoading }: ProfileHeaderProp
           {/* Action Buttons */}
           <div className="flex justify-center md:justify-start gap-3 pt-2">
             <a
-              href={mentorProfile?.mentorEmail ? `mailto:${mentorProfile.mentorEmail}` : undefined}
+              href={chatEmail ? `mailto:${chatEmail}` : undefined}
               className="inline-flex items-center gap-2 bg-[var(--primary-500)] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[var(--primary-dark)] transition-all"
-              aria-disabled={!mentorProfile?.mentorEmail}
+              aria-disabled={!chatEmail}
             >
               <Mail className="w-4 h-4" /> Mail
             </a>
             <button
               type="button"
               onClick={handleChat}
-              disabled={!mentorProfile?.mentorEmail}
+              disabled={!chatEmail}
               className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-6 py-2.5 rounded-xl font-semibold hover:bg-slate-200 transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               <MessageSquare className="w-4 h-4" /> Chat

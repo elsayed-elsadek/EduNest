@@ -8,6 +8,7 @@ import { isSafeExternalUrl } from '../../../../utils/safeExternalUrl';
 
 interface ContactSidebarProps {
   mentorProfile: MentorProfile | null;
+  routeEmail?: string;
 }
 
 // ✅ Helper: return icon + label per platform
@@ -59,8 +60,9 @@ const getSocialMeta = (media: string): { label: string; icon: ReactNode; color: 
   }
 };
 
-const ContactSidebar = ({ mentorProfile }: ContactSidebarProps) => {
+const ContactSidebar = ({ mentorProfile, routeEmail }: ContactSidebarProps) => {
   const [copied, setCopied] = useState(false);
+  const email = mentorProfile?.mentorEmail?.trim() || routeEmail?.trim() || '';
 
   const handleCopyLink = async () => {
     try {
@@ -106,7 +108,7 @@ const ContactSidebar = ({ mentorProfile }: ContactSidebarProps) => {
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Email Address</p>
               <p className="text-sm font-semibold text-slate-900 break-all">
-                {mentorProfile?.mentorEmail || 'Not available'}
+                {email || 'Not available'}
               </p>
             </div>
           </div>

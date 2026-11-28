@@ -12,11 +12,11 @@ import type {
 
 /**
  * Sends a POST request to join a mentorship.
- * @param mentorshipId - The numeric ID of the mentorship to join.
+ * @param mentorshipId - The public mentorship id (UUID string).
  * @returns The success message from the backend.
  * @throws Error with a descriptive message on failure.
  */
-export const joinMentorship = async (mentorshipId: number): Promise<string> => {
+export const joinMentorship = async (mentorshipId: string | number): Promise<string> => {
   const { data } = await api.post<JoinMentorshipSuccessResponse>(
     `/api/v1/mentorship/${mentorshipId}/join`
   );

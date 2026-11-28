@@ -137,13 +137,16 @@ export const useDirectChat = () => {
   const [messages,   setMessages  ] = useState<Message[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [loading,    setLoading   ] = useState(false);
+  const [conversationsLoaded, setConversationsLoaded] = useState(false);
   const [msgLoading, setMsgLoading] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
+  const [pendingResolvedChat, setPendingResolvedChat] = useState<Chat | null>(null);
 
   const mountedRef    = useRef(true);
   const activeChatRef = useRef<Chat | null>(null);
   const messagesRef   = useRef<Message[]>([]);
-  const fetchConvsRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const fetchConvsRef = useRef<() => Promise<Chat[]>>(() => Promise.resolve([]));
+  const pendingRecipientEmailRef = useRef<string | null>(null);
 
   const activeConversationIdRef = useRef<string | null>(null);
   const historyGenerationRef   = useRef(0);
@@ -191,9 +194,22 @@ export const useDirectChat = () => {
     setUnavailable(false);
   }, [resetConversationState]);
 
-  const fetchConversations = useCallback(async () => {
-    if (!token) return;
+  const beginPendingDirectChat = useCallback((email: string) => {
+    pendingRecipientEmailRef.current = email.toLowerCase().trim();
+    setPendingResolvedChat(null);
+  }, []);
+
+  const cancelPendingDirectChat = useCallback(() => {
+    pendingRecipientEmailRef.current = null;
+    setPendingResolvedChat(null);
+  }, []);
+
+  const clearPendingResolvedChat = useCallback(() => setPendingResolvedChat(null), []);
+
+  const fetchConversations = useCallback(async (): Promise<Chat[]> => {
+    if (!token) return [];
     setLoading(true);
+    setConversationsLoaded(false);
     try {
       const res  = await getAllConversations();
       const data = res as { apiResponse?: { conversations?: ConversationDto[] } };
@@ -202,9 +218,17 @@ export const useDirectChat = () => {
       const filtered = list.filter((c: ConversationDto) =>
         c.otherUserEmail.toLowerCase().trim() !== myEmail
       );
-      if (mountedRef.current) setChats(sortByRecent(filtered.map(toChat)));
-    } catch { /* silent */ }
-    finally { if (mountedRef.current) setLoading(false); }
+      const mapped = sortByRecent(filtered.map(toChat));
+      if (mountedRef.current) setChats(mapped);
+      return mapped;
+    } catch {
+      return [];
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+        setConversationsLoaded(true);
+      }
+    }
   }, [token, myEmail]);
 
   useEffect(() => { fetchConvsRef.current = fetchConversations; }, [fetchConversations]);
@@ -339,12 +363,31 @@ export const useDirectChat = () => {
     }
   }, [commitMessages]);
 
-  const handlePrivateMessage = useCallback((data: unknown) => {
+  const handlePrivateMessage = useCallback(async (data: unknown) => {
     if (!mountedRef.current) return;
 
     const event = data as ConversationRealtimeEvent;
     const eventConversationId = asOpaqueId(event.conversationId);
     const activeConversationId = activeConversationIdRef.current;
+
+    // A first private message creates the conversation lazily on the backend.
+    // Resolve the pending 1:1 target to the real conversation id from the
+    // server event — never fabricate an id from the recipient email.
+    const pendingEmail = pendingRecipientEmailRef.current;
+    if (pendingEmail && eventConversationId) {
+      const sender = event.senderEmail?.toLowerCase().trim();
+      const recipient = event.recipientEmail?.toLowerCase().trim();
+      if (sender === pendingEmail || recipient === pendingEmail) {
+        pendingRecipientEmailRef.current = null;
+        const chats = await fetchConvsRef.current();
+        const realChat = chats.find(c => c.userId.toLowerCase().trim() === pendingEmail);
+        if (realChat && mountedRef.current) {
+          setPendingResolvedChat(realChat);
+          await openConversation(realChat);
+        }
+        return;
+      }
+    }
 
     // Private frames are globally delivered; route them by opaque UUID only.
     if (!eventConversationId || !activeConversationId || eventConversationId !== activeConversationId) {
@@ -397,7 +440,7 @@ export const useDirectChat = () => {
     messageOverridesRef.current.set(messageId, next);
     commitMessages(prev => upsertMessage(prev, next));
     fetchConvsRef.current();
-  }, [commitMessages]);
+  }, [commitMessages, openConversation]);
 
   useEffect(() => {
     if (!token || !isHydrated) return;
@@ -417,10 +460,11 @@ export const useDirectChat = () => {
   }, [isHydrated, token]);
 
   return {
-    chats, messages, activeChat, loading, msgLoading, unavailable,
+    chats, messages, activeChat, loading, conversationsLoaded, msgLoading, unavailable,
     openConversation, sendMessage,
     handleEditMessage, handleDeleteMessage,
     markUnavailable, clearUnavailable,
+    beginPendingDirectChat, cancelPendingDirectChat, pendingResolvedChat, clearPendingResolvedChat,
     refetchConversations: fetchConversations,
     myEmail,   // ← already normalized
   };
