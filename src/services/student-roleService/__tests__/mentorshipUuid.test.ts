@@ -1,18 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { getMock } = vi.hoisted(() => ({ getMock: vi.fn() }));
-vi.mock('../../api', () => ({ default: { get: getMock } }));
+const { getMock, postMock } = vi.hoisted(() => ({
+  getMock: vi.fn(),
+  postMock: vi.fn(),
+}));
+vi.mock('../../api', () => ({ default: { get: getMock, post: postMock } }));
 
 import {
   fetchMentorshipDetails,
   fetchMentorshipOverview,
 } from '../mentorshipDetails.api';
+import { joinMentorship } from '../enrollMentorship';
 
 const mentorshipId = '4e94db37-c724-4beb-a7a5-4136aa64b7d9';
 const relatedMentorshipId = '26a24c4a-f2f5-4cb1-92af-111ac540ddc2';
 
 describe('mentorship UUID flow', () => {
-  beforeEach(() => getMock.mockReset());
+  beforeEach(() => {
+    getMock.mockReset();
+    postMock.mockReset();
+  });
 
   it('preserves UUIDs in detail and related mentorship response mappers', async () => {
     getMock.mockResolvedValue({
@@ -48,5 +55,13 @@ describe('mentorship UUID flow', () => {
         signal: undefined,
       },
     );
+  });
+
+  it('uses the UUID unchanged in the join request URL', async () => {
+    postMock.mockResolvedValue({ data: { apiResponse: { message: 'joined' } } });
+
+    await expect(joinMentorship(mentorshipId)).resolves.toBe('joined');
+
+    expect(postMock).toHaveBeenCalledWith(`/api/v1/mentorship/${mentorshipId}/join`);
   });
 });

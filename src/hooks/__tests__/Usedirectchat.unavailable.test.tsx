@@ -112,6 +112,29 @@ describe('INT-04 Batch 2 — useDirectChat unavailable state', () => {
     expect(exposed).not.toContain(errorCode);
   });
 
+  it('exposes conversationsLoaded after the conversation list resolves', async () => {
+    getAllConversationsMock.mockResolvedValueOnce({
+      apiResponse: {
+        conversations: [{
+          conversationId: 'conv-uuid',
+          otherUserName: 'Mentor Name',
+          otherUserEmail: 'mentor@example.com',
+          lastMessage: '',
+          lastMessageTime: '',
+          unreadCount: 0,
+        }],
+      },
+    });
+
+    const { result } = renderHook(() => useDirectChat());
+    expect(result.current.conversationsLoaded).toBe(false);
+
+    await act(async () => { await Promise.resolve(); });
+
+    expect(result.current.conversationsLoaded).toBe(true);
+    expect(result.current.chats).toEqual([CHAT]);
+  });
+
   it('does not classify a 500 as unavailable', async () => {
     getConversationMessagesMock.mockRejectedValueOnce(apiError(500, 'ERR_INTERNAL_SYSTEM'));
     const { result } = renderHook(() => useDirectChat());

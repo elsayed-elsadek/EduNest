@@ -24,8 +24,10 @@ const EnrollMentorship = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [mentorshipId]);
 
-  const normalizedId = Number(mentorshipId ?? '');
-  const hasValidId = Number.isFinite(normalizedId) && normalizedId > 0;
+  // Mentorship ids are opaque UUID strings; coercing them to numbers turns
+  // valid links into NaN and shows the invalid-id state.
+  const normalizedId = (mentorshipId ?? '').trim();
+  const hasValidId = normalizedId.length > 0;
 
   const {
     data: mentorship,
